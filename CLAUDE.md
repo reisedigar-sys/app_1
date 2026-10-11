@@ -17,9 +17,10 @@ Fase 2 (longo prazo): marketplace estilo iFood lendo e escrevendo nas MESMAS age
 - Next.js (App Router) + TypeScript + Tailwind, PWA
 - Supabase (Postgres, Auth, Realtime, RLS, Edge Functions)
 - Vercel (hospedagem)
-- WhatsApp: Meta Cloud API ou Z-API
-- Pix: Asaas (split) ou Mercado Pago
-- Testes: Vitest (unitários), Playwright (fluxo ponta a ponta)
+- WhatsApp: Meta Cloud API (oficial; não usar Z-API ou outras APIs não oficiais)
+- Pix: Asaas (subconta por loja + split)
+- Testes: Vitest (unitários e banco), Playwright (fluxo ponta a ponta)
+- Node 22, pnpm, ESLint, Prettier. Next.js 16: middleware se chama `proxy.ts`; leia `AGENTS.md` e `node_modules/next/dist/docs/` antes de usar APIs do Next
 
 ## Regras de negócio
 - Duração do serviço depende de `porte` e `pelagem` (tabela `servico_preco`).
@@ -62,5 +63,19 @@ Fase 2 (longo prazo): marketplace estilo iFood lendo e escrevendo nas MESMAS age
 - Fluxo do tutor segue `fluxo-agendamento-referencia.md`: serviço principal (escolha única) + adicionais, unidade por localização/CEP/lista (rede com várias unidades), data e hora OU profissional, vários pets no mesmo pedido (`pedido`), grade de 15 min (`petshop.slot_minutos`).
 - Plano detalhado em `PLANO-MVP.md`.
 
-## Primeira tarefa para o Claude Code
-Aplicar `schema.sql` e depois `002_requisitos_mvp.sql` como migrações em Supabase, gerar os tipos TypeScript, e criar o motor de disponibilidade (`lib/disponibilidade.ts`) com testes cobrindo: sobreposição, buffer, folga do profissional, bloqueios, fim de expediente, vários serviços em sequência, horário específico por serviço e "qualquer profissional".
+## Decisões tomadas (antes da semana 1)
+- **Motor de disponibilidade em SQL**: `dias_com_vaga`, `horarios_do_dia`, `profissionais_disponiveis` e `criar_pedido` são funções Postgres chamadas via RPC. O TypeScript não reimplementa regra de disponibilidade.
+- **"Qualquer profissional"**: o horário aparece se algum profissional habilitado tiver vaga; ao confirmar, escolhe quem tem menos minutos agendados no dia; empate → `profissional.ordem`.
+- **Buffer gravado no agendamento** (`agendamento.buffer_minutos`); a coluna `ocupado = [inicio, fim + buffer)` é mantida por trigger e usada na constraint `agendamento_sem_conflito`. Mudar o buffer da loja não afeta agendamentos existentes.
+- **Comissão**: zero para app próprio, balcão e WhatsApp; só o canal `marketplace` paga `comissao_marketplace_pct`.
+- **Consentimento LGPD por loja** em `tutor_petshop.consentimento_contato_em`; marketing em `consentimento_marketing_em` (separado).
+- **Dados entre lojas**: tutor e pet são globais só no essencial. Observações (`tutor_petshop.observacoes`, `pet_petshop`), faltas e histórico ficam por loja.
+- **Rede com várias unidades**: tenant = unidade (`petshop_id`); `rede_membro` dá ao dono da rede acesso a todas as unidades.
+- **Papéis** (`petshop_membro.papel`): dono (tudo, inclusive equipe), gerente (configuração), atendente (agenda), profissional (só a própria agenda).
+- **Sinal após faltas**: a semana 6 só conta faltas e marca `tutor_petshop.exige_sinal`; a cobrança entra na semana 8.
+- **Encaixe**: `criar_pedido(..., encaixe => true)`, só para equipe; ignora a grade, nunca a constraint.
+- **Pedido e agendamento só são criados por `criar_pedido`**: não há política de INSERT para `pedido`, `agendamento` e `agendamento_item`.
+
+## Estado atual
+- Semana 1 (fundação) concluída: migrações `supabase/migrations/…0001_schema_base.sql` e `…0002_requisitos_mvp.sql`, seeds, tipos gerados, clientes Supabase, testes de RLS e CI. Ver README.
+- Próximo: semana 2 (onboarding da loja). Pendência: criar rede/loja pelo app precisa de uma função `criar_rede_e_loja` (hoje não há política de INSERT em `rede`).
