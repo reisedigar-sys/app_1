@@ -1260,6 +1260,40 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      adicionar_membro: {
+        Args: {
+          p_email: string;
+          p_papel: Database["public"]["Enums"]["papel_loja"];
+          p_petshop_id: string;
+          p_profissional_id?: string;
+        };
+        Returns: string;
+      };
+      checklist_onboarding: { Args: { p_petshop_id: string }; Returns: Json };
+      criar_bloqueio: {
+        Args: {
+          p_fim: string;
+          p_inicio: string;
+          p_motivo?: string;
+          p_petshop_id: string;
+          p_profissional_id?: string;
+          p_tipo?: Database["public"]["Enums"]["tipo_bloqueio"];
+        };
+        Returns: string;
+      };
+      criar_rede_e_loja: {
+        Args: { p_fuso?: string; p_loja_nome: string; p_rede_nome: string; p_slug: string };
+        Returns: string;
+      };
+      listar_equipe: {
+        Args: { p_petshop_id: string };
+        Returns: {
+          email: string;
+          papel: Database["public"]["Enums"]["papel_loja"];
+          profissional_id: string;
+          user_id: string;
+        }[];
+      };
       timemultirange: { Args: Record<PropertyKey, never>; Returns: unknown };
     };
     Enums: {

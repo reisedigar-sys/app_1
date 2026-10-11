@@ -15,7 +15,7 @@ function cliente() {
 describe("API com a chave pública", () => {
   it("visitante lê o catálogo, mas não os pets", async () => {
     const sb = cliente();
-    const { data: lojas, error } = await sb.from("petshop").select("slug").order("slug");
+    const { data: lojas, error } = await sb.from("petshop").select("slug").in("id", Object.values(LOJA)).order("slug");
     expect(error).toBeNull();
     expect(lojas?.map((l) => l.slug)).toEqual(["banho-e-cia-moema", "pet-feliz-centro", "pet-feliz-zona-sul"]);
     const { data: pets } = await sb.from("pet").select("id");

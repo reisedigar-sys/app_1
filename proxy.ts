@@ -21,7 +21,15 @@ export async function proxy(request: NextRequest) {
     },
   });
 
-  await supabase.auth.getClaims();
+  const { data } = await supabase.auth.getClaims();
+
+  // Checagem otimista: a autorização de verdade está no RLS e em lib/painel/sessao.ts.
+  if (!data?.claims && request.nextUrl.pathname.startsWith("/painel")) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/entrar";
+    url.search = "";
+    return NextResponse.redirect(url);
+  }
   return response;
 }
 
