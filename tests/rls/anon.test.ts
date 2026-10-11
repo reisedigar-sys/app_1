@@ -1,13 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { ANON, emTransacao } from "../helpers/db";
-import { LOJA, PROFISSIONAL } from "../helpers/ids";
+import { LOJA, PROFISSIONAL, REDE } from "../helpers/ids";
 
 describe("visitante (catálogo público)", () => {
   it("lê lojas ativas, serviços, preços e profissionais ativos", async () => {
     await emTransacao(async (db) => {
       await db.como(ANON);
-      expect(await db.count("select 1 from public.petshop")).toBe(3);
-      expect(await db.count("select 1 from public.rede")).toBe(2);
+      // Conta só o seed: os testes E2E criam lojas novas no banco local.
+      expect(await db.count("select 1 from public.petshop where id = any($1)", [Object.values(LOJA)])).toBe(3);
+      expect(await db.count("select 1 from public.rede where id = any($1)", [Object.values(REDE)])).toBe(2);
       expect(await db.count("select 1 from public.servico where petshop_id = $1", [LOJA.centro])).toBe(6);
       expect(await db.count("select 1 from public.servico_preco where petshop_id = $1", [LOJA.centro])).toBe(90);
       expect(await db.count("select 1 from public.profissional where petshop_id = $1", [LOJA.centro])).toBe(3);
