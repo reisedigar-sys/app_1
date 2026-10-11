@@ -19,7 +19,8 @@ pnpm dev                   # http://localhost:3000
 | Comando | O que faz |
 | --- | --- |
 | `pnpm test` | Testes (precisa do Supabase local rodando) |
-| `pnpm check` | Lint + tipos + testes, o mesmo que o CI |
+| `pnpm test:e2e` | Testes ponta a ponta (Playwright, celular). Sobe o `pnpm dev` sozinho se nada estiver na porta 3100 |
+| `pnpm check` | Lint + tipos + testes |
 | `pnpm db:reset` | Recria o banco do zero: migrações + `supabase/seed.sql` |
 | `pnpm db:types` | Regera `lib/supabase/database.types.ts` depois de mudar o banco |
 | `pnpm db:stop` | Para o Supabase local |
@@ -27,10 +28,25 @@ pnpm dev                   # http://localhost:3000
 Studio, e-mail de teste e Edge Functions ficam desligados no `db:start` para subir mais rápido. Para usá-los, rode
 `pnpm exec supabase start` sem `-x`.
 
+Sem download de navegador (ex.: container sem acesso), aponte o Playwright para um Chromium local com
+`PW_CHROMIUM_PATH=/caminho/do/chrome` no `.env.local` ou no ambiente.
+
+## Painel da loja (`/painel`)
+
+Login por e-mail em `/entrar`. Quem ainda não tem loja cai em `/painel/nova-loja`. Em `/painel/{loja}`:
+checklist de onboarding, dados da loja, profissionais (com foto), serviços e categorias, grade de preço/duração por
+porte × pelagem (com cópia entre portes), quem faz o quê, horários (gerais e por serviço), bloqueios e equipe.
+Dono e gerente configuram; atendente vê e cria bloqueios; só o dono administra a equipe.
+
 ## Estrutura
 
 ```
 app/                       Next.js (App Router); manifest.ts = PWA
+  entrar/                  login e cadastro da equipe
+  painel/                  painel da loja (Server Components + Server Actions)
+components/                componentes de interface
+lib/painel/                sessão/autorização, validação e formatos do painel
+e2e/                       testes ponta a ponta (Playwright)
 lib/supabase/
   client.ts                cliente do navegador (chave pública, sujeito ao RLS)
   server.ts                cliente do servidor com a sessão do usuário (cookies)
@@ -52,6 +68,8 @@ tests/
   tutor/pet, pedido e agendamento, funções de autorização (schema `app`) e políticas de RLS.
 - `20261011000002_requisitos_mvp.sql`: fila de notificações, log de mensagens, contador de faltas, lista de espera,
   WhatsApp (número por loja, idempotência do webhook, sessão do bot) e avaliações.
+- `20261011000003_onboarding.sql`: `criar_rede_e_loja`, `adicionar_membro`/`listar_equipe`, `checklist_onboarding`,
+  `criar_bloqueio` (horário local da loja → UTC no banco), bucket `fotos` e proteção da comissão da plataforma.
 
 Garantias no próprio banco:
 

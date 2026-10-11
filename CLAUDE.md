@@ -76,6 +76,18 @@ Fase 2 (longo prazo): marketplace estilo iFood lendo e escrevendo nas MESMAS age
 - **Encaixe**: `criar_pedido(..., encaixe => true)`, só para equipe; ignora a grade, nunca a constraint.
 - **Pedido e agendamento só são criados por `criar_pedido`**: não há política de INSERT para `pedido`, `agendamento` e `agendamento_item`.
 
+## Convenções do front-end (Next.js 16 com cacheComponents)
+- Tudo que lê sessão/cookies fica dentro de `<Suspense>`; `lib/supabase/server.ts` chama `connection()`.
+- Autorização: RLS no banco + `lib/painel/sessao.ts` (`exigirLoja`) nas telas. Server Actions começam com `iniciarAcao` e
+  conferem linhas afetadas (`.select()`) para responder "sem permissão".
+- O roteador mantém telas visitadas escondidas no DOM: não use `id` fixo em campos (o rótulo envolve o campo) e, nos
+  testes E2E, use os helpers de `e2e/util.ts`, que miram só elementos visíveis.
+- IDs: valide com `z.guid()` (os IDs do seed não são UUID v4).
+- Horário informado pela loja é local: a conversão para UTC é feita no banco com `petshop.fuso` (ex.: `criar_bloqueio`).
+
 ## Estado atual
-- Semana 1 (fundação) concluída: migrações `supabase/migrations/…0001_schema_base.sql` e `…0002_requisitos_mvp.sql`, seeds, tipos gerados, clientes Supabase, testes de RLS e CI. Ver README.
-- Próximo: semana 2 (onboarding da loja). Pendência: criar rede/loja pelo app precisa de uma função `criar_rede_e_loja` (hoje não há política de INSERT em `rede`).
+- Semana 1 (fundação) concluída.
+- Semana 2 (onboarding da loja) concluída: migração 003, login da equipe, painel com checklist e telas de configuração,
+  testes de banco e E2E (Playwright).
+- Equipe: só entra quem já tem conta (convite por e-mail fica para depois).
+- Próximo: semana 3 (motor de disponibilidade).
