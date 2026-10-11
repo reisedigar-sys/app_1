@@ -1270,6 +1270,7 @@ export type Database = {
         Returns: string;
       };
       checklist_onboarding: { Args: { p_petshop_id: string }; Returns: Json };
+      copiar_catalogo: { Args: { p_destino: string; p_origem: string; p_substituir?: boolean }; Returns: Json };
       criar_bloqueio: {
         Args: {
           p_fim: string;
@@ -1299,6 +1300,7 @@ export type Database = {
         Args: { p_fuso?: string; p_loja_nome: string; p_rede_nome: string; p_slug: string };
         Returns: string;
       };
+      criar_unidade: { Args: { p_nome: string; p_rede_id: string; p_slug: string }; Returns: string };
       dias_com_vaga: {
         Args: { p_itens: Json; p_mes: string; p_petshop_id: string; p_profissional_id?: string };
         Returns: {
