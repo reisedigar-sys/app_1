@@ -1281,9 +1281,38 @@ export type Database = {
         };
         Returns: string;
       };
+      criar_pedido: {
+        Args: {
+          p_canal: Database["public"]["Enums"]["canal_agendamento"];
+          p_chave_idempotencia: string;
+          p_encaixe?: boolean;
+          p_inicio: string;
+          p_itens: Json;
+          p_observacoes?: string;
+          p_petshop_id: string;
+          p_profissional_id?: string;
+          p_tutor_id: string;
+        };
+        Returns: Json;
+      };
       criar_rede_e_loja: {
         Args: { p_fuso?: string; p_loja_nome: string; p_rede_nome: string; p_slug: string };
         Returns: string;
+      };
+      dias_com_vaga: {
+        Args: { p_itens: Json; p_mes: string; p_petshop_id: string; p_profissional_id?: string };
+        Returns: {
+          dia: string;
+        }[];
+      };
+      horarios_do_dia: {
+        Args: { p_data: string; p_itens: Json; p_petshop_id: string; p_profissional_id?: string };
+        Returns: {
+          hora: string;
+          inicio: string;
+          profissionais: string[];
+          retirada_estimada: string;
+        }[];
       };
       listar_equipe: {
         Args: { p_petshop_id: string };
@@ -1292,6 +1321,16 @@ export type Database = {
           papel: Database["public"]["Enums"]["papel_loja"];
           profissional_id: string;
           user_id: string;
+        }[];
+      };
+      profissionais_disponiveis: {
+        Args: { p_inicio: string; p_itens: Json; p_petshop_id: string };
+        Returns: {
+          bio: string;
+          foto_url: string;
+          nome: string;
+          profissional_id: string;
+          retirada_estimada: string;
         }[];
       };
       timemultirange: { Args: Record<PropertyKey, never>; Returns: unknown };

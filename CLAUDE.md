@@ -57,7 +57,7 @@ Fase 2 (longo prazo): marketplace estilo iFood lendo e escrevendo nas MESMAS age
 ## Requisitos adicionais (migração 002)
 - Uma visita tem UM profissional e pode ter vários serviços; só pode ser escolhido quem estiver habilitado em todos eles (`profissional_servico`). O overbooking é travado em `agendamento`.
 - Canais de entrada: app próprio, WhatsApp (bot guiado + atendente), balcão e, no futuro, marketplace. Todos usam a mesma função `criar_agendamento` com o campo `canal`. O tutor é identificado pelo telefone (`telefone_e164`).
-- `profissional_servico` define quem faz o quê; `horario_trabalho.servico_id` define janelas por tipo de serviço (janela do serviço substitui a geral).
+- `profissional_servico` define quem faz o quê; `horario_trabalho.servico_id` define janelas por tipo de serviço: se o profissional tem janelas específicas para um serviço, só elas valem para esse serviço, em todos os dias (ex.: tosa só terça e quinta).
 - Anti no-show: fila `notificacao_agendada` (worker com SKIP LOCKED), confirmação por token, contador de faltas e sinal obrigatório após faltas.
 - Meta de escala: 1.000 petshops. Toda consulta filtra por `petshop_id` + intervalo de tempo.
 - Fluxo do tutor segue `fluxo-agendamento-referencia.md`: serviço principal (escolha única) + adicionais, unidade por localização/CEP/lista (rede com várias unidades), data e hora OU profissional, vários pets no mesmo pedido (`pedido`), grade de 15 min (`petshop.slot_minutos`).
