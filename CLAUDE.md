@@ -57,7 +57,7 @@ Fase 2 (longo prazo): marketplace estilo iFood lendo e escrevendo nas MESMAS age
 ## Requisitos adicionais (migração 002)
 - Uma visita tem UM profissional e pode ter vários serviços; só pode ser escolhido quem estiver habilitado em todos eles (`profissional_servico`). O overbooking é travado em `agendamento`.
 - Canais de entrada: app próprio, WhatsApp (bot guiado + atendente), balcão e, no futuro, marketplace. Todos usam a mesma função `criar_agendamento` com o campo `canal`. O tutor é identificado pelo telefone (`telefone_e164`).
-- `profissional_servico` define quem faz o quê; `horario_trabalho.servico_id` define janelas por tipo de serviço (janela do serviço substitui a geral).
+- `profissional_servico` define quem faz o quê; `horario_trabalho.servico_id` define janelas por tipo de serviço: se o profissional tem janelas específicas para um serviço, só elas valem para esse serviço, em todos os dias (ex.: tosa só terça e quinta).
 - Anti no-show: fila `notificacao_agendada` (worker com SKIP LOCKED), confirmação por token, contador de faltas e sinal obrigatório após faltas.
 - Meta de escala: 1.000 petshops. Toda consulta filtra por `petshop_id` + intervalo de tempo.
 - Fluxo do tutor segue `fluxo-agendamento-referencia.md`: serviço principal (escolha única) + adicionais, unidade por localização/CEP/lista (rede com várias unidades), data e hora OU profissional, vários pets no mesmo pedido (`pedido`), grade de 15 min (`petshop.slot_minutos`).
@@ -71,6 +71,8 @@ Fase 2 (longo prazo): marketplace estilo iFood lendo e escrevendo nas MESMAS age
 - **Consentimento LGPD por loja** em `tutor_petshop.consentimento_contato_em`; marketing em `consentimento_marketing_em` (separado).
 - **Dados entre lojas**: tutor e pet são globais só no essencial. Observações (`tutor_petshop.observacoes`, `pet_petshop`), faltas e histórico ficam por loja.
 - **Rede com várias unidades**: tenant = unidade (`petshop_id`); `rede_membro` dá ao dono da rede acesso a todas as unidades.
+  O dono da rede abre unidades (`criar_unidade`) e pode copiar o catálogo entre unidades da mesma rede (`copiar_catalogo`):
+  categorias, serviços, preços e tempos; nunca entre redes diferentes. Equipe, habilitação e horários são de cada unidade.
 - **Papéis** (`petshop_membro.papel`): dono (tudo, inclusive equipe), gerente (configuração), atendente (agenda), profissional (só a própria agenda).
 - **Sinal após faltas**: a semana 6 só conta faltas e marca `tutor_petshop.exige_sinal`; a cobrança entra na semana 8.
 - **Encaixe**: `criar_pedido(..., encaixe => true)`, só para equipe; ignora a grade, nunca a constraint.
@@ -90,4 +92,8 @@ Fase 2 (longo prazo): marketplace estilo iFood lendo e escrevendo nas MESMAS age
 - Semana 2 (onboarding da loja) concluída: migração 003, login da equipe, painel com checklist e telas de configuração,
   testes de banco e E2E (Playwright).
 - Equipe: só entra quem já tem conta (convite por e-mail fica para depois).
-- Próximo: semana 3 (motor de disponibilidade).
+- Semana 3 (motor de disponibilidade) concluída: migração 004 (`dias_com_vaga`, `horarios_do_dia`,
+  `profissionais_disponiveis`, `criar_pedido`), `lib/disponibilidade.ts`, testes do motor e relatório de desempenho no
+  README (p95 < 25 ms com 1.000 lojas; sem cache). Também: `criar_unidade` e `copiar_catalogo` (migração 005).
+- Testes de agenda usam datas relativas (`tests/helpers/datas.ts`): a janela máxima da loja é de até 365 dias.
+- Próximo: semana 4 (lado do tutor).

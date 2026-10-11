@@ -3,7 +3,7 @@ import { Pool, type PoolClient, type QueryResultRow } from "pg";
 const pool = new Pool({
   connectionString:
     process.env.DATABASE_URL ?? "postgresql://postgres:postgres@127.0.0.1:54322/postgres",
-  max: 4,
+  max: 6,
 });
 
 export type Papel = { anon: true } | { usuario: string };
@@ -65,6 +65,16 @@ export async function emTransacao(fn: (db: Db) => Promise<void>) {
     await fn(new Db(client));
   } finally {
     await client.query("rollback");
+    client.release();
+  }
+}
+
+/** Conexão própria, sem transação automática (para testes de concorrência, que precisam de commit). */
+export async function comConexao<T>(fn: (db: Db) => Promise<T>): Promise<T> {
+  const client = await pool.connect();
+  try {
+    return await fn(new Db(client));
+  } finally {
     client.release();
   }
 }

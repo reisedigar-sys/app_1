@@ -51,7 +51,8 @@ export function NovoHorario({
             ))}
           </Selecao>
           <p className="text-xs text-neutral-500">
-            Um horário “só para um serviço” substitui o horário geral desse serviço no dia. Ex.: tosa só terça e quinta de manhã.
+            Se um serviço tiver horários “só para ele”, o profissional faz esse serviço apenas nesses horários. Ex.: tosa só
+            terça e quinta de manhã.
           </p>
         </>
       )}

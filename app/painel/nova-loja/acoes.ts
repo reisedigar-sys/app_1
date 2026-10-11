@@ -27,10 +27,10 @@ export async function criarLoja(_: Estado, form: FormData): Promise<Estado> {
 
   let lojaId: string;
   if (rede_id) {
-    // Nova unidade numa rede existente: o RLS só permite para o dono da rede.
-    const { data, error } = await supabase.from("petshop").insert({ rede_id, nome: loja_nome, slug }).select("id").single();
+    // Nova unidade numa rede existente: só o dono da rede (conferido no banco).
+    const { data, error } = await supabase.rpc("criar_unidade", { p_rede_id: rede_id, p_nome: loja_nome, p_slug: slug });
     if (error) return { ok: false, mensagem: mensagemDeErro(error, contexto), erros: error.code === "23505" ? { slug: contexto.duplicado } : undefined };
-    lojaId = data.id;
+    lojaId = data;
   } else {
     if (!rede_nome || rede_nome.length < 2) return { ok: false, mensagem: "Confira os campos destacados.", erros: { rede_nome: "Informe o nome da rede ou marca." } };
     const { data, error } = await supabase.rpc("criar_rede_e_loja", { p_rede_nome: rede_nome, p_loja_nome: loja_nome, p_slug: slug });

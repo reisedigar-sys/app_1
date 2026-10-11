@@ -70,6 +70,9 @@ tests/
   WhatsApp (número por loja, idempotência do webhook, sessão do bot) e avaliações.
 - `20261011000003_onboarding.sql`: `criar_rede_e_loja`, `adicionar_membro`/`listar_equipe`, `checklist_onboarding`,
   `criar_bloqueio` (horário local da loja → UTC no banco), bucket `fotos` e proteção da comissão da plataforma.
+- `20261011000004_disponibilidade.sql`: motor de disponibilidade (`dias_com_vaga`, `horarios_do_dia`,
+  `profissionais_disponiveis`) e `criar_pedido`.
+- `20261011000005_copiar_catalogo.sql`: `criar_unidade` e `copiar_catalogo` entre unidades da mesma rede.
 
 Garantias no próprio banco:
 
@@ -78,6 +81,37 @@ Garantias no próprio banco:
 - **Sem overbooking**: constraint de exclusão `agendamento_sem_conflito` sobre `[inicio, fim + buffer)` por profissional,
   ignorando cancelados e faltas.
 - **Faltas**: marcar `faltou` incrementa `tutor_petshop.faltas`; acima de `petshop.limite_faltas`, `exige_sinal = true`.
+
+## Motor de disponibilidade
+
+Funções SQL chamadas via RPC; `lib/disponibilidade.ts` é só a camada tipada (e traduz os códigos de erro).
+
+| Função | Para quê |
+| --- | --- |
+| `dias_com_vaga(loja, itens, mês, profissional?)` | Calendário: dias do mês com ao menos um horário |
+| `horarios_do_dia(loja, itens, data, profissional?)` | Horários na grade da loja; sem profissional = "qualquer" |
+| `profissionais_disponiveis(loja, itens, início)` | Quem pode atender naquele horário, com a retirada estimada |
+| `criar_pedido(loja, tutor, itens, início, canal, chave, …)` | Única porta de entrada para agendar (app, balcão, WhatsApp, marketplace) |
+
+`itens` = um objeto por pet, na ordem de atendimento: `{ "pet_id": "…", "servicos": [principal, adicionais…] }` (ou
+`porte`/`pelagem` no lugar de `pet_id`, para quem ainda não fez login). Erros: `AG001` horário indisponível, `AG002`
+pedido inválido, `AG003` serviço sem preço para o porte/pelagem, `AG004` fora do período de agendamento.
+
+### Desempenho (1.000 lojas)
+
+Seed de carga em `supabase/perf/seed_1000_lojas.sql`: 1.000 lojas, 3 profissionais cada, agenda aberta por 60 dias
+com metade ocupada (451 mil agendamentos, 60 mil preços). Medição com `node scripts/perf-disponibilidade.mjs 300`
+(300 lojas sorteadas, consulta como visitante, banho + hidratação), Supabase local:
+
+| Consulta | p50 | p95 | máx |
+| --- | --- | --- | --- |
+| `dias_com_vaga` (mês inteiro) | 14 ms | 18 ms | 23 ms |
+| `dias_com_vaga` (mês atual) | 11 ms | 16 ms | 18 ms |
+| `horarios_do_dia` | 10 ms | 14 ms | 17 ms |
+| `profissionais_disponiveis` | 10 ms | 13 ms | 16 ms |
+
+Bem abaixo da meta de 300 ms: **não há cache por loja e mês** por enquanto. Refazer a medição na semana 9 (k6, com
+rede e pooler) antes do piloto. Para limpar o banco depois do seed de carga: `pnpm db:reset`.
 
 ### Usuários do seed (senha `senha123`)
 
