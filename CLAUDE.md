@@ -92,4 +92,8 @@ Fase 2 (longo prazo): marketplace estilo iFood lendo e escrevendo nas MESMAS age
 - Semana 2 (onboarding da loja) concluída: migração 003, login da equipe, painel com checklist e telas de configuração,
   testes de banco e E2E (Playwright).
 - Equipe: só entra quem já tem conta (convite por e-mail fica para depois).
-- Próximo: semana 3 (motor de disponibilidade).
+- Semana 3 (motor de disponibilidade) concluída: migração 004 (`dias_com_vaga`, `horarios_do_dia`,
+  `profissionais_disponiveis`, `criar_pedido`), `lib/disponibilidade.ts`, testes do motor e relatório de desempenho no
+  README (p95 < 25 ms com 1.000 lojas; sem cache). Também: `criar_unidade` e `copiar_catalogo` (migração 005).
+- Testes de agenda usam datas relativas (`tests/helpers/datas.ts`): a janela máxima da loja é de até 365 dias.
+- Próximo: semana 4 (lado do tutor).
