@@ -1,22 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { ANON, type Db, comConexao, emTransacao, usuario } from "../helpers/db";
+import { HOJE, proximo, somarDias } from "../helpers/datas";
 import { LOJA, PEDIDO, PET, PROFISSIONAL, TUTOR, USUARIO } from "../helpers/ids";
 
 // Datas relativas: TER é a terça-feira entre 14 e 20 dias à frente (dentro da janela padrão de 30 dias da loja
 // e longe dos agendamentos e bloqueios do seed). Equipe da Centro: Paula (ordem 1; tosa só ter/qui 9h–13h), Marcos (ordem 2; 20% mais lento,
 // não faz tosa) e Júlia (ordem 3). Todos trabalham ter–sáb, 9h–18h. Buffer da loja: 10 min. Grade: 15 min.
 // Durações do seed: Mel (pequeno/curta) banho 45, tosa 90, hidratação 15; Thor (grande/longa) banho 90.
-function somarDias(data: string, n: number) {
-  const d = new Date(`${data}T12:00:00Z`);
-  d.setUTCDate(d.getUTCDate() + n);
-  return d.toISOString().slice(0, 10);
-}
-const HOJE = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(new Date());
-const TER = (() => {
-  let d = somarDias(HOJE, 14);
-  while (new Date(`${d}T12:00:00Z`).getUTCDay() !== 2) d = somarDias(d, 1);
-  return d;
-})();
+const TER = proximo(2, 14);
 const DOM = somarDias(TER, -2);
 const SEG = somarDias(TER, -1);
 const QUA = somarDias(TER, 1);
