@@ -45,3 +45,25 @@ export async function salvarServico(_: Estado, form: FormData): Promise<Estado> 
   revalidarLoja(lojaId);
   return { ok: true, mensagem: "Salvo." };
 }
+
+export async function copiarCatalogo(_: Estado, form: FormData): Promise<Estado> {
+  const { supabase, lojaId } = await iniciarAcao(form);
+  const dados = z
+    .object({ origem: z.guid("Escolha a unidade de origem."), substituir: checkbox })
+    .safeParse(dadosDoForm(form));
+  if (!dados.success) return errosDeValidacao(dados.error);
+  const { data, error } = await supabase.rpc("copiar_catalogo", {
+    p_origem: dados.data.origem,
+    p_destino: lojaId,
+    p_substituir: dados.data.substituir,
+  });
+  if (error) return { ok: false, mensagem: mensagemDeErro(error) };
+  const r = data as { categorias: number; servicos_novos: number; servicos_atualizados: number; precos: number };
+  revalidarLoja(lojaId);
+  return {
+    ok: true,
+    mensagem:
+      `Catálogo copiado: ${r.servicos_novos} serviço(s) novo(s), ${r.servicos_atualizados} atualizado(s), ` +
+      `${r.precos} preço(s) e ${r.categorias} categoria(s). Agora defina quem faz cada serviço nesta unidade.`,
+  };
+}

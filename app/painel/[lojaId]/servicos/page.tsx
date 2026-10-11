@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Aviso, Cartao, Carregando, Titulo, Vazio } from "@/components/ui";
-import { exigirLoja, podeConfigurar } from "@/lib/painel/sessao";
+import { exigirLoja, minhasLojas, podeConfigurar } from "@/lib/painel/sessao";
 import { createClient } from "@/lib/supabase/server";
-import { EditarServico, NovaCategoria, NovoServico } from "./formularios";
+import { CopiarCatalogo, EditarServico, NovaCategoria, NovoServico } from "./formularios";
 
 export const metadata: Metadata = { title: "Serviços" };
 
@@ -20,9 +20,11 @@ export default function ServicosPage({ params }: PageProps<"/painel/[lojaId]/ser
 
 async function Conteudo({ params }: { params: Promise<{ lojaId: string }> }) {
   const { lojaId } = await params;
-  const { papel } = await exigirLoja(lojaId);
+  const { loja, papel } = await exigirLoja(lojaId);
   const supabase = await createClient();
-  const [cats, servs] = await Promise.all([
+  // Outras unidades da mesma rede que o usuário também configura (origem possível para copiar o catálogo).
+  const candidatas = (await minhasLojas()).filter((l) => l.id !== lojaId && podeConfigurar(l.papel)).map((l) => l.id);
+  const [cats, servs, irmas] = await Promise.all([
     supabase.from("categoria_servico").select("id, nome").eq("petshop_id", lojaId).order("ordem").order("nome"),
     supabase
       .from("servico")
@@ -30,6 +32,9 @@ async function Conteudo({ params }: { params: Promise<{ lojaId: string }> }) {
       .eq("petshop_id", lojaId)
       .order("ordem")
       .order("nome"),
+    candidatas.length
+      ? supabase.from("petshop").select("id, nome").in("id", candidatas).eq("rede_id", loja.rede_id).order("nome")
+      : Promise.resolve({ data: [] as { id: string; nome: string }[], error: null }),
   ]);
   if (cats.error || servs.error) return <Aviso tipo="erro">Não foi possível carregar os serviços.</Aviso>;
   const categorias = cats.data;
@@ -80,6 +85,13 @@ async function Conteudo({ params }: { params: Promise<{ lojaId: string }> }) {
             <h2 className="mb-3 font-medium">Novo serviço</h2>
             <NovoServico lojaId={lojaId} categorias={categorias} />
           </Cartao>
+          {(irmas.data ?? []).length > 0 && (
+            <Cartao>
+              <h2 className="mb-1 font-medium">Copiar de outra unidade</h2>
+              <p className="mb-3 text-sm text-neutral-500">Aproveite o catálogo de outra unidade da sua rede e ajuste os tempos depois.</p>
+              <CopiarCatalogo lojaId={lojaId} unidades={irmas.data ?? []} />
+            </Cartao>
+          )}
           <Cartao>
             <h2 className="mb-1 font-medium">Categorias</h2>
             <p className="mb-3 text-sm text-neutral-500">{categorias.map((c) => c.nome).join(", ") || "Nenhuma ainda."}</p>

@@ -2,7 +2,7 @@
 
 import { FormAcao } from "@/components/form-acao";
 import { AreaTexto, Caixa, Campo, Selecao } from "@/components/ui";
-import { criarCategoria, criarServico, salvarServico } from "./acoes";
+import { copiarCatalogo, criarCategoria, criarServico, salvarServico } from "./acoes";
 
 type Categoria = { id: string; nome: string };
 type Servico = {
@@ -74,6 +74,30 @@ export function NovaCategoria({ lojaId }: { lojaId: string }) {
         <>
           <input type="hidden" name="loja_id" value={lojaId} />
           <Campo rotulo="Nova categoria" nome="nome" placeholder="Ex.: Banho, Tosa, Extras" erro={erros.nome} />
+        </>
+      )}
+    </FormAcao>
+  );
+}
+
+export function CopiarCatalogo({ lojaId, unidades }: { lojaId: string; unidades: { id: string; nome: string }[] }) {
+  return (
+    <FormAcao acao={copiarCatalogo} rotuloEnviar="Copiar catálogo">
+      {(erros) => (
+        <>
+          <input type="hidden" name="loja_id" value={lojaId} />
+          <Selecao rotulo="Copiar de" nome="origem" defaultValue={unidades[0]?.id} erro={erros.origem}>
+            {unidades.map((u) => (
+              <option key={u.id} value={u.id}>
+                {u.nome}
+              </option>
+            ))}
+          </Selecao>
+          <Caixa rotulo="Substituir serviços com o mesmo nome (preços e tempos desta unidade serão sobrescritos)" nome="substituir" />
+          <p className="text-xs text-neutral-500">
+            Copia categorias, serviços, preços e tempos. Sem “substituir”, só cria o que falta e mantém o que esta unidade já
+            ajustou. Profissionais e horários não são copiados.
+          </p>
         </>
       )}
     </FormAcao>
