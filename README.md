@@ -70,6 +70,9 @@ tests/
   WhatsApp (número por loja, idempotência do webhook, sessão do bot) e avaliações.
 - `20261011000003_onboarding.sql`: `criar_rede_e_loja`, `adicionar_membro`/`listar_equipe`, `checklist_onboarding`,
   `criar_bloqueio` (horário local da loja → UTC no banco), bucket `fotos` e proteção da comissão da plataforma.
+- `20261011000004_disponibilidade.sql`: motor de disponibilidade (`dias_com_vaga`, `horarios_do_dia`,
+  `profissionais_disponiveis`) e `criar_pedido`.
+- `20261011000005_copiar_catalogo.sql`: `criar_unidade` e `copiar_catalogo` entre unidades da mesma rede.
 
 Garantias no próprio banco:
 
