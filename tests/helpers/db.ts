@@ -42,18 +42,23 @@ export class Db {
     await this.query("select set_config('request.jwt.claims', '', true)");
   }
 
-  /** Executa e devolve o código SQLSTATE do erro (ou null), sem abortar a transação. */
-  async erro(sql: string, params: unknown[] = []): Promise<string | null> {
+  /** Executa sem abortar a transação: devolve o código SQLSTATE do erro (ou null) e as linhas afetadas. */
+  async tentar(sql: string, params: unknown[] = []): Promise<{ codigo: string | null; linhas: number }> {
     const nome = `sp_${++this.savepoint}`;
     await this.query(`savepoint ${nome}`);
     try {
-      await this.query(sql, params);
+      const r = await this.query(sql, params);
       await this.query(`release savepoint ${nome}`);
-      return null;
+      return { codigo: null, linhas: r.rowCount ?? 0 };
     } catch (e) {
       await this.query(`rollback to savepoint ${nome}`);
-      return (e as { code?: string }).code ?? "erro";
+      return { codigo: (e as { code?: string }).code ?? "erro", linhas: 0 };
     }
+  }
+
+  /** Executa e devolve o código SQLSTATE do erro (ou null), sem abortar a transação. */
+  async erro(sql: string, params: unknown[] = []): Promise<string | null> {
+    return (await this.tentar(sql, params)).codigo;
   }
 }
 

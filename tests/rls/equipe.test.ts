@@ -140,3 +140,35 @@ describe("equipe da loja", () => {
     });
   });
 });
+
+describe("edição direta de agendamento", () => {
+  it("a equipe muda status e observações, mas não horário, profissional ou preço", async () => {
+    await emTransacao(async (db) => {
+      await db.como(usuario(USUARIO.aliceAtendenteCentro));
+      expect(
+        await db.erro("update public.agendamento set status = 'confirmado', observacoes = 'ok' where id = $1", [AGENDAMENTO.thorCentro]),
+      ).toBeNull();
+      for (const set of [
+        "inicio = inicio + interval '1 day', fim = fim + interval '1 day'",
+        `profissional_id = '${PROFISSIONAL.paula}'`,
+        "preco_total_centavos = 0",
+        "canal = 'balcao'",
+        "encaixe = true",
+      ]) {
+        expect(await db.erro(`update public.agendamento set ${set} where id = $1`, [AGENDAMENTO.thorCentro]), set).toBe("42501");
+      }
+    });
+  });
+
+  it("a profissional também só muda o status da própria agenda", async () => {
+    await emTransacao(async (db) => {
+      await db.como(usuario(USUARIO.paulaProfissionalCentro));
+      expect(
+        await db.erro("update public.agendamento set status = 'em_atendimento' where id = $1", [AGENDAMENTO.melCentroPassado]),
+      ).toBeNull();
+      expect(await db.erro("update public.agendamento set fim = fim + interval '1 hour' where id = $1", [AGENDAMENTO.melCentroPassado])).toBe(
+        "42501",
+      );
+    });
+  });
+});

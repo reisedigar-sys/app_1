@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it } from "vitest";
-import { ANON, emTransacao, usuario } from "../helpers/db";
+import { ANON, type Db, emTransacao, usuario } from "../helpers/db";
 import { LOJA, TUTOR, USUARIO } from "../helpers/ids";
 
 // Como saber se a linha pertence ao tutor $2 (tabelas sem coluna tutor_id).
@@ -21,6 +21,12 @@ const TABELAS_PUBLICAS = new Set([
 
 let tabelas: string[] = [];
 
+/** Linhas alteradas; recusa por falta de permissão (42501) conta como nenhuma linha alcançada. */
+async function linhasAfetadas(db: Db, sql: string, params: unknown[] = []) {
+  const { codigo, linhas } = await db.tentar(sql, params);
+  if (codigo && codigo !== "42501") throw new Error(`erro inesperado ${codigo} em: ${sql}`);
+  return linhas;
+}
 beforeAll(async () => {
   await emTransacao(async (db) => {
     tabelas = (
@@ -96,10 +102,8 @@ describe.each([
     await emTransacao(async (db) => {
       await db.como(usuario(userId));
       for (const t of tabelas) {
-        const up = await db.query(`update public.${t} set petshop_id = petshop_id where petshop_id = $1`, [LOJA.moema]);
-        expect(up.rowCount, `update em ${t}`).toBe(0);
-        const del = await db.query(`delete from public.${t} where petshop_id = $1`, [LOJA.moema]);
-        expect(del.rowCount, `delete em ${t}`).toBe(0);
+        expect(await linhasAfetadas(db, `update public.${t} set petshop_id = petshop_id where petshop_id = $1`, [LOJA.moema]), `update em ${t}`).toBe(0);
+        expect(await linhasAfetadas(db, `delete from public.${t} where petshop_id = $1`, [LOJA.moema]), `delete em ${t}`).toBe(0);
       }
     });
   });
@@ -121,10 +125,8 @@ describe("visitante anônimo", () => {
     await emTransacao(async (db) => {
       await db.como(ANON);
       for (const t of tabelas) {
-        const up = await db.query(`update public.${t} set petshop_id = petshop_id`);
-        expect(up.rowCount, t).toBe(0);
-        const del = await db.query(`delete from public.${t}`);
-        expect(del.rowCount, t).toBe(0);
+        expect(await linhasAfetadas(db, `update public.${t} set petshop_id = petshop_id`), t).toBe(0);
+        expect(await linhasAfetadas(db, `delete from public.${t}`), t).toBe(0);
       }
     });
   });
