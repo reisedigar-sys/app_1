@@ -38,7 +38,7 @@ Fase 2 (longo prazo): marketplace estilo iFood lendo e escrevendo nas MESMAS age
 - Toda mudança em disponibilidade de horários exige teste.
 - Migrações versionadas em `supabase/migrations/`. Nunca editar migração já aplicada; criar nova.
 - Nunca expor chave `service_role` no front-end.
-- LGPD: registrar consentimento de contato (WhatsApp) em `tutor.consentimento_contato_em`.
+- LGPD: registrar consentimento de contato (WhatsApp) por loja em `tutor_petshop.consentimento_contato_em`; marketing em `tutor_petshop.consentimento_marketing_em`.
 
 ## Roadmap
 **Fase 0 — Validação (semana 0–1)**: entrevistar 3–5 petshops; fechar 2–3 pilotos.
@@ -56,7 +56,7 @@ Fase 2 (longo prazo): marketplace estilo iFood lendo e escrevendo nas MESMAS age
 
 ## Requisitos adicionais (migração 002)
 - Uma visita tem UM profissional e pode ter vários serviços; só pode ser escolhido quem estiver habilitado em todos eles (`profissional_servico`). O overbooking é travado em `agendamento`.
-- Canais de entrada: app próprio, WhatsApp (bot guiado + atendente), balcão e, no futuro, marketplace. Todos usam a mesma função `criar_agendamento` com o campo `canal`. O tutor é identificado pelo telefone (`telefone_e164`).
+- Canais de entrada: app próprio, WhatsApp (bot guiado + atendente), balcão e, no futuro, marketplace. Todos usam a mesma função `criar_pedido` com o campo `canal`. O tutor é identificado pelo telefone (`telefone_e164`).
 - `profissional_servico` define quem faz o quê; `horario_trabalho.servico_id` define janelas por tipo de serviço: se o profissional tem janelas específicas para um serviço, só elas valem para esse serviço, em todos os dias (ex.: tosa só terça e quinta).
 - Anti no-show: fila `notificacao_agendada` (worker com SKIP LOCKED), confirmação por token, contador de faltas e sinal obrigatório após faltas.
 - Meta de escala: 1.000 petshops. Toda consulta filtra por `petshop_id` + intervalo de tempo.
@@ -77,6 +77,7 @@ Fase 2 (longo prazo): marketplace estilo iFood lendo e escrevendo nas MESMAS age
 - **Sinal após faltas**: a semana 6 só conta faltas e marca `tutor_petshop.exige_sinal`; a cobrança entra na semana 8.
 - **Encaixe**: `criar_pedido(..., encaixe => true)`, só para equipe; ignora a grade, nunca a constraint.
 - **Pedido e agendamento só são criados por `criar_pedido`**: não há política de INSERT para `pedido`, `agendamento` e `agendamento_item`.
+- **Edição direta de agendamento** (equipe, via RLS) só altera `status` e `observacoes` (permissão por coluna, migração 006). Horário e profissional mudam só por funções do back-end (remarcar, semana 5).
 
 ## Convenções do front-end (Next.js 16 com cacheComponents)
 - Tudo que lê sessão/cookies fica dentro de `<Suspense>`; `lib/supabase/server.ts` chama `connection()`.
