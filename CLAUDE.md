@@ -97,4 +97,21 @@ Fase 2 (longo prazo): marketplace estilo iFood lendo e escrevendo nas MESMAS age
   `profissionais_disponiveis`, `criar_pedido`), `lib/disponibilidade.ts`, testes do motor e relatório de desempenho no
   README (p95 < 25 ms com 1.000 lojas; sem cache). Também: `criar_unidade` e `copiar_catalogo` (migração 005).
 - Testes de agenda usam datas relativas (`tests/helpers/datas.ts`): a janela máxima da loja é de até 365 dias.
-- Próximo: semana 4 (lado do tutor).
+- Semana 4 (lado do tutor) concluída: migração 007, `/{slug}`, `/{slug}/agendar` (5 etapas), `/conta` (login por
+  e-mail, perfil, pets, agendamentos com remarcar/cancelar) e E2E do fluxo com 2 pets.
+- Próximo: semana 5 (painel da loja: agenda do dia/semana, status, balcão, encaixe).
+
+## Decisões da semana 4
+- **Login do tutor só por e-mail** por enquanto. O telefone é obrigatório no perfil, mas não verificado: um cadastro
+  feito no balcão (sem conta) e um com conta podem ter o mesmo número até a verificação por código (com o WhatsApp),
+  que vai unir os dois. Ninguém assume o histórico de outra pessoa só digitando um telefone.
+- **Unidade depois do serviço**: o catálogo é de cada unidade; o pedido é traduzido para a unidade escolhida pelo
+  NOME do serviço (`unidades_para_pedido`). Só aparecem unidades com todos os serviços e preço para cada pet.
+- **Pets atendidos na ordem em que foram escolhidos**; observações por pet vão juntas no campo do pedido.
+- **Cancelar/remarcar é por pet** (agendamento). Remarcar passa pelo motor ignorando o próprio horário e mantém o
+  profissional quando ele está livre. Fora do prazo gratuito, cancelar é permitido e o tutor é avisado.
+- **Consentimento de contato** só é gravado quando o tutor marca a opção (desmarcar não apaga uma autorização anterior).
+- **Depois de login/cadastro/perfil a navegação é uma carga completa** (`Estado.destino` em `FormAcao`): o cache do
+  roteador guardava a tela que redirecionava para o login.
+- **Avaliações**: as estrelas só aparecem quando há avaliações; a tela de avaliar fica para depois do MVP.
+- **Repositório público**: os prints de referência (marca de terceiros e pessoas reais) não são versionados.

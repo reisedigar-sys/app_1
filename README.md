@@ -38,6 +38,16 @@ checklist de onboarding, dados da loja, profissionais (com foto), serviços e ca
 porte × pelagem (com cópia entre portes), quem faz o quê, horários (gerais e por serviço), bloqueios e equipe.
 Dono e gerente configuram; atendente vê e cria bloqueios; só o dono administra a equipe.
 
+## Lado do tutor
+
+- `/{slug}`: página pública da loja (serviços "a partir de", equipe, botão Agendar).
+- `/{slug}/agendar`: fluxo em 5 etapas, seguindo `fluxo-agendamento-referencia.md`: pets (vários) → serviço principal +
+  adicionais + observações por pet → unidade da rede (localização, CEP ou lista, com preço) → data e hora **ou**
+  profissional → resumo editável e confirmação (pagamento na loja até a semana 8).
+- `/conta`: login por e-mail, seus dados (nome e celular), meus pets (com foto) e meus agendamentos (remarcar e cancelar).
+
+Os testes E2E apagam o que criam (contas `@e2e.test`, lojas `e2e-…`) antes e depois de rodar (`e2e/limpeza.ts`).
+
 ## Estrutura
 
 ```
@@ -73,6 +83,10 @@ tests/
 - `20261011000004_disponibilidade.sql`: motor de disponibilidade (`dias_com_vaga`, `horarios_do_dia`,
   `profissionais_disponiveis`) e `criar_pedido`.
 - `20261011000005_copiar_catalogo.sql`: `criar_unidade` e `copiar_catalogo` entre unidades da mesma rede.
+- `20261011000006_agendamento_colunas.sql`: a equipe só edita `status` e `observacoes` de um agendamento pela API.
+- `20261012000007_tutor.sql`: perfil do tutor, `unidades_para_pedido`, `profissionais_aptos` (com avaliação),
+  `meus_agendamentos`, `cancelar_agendamento`, `remarcar_agendamento`, consentimento por loja, foto do pet e endereços
+  reservados.
 
 Garantias no próprio banco:
 
