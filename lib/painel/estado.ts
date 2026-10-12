@@ -1,7 +1,13 @@
 import type { z } from "zod";
 
 /** Resultado de uma Server Action de formulário. */
-export type Estado = { ok?: boolean; mensagem?: string; erros?: Record<string, string> };
+export type Estado = {
+  ok?: boolean;
+  mensagem?: string;
+  erros?: Record<string, string>;
+  /** Carga completa da página (não navegação do roteador); usado depois de login/cadastro. */
+  destino?: string;
+};
 
 export const estadoInicial: Estado = {};
 

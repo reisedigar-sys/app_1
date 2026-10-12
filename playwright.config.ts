@@ -4,6 +4,9 @@ const PORTA = 3100;
 
 export default defineConfig({
   testDir: "e2e",
+  // Antes e depois: apaga o que os testes criam (contas @e2e.test, lojas "e2e-…").
+  globalSetup: "./e2e/limpeza.ts",
+  globalTeardown: "./e2e/limpeza.ts",
   fullyParallel: false,
   workers: 1,
   retries: process.env.CI ? 1 : 0,

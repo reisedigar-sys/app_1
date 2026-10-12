@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { centavosParaReais, reaisParaCentavos, slugify, telefoneParaE164 } from "./formatos";
+import { centavosParaReais, reaisParaCentavos, slugify, telefoneLegivel, telefoneParaE164 } from "./formatos";
 
 describe("formatos", () => {
   it("converte reais em centavos", () => {
@@ -22,5 +22,7 @@ describe("formatos", () => {
     expect(telefoneParaE164("11 3333-4444")).toBe("+551133334444");
     expect(telefoneParaE164("+55 11 98888-0001")).toBe("+5511988880001");
     expect(telefoneParaE164("123")).toBeNull();
+    expect(telefoneLegivel("+5511988880001")).toBe("(11) 98888-0001");
+    expect(telefoneLegivel("+551133334444")).toBe("(11) 3333-4444");
   });
 });

@@ -1269,6 +1269,7 @@ export type Database = {
         };
         Returns: string;
       };
+      cancelar_agendamento: { Args: { p_agendamento_id: string }; Returns: Json };
       checklist_onboarding: { Args: { p_petshop_id: string }; Returns: Json };
       copiar_catalogo: { Args: { p_destino: string; p_origem: string; p_substituir?: boolean }; Returns: Json };
       criar_bloqueio: {
@@ -1325,17 +1326,74 @@ export type Database = {
           user_id: string;
         }[];
       };
-      profissionais_disponiveis: {
-        Args: { p_inicio: string; p_itens: Json; p_petshop_id: string };
+      meus_agendamentos: {
+        Args: Record<PropertyKey, never>;
         Returns: {
+          cancelamento_gratuito_ate: string;
+          fim: string;
+          id: string;
+          inicio: string;
+          loja_fuso: string;
+          loja_nome: string;
+          loja_slug: string;
+          loja_telefone: string;
+          pedido_id: string;
+          pet_id: string;
+          pet_nome: string;
+          petshop_id: string;
+          preco_total_centavos: number;
+          profissional_id: string;
+          profissional_nome: string;
+          servicos: string[];
+          status: Database["public"]["Enums"]["status_agendamento"];
+        }[];
+      };
+      profissionais_aptos: {
+        Args: { p_itens: Json; p_petshop_id: string };
+        Returns: {
+          avaliacoes: number;
           bio: string;
           foto_url: string;
           nome: string;
+          nota_media: number;
+          profissional_id: string;
+        }[];
+      };
+      profissionais_disponiveis: {
+        Args: { p_inicio: string; p_itens: Json; p_petshop_id: string };
+        Returns: {
+          avaliacoes: number;
+          bio: string;
+          foto_url: string;
+          nome: string;
+          nota_media: number;
           profissional_id: string;
           retirada_estimada: string;
         }[];
       };
+      registrar_consentimento: {
+        Args: { p_contato: boolean; p_marketing?: boolean; p_petshop_id: string };
+        Returns: undefined;
+      };
+      remarcar_agendamento: {
+        Args: { p_agendamento_id: string; p_inicio: string; p_profissional_id?: string };
+        Returns: Json;
+      };
+      salvar_perfil_tutor: { Args: { p_nome: string; p_telefone: string }; Returns: string };
       timemultirange: { Args: Record<PropertyKey, never>; Returns: unknown };
+      unidades_para_pedido: {
+        Args: { p_itens: Json; p_lat?: number; p_lng?: number; p_petshop_id: string };
+        Returns: {
+          distancia_km: number;
+          endereco: string;
+          itens: Json;
+          nome: string;
+          petshop_id: string;
+          slug: string;
+          telefone: string;
+          total_centavos: number;
+        }[];
+      };
     };
     Enums: {
       acao_sem_confirmacao: "avisar_loja" | "liberar_horario";
