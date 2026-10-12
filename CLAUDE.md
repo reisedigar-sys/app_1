@@ -99,7 +99,28 @@ Fase 2 (longo prazo): marketplace estilo iFood lendo e escrevendo nas MESMAS age
 - Testes de agenda usam datas relativas (`tests/helpers/datas.ts`): a janela máxima da loja é de até 365 dias.
 - Semana 4 (lado do tutor) concluída: migração 007, `/{slug}`, `/{slug}/agendar` (5 etapas), `/conta` (login por
   e-mail, perfil, pets, agendamentos com remarcar/cancelar) e E2E do fluxo com 2 pets.
-- Próximo: semana 5 (painel da loja: agenda do dia/semana, status, balcão, encaixe).
+- Próximo: semana 5 (painel da loja: agenda do dia/semana, status, balcão, encaixe). Siga o prompt da semana 5 em
+  `PROMPTS-CLAUDE-CODE.md`, numa branch nova a partir da `main` (`semana-5-…`), com PR ao final.
+
+## Pendências fora do código (decisão ou ação do dono do produto)
+- **Repositório público**: `reisedigar-sys/app_1` está público. Recomendado torná-lo privado
+  (*Settings → General → Danger Zone → Change visibility*). Enquanto público, não versionar prints de terceiros,
+  dados reais de pilotos nem segredos.
+- **Ambientes (staging e produção)**: ainda não criados. Passo a passo em `docs/ambientes.md`. Quando o dono enviar os
+  Reference IDs do Supabase, o domínio e a confirmação dos secrets, configurar: migrações e deploy automáticos no
+  staging a cada merge na `main`; produção por PR `main` → `producao`, com aprovação manual, banco antes do app.
+- **Contas que demoram**: verificação da empresa na Meta (WhatsApp, semanas 6–7) e Asaas com sandbox e split (semana 8).
+- **Marca da loja**: a página pública mostra nome, endereço e telefone; logo e cor ainda não existem no cadastro.
+  Incluir se os pilotos pedirem (candidato para a semana 5).
+
+## Ambiente de desenvolvimento (sessões na nuvem do Claude Code)
+- O Docker do container pode parar entre sessões. Para subir de novo:
+  `(dockerd > /tmp/dockerd.log 2>&1 &)`, esperar `docker ps` responder e então
+  `pnpm exec supabase stop --no-backup; SUPABASE_INTERNAL_IMAGE_REGISTRY=docker.io pnpm db:start`.
+  O registro padrão de imagens (public.ecr.aws) é bloqueado aqui; o Docker Hub funciona.
+- Playwright: use o Chromium já instalado com `PW_CHROMIUM_PATH=/opt/pw-browsers/chromium` (está no `.env.local`
+  local, que não é versionado; recrie a partir do `.env.example` se precisar).
+- Rode `pnpm db:types` só com o banco local no ar (o script não apaga mais os tipos se ele estiver fora).
 
 ## Decisões da semana 4
 - **Login do tutor só por e-mail** por enquanto. O telefone é obrigatório no perfil, mas não verificado: um cadastro
