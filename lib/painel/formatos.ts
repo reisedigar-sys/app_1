@@ -48,3 +48,12 @@ export const NOME_PORTE: Record<(typeof PORTES)[number], string> = {
 export const NOME_PELAGEM: Record<(typeof PELAGENS)[number], string> = { curta: "Curta", media: "Média", longa: "Longa" };
 export const DIAS_SEMANA = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"] as const;
 export const NOME_PAPEL = { dono: "Dono", gerente: "Gerente", atendente: "Atendente", profissional: "Profissional" } as const;
+
+/** "+5511988887777" → "(11) 98888-7777". */
+export function telefoneLegivel(e164: string | null | undefined) {
+  if (!e164) return null;
+  const d = e164.replace(/^\+55/, "");
+  if (d.length === 11) return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+  if (d.length === 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+  return e164;
+}

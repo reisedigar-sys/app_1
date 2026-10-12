@@ -13,7 +13,19 @@ export type ItemPedido =
   | { porte: Database["public"]["Enums"]["porte"]; pelagem: Database["public"]["Enums"]["pelagem"]; servicos: string[] };
 
 export type Horario = { inicio: string; hora: string; retiradaEstimada: string; profissionais: string[] };
-export type ProfissionalDisponivel = { id: string; nome: string; fotoUrl: string | null; bio: string | null; retiradaEstimada: string };
+export type Profissional = { id: string; nome: string; fotoUrl: string | null; bio: string | null; notaMedia: number | null; avaliacoes: number };
+export type ProfissionalDisponivel = Profissional & { retiradaEstimada: string };
+export type Unidade = {
+  id: string;
+  nome: string;
+  slug: string;
+  endereco: string;
+  telefone: string | null;
+  distanciaKm: number | null;
+  /** O pedido traduzido para os serviços desta unidade. */
+  itens: ItemPedido[];
+  totalCentavos: number;
+};
 export type ResumoPedido = {
   pedido_id: string;
   total_centavos: number;
@@ -76,7 +88,41 @@ export async function horariosDoDia(sb: Cliente, lojaId: string, itens: ItemPedi
 /** Quem pode atender num horário (com a retirada estimada de cada um). */
 export async function profissionaisDisponiveis(sb: Cliente, lojaId: string, itens: ItemPedido[], inicio: string): Promise<ProfissionalDisponivel[]> {
   const dados = ou(await sb.rpc("profissionais_disponiveis", { p_petshop_id: lojaId, p_itens: itens, p_inicio: inicio }));
-  return dados.map((p) => ({ id: p.profissional_id, nome: p.nome, fotoUrl: p.foto_url, bio: p.bio, retiradaEstimada: p.retirada_estimada }));
+  return dados.map((p) => ({ ...profissional(p), retiradaEstimada: p.retirada_estimada }));
+}
+
+function profissional(p: { profissional_id: string; nome: string; foto_url: string | null; bio: string | null; nota_media: number | null; avaliacoes: number }): Profissional {
+  return {
+    id: p.profissional_id,
+    nome: p.nome,
+    fotoUrl: p.foto_url,
+    bio: p.bio,
+    notaMedia: p.nota_media === null ? null : Number(p.nota_media),
+    avaliacoes: p.avaliacoes,
+  };
+}
+
+/** Caminho "Profissional": todos os profissionais aptos para o pedido, com avaliação. */
+export async function profissionaisAptos(sb: Cliente, lojaId: string, itens: ItemPedido[]): Promise<Profissional[]> {
+  const dados = ou(await sb.rpc("profissionais_aptos", { p_petshop_id: lojaId, p_itens: itens }));
+  return dados.map(profissional);
+}
+
+/** Unidades da mesma rede que atendem o pedido, com o preço de cada uma e a distância (se houver localização). */
+export async function unidadesParaPedido(sb: Cliente, lojaId: string, itens: ItemPedido[], local?: { lat: number; lng: number }): Promise<Unidade[]> {
+  const dados = ou(
+    await sb.rpc("unidades_para_pedido", { p_petshop_id: lojaId, p_itens: itens, p_lat: local?.lat, p_lng: local?.lng }),
+  );
+  return dados.map((u) => ({
+    id: u.petshop_id,
+    nome: u.nome,
+    slug: u.slug,
+    endereco: u.endereco,
+    telefone: u.telefone,
+    distanciaKm: u.distancia_km === null ? null : Number(u.distancia_km),
+    itens: u.itens as unknown as ItemPedido[],
+    totalCentavos: u.total_centavos,
+  }));
 }
 
 /** Cria o pedido (um agendamento por pet, em sequência). A mesma chave de idempotência nunca duplica. */
