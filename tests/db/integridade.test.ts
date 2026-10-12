@@ -159,10 +159,17 @@ describe("horários de trabalho e cadastro", () => {
     });
   });
 
-  it("telefone identifica o tutor globalmente (único)", async () => {
+  it("telefone: no máximo um cadastro de balcão e um com conta por número", async () => {
     await emTransacao(async (db) => {
+      // A Ana tem conta com +5511988880001: o balcão ainda pode ter um cadastro sem conta com o mesmo número
+      // (até a verificação por código unir os dois).
+      expect(await db.erro("insert into public.tutor (nome, telefone_e164) values ('Ana (balcão)', '+5511988880001')")).toBeNull();
+      expect(await db.erro("insert into public.tutor (nome, telefone_e164) values ('Outra Ana', '+5511988880001')")).toBe("23505");
+      await db.query(
+        `insert into auth.users (instance_id, id, aud, role, email) values ('00000000-0000-0000-0000-000000000000', 'b1000000-0000-0000-0000-000000000001', 'authenticated', 'authenticated', 'x@x.test')`,
+      );
       expect(
-        await db.erro("insert into public.tutor (nome, telefone_e164) values ('Outra Ana', '+5511988880001')"),
+        await db.erro("insert into public.tutor (user_id, nome, telefone_e164) values ('b1000000-0000-0000-0000-000000000001', 'X', '+5511988880001')"),
       ).toBe("23505");
     });
   });
