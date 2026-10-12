@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, type ReactNode } from "react";
+import { useActionState, useEffect, type ReactNode } from "react";
 import { useFormStatus } from "react-dom";
 import type { Estado } from "@/lib/painel/estado";
 import { Aviso, Botao } from "./ui";
@@ -26,6 +26,11 @@ export function FormAcao({
 }) {
   const [estado, formAction] = useActionState(acao, {});
   const erros = estado.erros ?? {};
+  // Depois de mudar a sessão (login, cadastro), recarrega a página de destino: o cache do roteador pode guardar
+  // telas visitadas antes do login (que redirecionavam para o login).
+  useEffect(() => {
+    if (estado.destino) window.location.assign(estado.destino);
+  }, [estado.destino]);
   return (
     <form action={formAction} className={className} noValidate>
       {typeof children === "function" ? children(erros) : children}
