@@ -18,8 +18,8 @@ export function revalidarLoja(lojaId: string) {
 
 export const SEM_PERMISSAO = { ok: false, mensagem: "Você não tem permissão para fazer isso nesta loja." } as const;
 
-/** Campo de formulário opcional: "" vira null. */
+/** Campo de formulário opcional: ausente ou "" vira null. */
 export const opcional = <T extends z.ZodType>(schema: T) =>
-  z.preprocess((v) => (typeof v === "string" && v.trim() === "" ? null : v), schema.nullable());
+  z.preprocess((v) => (v === undefined || (typeof v === "string" && v.trim() === "") ? null : v), schema.nullable());
 
 export const checkbox = z.preprocess((v) => v === "on" || v === "true", z.boolean());
