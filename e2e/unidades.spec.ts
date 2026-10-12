@@ -9,7 +9,7 @@ test("dona da rede abre uma unidade nova e copia o catálogo da outra", async ({
 
   // A rede existente já vem selecionada: é uma nova unidade da Pet Feliz.
   await expect(campo(page, "Rede")).toHaveValue("10000000-0000-0000-0000-000000000001");
-  await campo(page, "Nome da loja").fill(`Pet Feliz Norte ${sufixo}`);
+  await campo(page, "Nome da loja").fill(`E2E Pet Feliz Norte ${sufixo}`);
   await botao(page, "Criar loja").click();
   await expect(page.getByRole("heading", { name: "Configuração da loja" })).toBeVisible();
 

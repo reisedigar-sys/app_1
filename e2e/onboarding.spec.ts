@@ -8,15 +8,15 @@ test("loja nova se configura sozinha até o checklist ficar completo", async ({ 
   await page.goto("/entrar");
   await page.getByRole("link", { name: "Criar conta" }).click();
   await campo(page, "Seu nome").fill("Fernanda Dona");
-  await campo(page, "E-mail").fill(`fernanda-${sufixo}@loja.test`);
+  await campo(page, "E-mail").fill(`fernanda-${sufixo}@e2e.test`);
   await campo(page, "Senha").fill("senha-segura-123");
   await botao(page, "Criar conta").click();
 
   // Sem loja: cai direto no cadastro da loja
   await expect(page.getByRole("heading", { name: "Cadastrar loja" })).toBeVisible();
   await campo(page, "Nome da rede ou marca").fill("Cão Limpo");
-  await campo(page, "Nome da loja").fill(`Cão Limpo ${sufixo}`);
-  await expect(campo(page, "Endereço da página da loja")).toHaveValue(`cao-limpo-${sufixo}`);
+  await campo(page, "Nome da loja").fill(`E2E Cão Limpo ${sufixo}`);
+  await expect(campo(page, "Endereço da página da loja")).toHaveValue(`e2e-cao-limpo-${sufixo}`);
   await botao(page, "Criar loja").click();
 
   await expect(page.getByRole("heading", { name: "Configuração da loja" })).toBeVisible();
@@ -113,5 +113,5 @@ test("loja nova se configura sozinha até o checklist ficar completo", async ({ 
   // Checklist completo
   await abrir(page, "Início");
   await expect(texto(page, "Tudo pronto!")).toBeVisible();
-  await expect(texto(page, `/cao-limpo-${sufixo}`)).toBeVisible();
+  await expect(texto(page, `/e2e-cao-limpo-${sufixo}`)).toBeVisible();
 });
