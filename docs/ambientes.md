@@ -3,83 +3,90 @@
 | | Teste (staging) | Produção |
 | --- | --- | --- |
 | Para quê | Ver as entregas antes dos clientes; demonstração para os pilotos | Clientes reais |
-| Banco | Supabase `agenda-pet-staging` (plano Free) | Supabase `agenda-pet-prod` (plano Pro) |
-| App | Vercel, deploy de Preview | Vercel, deploy de Production |
-| Endereço | `staging.SEU-DOMINIO` | `app.SEU-DOMINIO` |
+| Banco | Supabase `hora-do-pet-staging` (`cwnwrpvjebtzheqbhzhj`, plano Free) | Supabase `hora-do-pet-prod` (`xddxurtmevhgxwffknyb`) |
+| App | Vercel, deploy de Preview da branch `main` | Vercel, deploy de Production |
+| Endereço | `staging.SEU-DOMINIO` (até lá, o endereço de Preview da `main`) | `app.SEU-DOMINIO` (até lá, `hora-do-pet.vercel.app`) |
 | Origem do código | Branch `main` | Branch `producao` (atualizada por PR `main` → `producao`) |
-| Migrações e deploy | Automáticos a cada merge na `main` | Só depois da sua aprovação: primeiro o banco, depois o app |
-| Dados | Loja de demonstração e contas de teste | Nunca recebe seeds nem testes |
+| Migrações | `deploy-staging.yml`, a cada merge na `main` | `deploy-producao.yml`, depois da sua aprovação |
+| App publicado por | Vercel, sozinha | `deploy-producao.yml`, **depois** das migrações (`vercel.json` desliga o deploy automático da `producao`) |
+| Dados | Contas e lojas de teste criadas pelas telas | Nunca recebe seeds nem testes |
 
 **Regra de ouro:** nenhuma chave ou senha é colada em chat, issue, PR ou arquivo do repositório. Elas vão direto
-para os *secrets* do GitHub e para as variáveis da Vercel.
+para os *secrets* do GitHub e para as variáveis da Vercel. Os Reference IDs e IDs da Vercel não são segredo.
+
+## Como publicar
+
+- **Staging:** faça o merge do PR na `main`. O workflow *Deploy staging* aplica as migrações e a Vercel publica o app.
+  Os dois rodam em paralelo: por alguns minutos o app novo pode ver o banco antigo (aceitável em teste).
+- **Produção:** abra um PR de `main` para `producao` (*base: producao, compare: main*) e faça o merge. O workflow
+  *Deploy produção* espera a sua aprovação (*Actions → Deploy produção → Review deployments → Approve*), aplica as
+  migrações e só então publica o app.
+
+Nenhum dos dois roda o `supabase/seed.sql` (o `db push` só aplica migrações).
 
 ---
 
-## Passo 1 — Supabase (2 projetos)
+## O que já está configurado (13/10/2026)
 
-1. Crie a conta em https://supabase.com (pode entrar com o GitHub).
-2. Crie uma **organização**: nome "Agenda Pet".
-3. **New project** → `agenda-pet-staging`
-   - **Database password**: clique em *Generate a password* e guarde num gerenciador de senhas.
-   - **Region**: *South America (São Paulo)* — menor latência e dados no Brasil (LGPD).
-   - Plano: Free.
-4. Repita para `agenda-pet-prod`, também em São Paulo.
-   - Plano: **Pro** (cerca de US$ 25/mês por organização) — backup diário e sem pausa por inatividade.
-     Pode deixar para ativar perto do piloto (semana 9), mas crie o projeto já.
-5. Anote o **Reference ID** de cada projeto (*Project Settings → General*). Não é segredo: pode me enviar.
-6. Crie um **Access Token** (*Account → Access Tokens → Generate new token*, nome `github-actions`). Este é segredo.
+### GitHub
+- Branch padrão: `main` (era `claude/new-session-blzpj6`, da primeira sessão).
+- Ruleset `main` (*Settings → Rules → Rulesets*): PR obrigatório (0 aprovações) e o check `check` (CI) verde.
+- Environments (*Settings → Environments*):
 
-## Passo 2 — GitHub (secrets e aprovação de produção)
+| Nome | Tipo | `staging` | `production` |
+| --- | --- | --- | --- |
+| `SUPABASE_ACCESS_TOKEN` | secret | token `github-actions` | token `github-actions-prod` |
+| `SUPABASE_DB_PASSWORD` | secret | senha do banco de staging | senha do banco de produção |
+| `SUPABASE_PROJECT_REF` | variable | `cwnwrpvjebtzheqbhzhj` | `xddxurtmevhgxwffknyb` |
+| `VERCEL_TOKEN` | secret | — | token da Vercel (pendente) |
+| `VERCEL_ORG_ID` / `VERCEL_PROJECT_ID` | variable | — | IDs da Vercel (pendente) |
 
-No repositório `reisedigar-sys/app_1`:
+- `production` tem **Required reviewers** (o dono) e só aceita a branch `producao`.
 
-1. *Settings → Environments → New environment*:
-   - `staging` (sem regras).
-   - `production` → marque **Required reviewers** e adicione você. Assim nada vai para produção sem o seu clique.
-2. Em cada environment, *Add environment secret*:
+### Supabase
+- Dois projetos em São Paulo, organização própria (criados no supabase.com, **não** pela integração da Vercel, que
+  criaria um banco só para todos os ambientes).
+- Tokens de acesso por projeto, **Read-only** (a senha do banco é que aplica as migrações), válidos até
+  **30/09/2027**: renovar antes disso em *Account → Access Tokens* e atualizar o secret no GitHub.
+  Se o `supabase link` falhar por permissão, gere de novo só o token daquele projeto com *Full access*.
+  As Edge Functions (WhatsApp, semanas 6–7) vão precisar de um token com escrita.
 
-| Nome | `staging` | `production` |
-| --- | --- | --- |
-| `SUPABASE_ACCESS_TOKEN` | token do passo 1.6 | o mesmo token |
-| `SUPABASE_DB_PASSWORD` | senha do banco de staging | senha do banco de produção |
-| `SUPABASE_PROJECT_REF` | Reference ID de staging | Reference ID de produção |
-| `VERCEL_TOKEN` | — | token da Vercel (passo 4.5) |
-| `VERCEL_ORG_ID` / `VERCEL_PROJECT_ID` | — | IDs do projeto na Vercel (passo 4.5) |
+### Vercel
+- Projeto `hora-do-pet`, plano Hobby (passar para **Pro** antes de clientes reais: o Hobby não permite uso comercial).
+- *Settings → Environments → Production → Branch Tracking*: `producao`. Preview: todas as outras branches.
+- Variáveis (*Settings → Environment Variables*), cada uma cadastrada uma vez em **Production** (chaves de prod) e uma
+  vez em **Preview** (chaves de staging), sem **Development**:
 
-3. *Settings → Branches → Add branch ruleset* para `main`: exigir PR e o check **check** (CI) passando antes do merge.
+| Variável | Tipo |
+| --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL` | Config |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Config |
+| `SUPABASE_SECRET_KEY` | **Secret** (nunca com prefixo `NEXT_PUBLIC_`) |
 
-## Passo 3 — Domínio
+  As chaves ficam em *Supabase → Project Settings → API Keys* (não usar a aba *Legacy*).
 
+---
+
+## Falta fazer
+
+### Vercel → GitHub (para o workflow publicar a produção)
+1. *Account Settings → Tokens → Create*: nome `github-actions`, escopo da sua conta. Cadastre como **secret**
+   `VERCEL_TOKEN` no environment `production`.
+2. *Project Settings → General*: copie o **Project ID** → **variable** `VERCEL_PROJECT_ID` no `production`.
+3. *Account Settings → General*: copie o **Team ID** (ou *User ID*) → **variable** `VERCEL_ORG_ID` no `production`.
+4. No ruleset do GitHub, inclua também a branch `producao` (*Target branches → Add target → Include by pattern*),
+   para que ela só mude por PR.
+
+### Supabase Auth (cada projeto)
+*Authentication → URL Configuration*: **Site URL** = endereço do app daquele ambiente (por enquanto o da Vercel) e o
+mesmo endereço em **Redirect URLs**. Trocar pelo domínio quando ele existir.
+
+### Domínio
 1. Registre o domínio (ex.: `agendapet.com.br` em https://registro.br — exige CPF/CNPJ).
-2. Ele será usado para: o app (`app.` e `staging.`), o e-mail de envio (passo 5) e a verificação do WhatsApp Business.
-3. Os registros de DNS serão criados nos passos 4 e 5; o registro.br aceita editar o DNS no próprio painel.
-
-## Passo 4 — Vercel
-
-1. Crie a conta em https://vercel.com com o GitHub e importe `reisedigar-sys/app_1` (*Add New → Project*).
-   Framework: Next.js (detectado sozinho). Não mude os comandos de build.
-2. *Settings → Environment Variables*:
-
-| Variável | Production | Preview |
-| --- | --- | --- |
-| `NEXT_PUBLIC_SUPABASE_URL` | URL do projeto prod | URL do projeto staging |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | publishable key prod | publishable key staging |
-| `SUPABASE_SECRET_KEY` | secret key prod | secret key staging |
-
-   URL e chaves ficam em *Supabase → Project Settings → API Keys*. A *secret key* nunca leva o prefixo `NEXT_PUBLIC_`.
-3. *Settings → Git → Production Branch*: troque para **`producao`**. Assim a `main` vira o ambiente de teste e nada
-   chega aos clientes sem passar pela branch `producao`. O deploy automático da `producao` será desligado pelo próprio
-   repositório (`vercel.json`, no PR de deploy): quem publica produção é o workflow do GitHub, **depois** de aplicar e
-   aprovar as migrações do banco. Isso evita o app novo no ar com o banco antigo.
-4. *Settings → Domains*: adicione `app.SEU-DOMINIO` (Production) e `staging.SEU-DOMINIO` atribuído à branch `main`.
+2. Na Vercel, *Settings → Domains*: `app.SEU-DOMINIO` (Production) e `staging.SEU-DOMINIO` atribuído à branch `main`.
    A Vercel mostra os registros DNS a criar no registro.br.
-5. Para o workflow publicar: *Account Settings → Tokens → Create* (`VERCEL_TOKEN`); os IDs ficam em
-   *Project Settings → General* (`Project ID`) e *Team/Account Settings → General* (`Team ID`, usado como `VERCEL_ORG_ID`).
-   Cadastre os três como secrets do environment `production` (passo 2).
-6. Plano: Hobby (grátis) serve para testar; para uso comercial com clientes, o plano **Pro** (US$ 20/mês por pessoa).
 
-## Passo 5 — E-mail de envio (SMTP)
-
+### E-mail de envio (SMTP)
 O e-mail embutido do Supabase envia pouquíssimas mensagens por hora e serve só para teste. Antes de clientes reais:
 
 1. Crie a conta em https://resend.com (plano gratuito: 3.000 e-mails/mês).
@@ -88,26 +95,16 @@ O e-mail embutido do Supabase envia pouquíssimas mensagens por hora e serve só
 3. *API Keys → Create*: guarde a chave.
 4. Em cada projeto Supabase: *Authentication → Emails → SMTP Settings → Enable custom SMTP*:
    host `smtp.resend.com`, porta `465`, usuário `resend`, senha = a API key, remetente `nao-responda@mail.SEU-DOMINIO`,
-   nome "Agenda Pet".
-5. Em *Authentication → URL Configuration*: **Site URL** = `https://app.SEU-DOMINIO` (prod) ou
-   `https://staging.SEU-DOMINIO` (staging), e adicione o mesmo endereço em **Redirect URLs**.
+   nome da marca.
 
-## Passo 6 — Contas que demoram (iniciar já, em paralelo)
-
+### Contas que demoram (iniciar já, em paralelo)
 - **Meta / WhatsApp Business (semanas 6–7):** https://business.facebook.com → criar o portfólio empresarial com o CNPJ
   e o domínio, fazer a **verificação da empresa** e depois cadastrar o app no https://developers.facebook.com com o
   produto WhatsApp. A verificação e a aprovação dos modelos de mensagem podem levar dias.
 - **Asaas (semana 8):** https://www.asaas.com → conta com o CNPJ da plataforma; solicitar acesso ao **sandbox** e à API de
   subcontas (split). A aprovação também leva alguns dias.
 
----
-
-## O que me enviar quando terminar
-
-- Os **Reference IDs** dos dois projetos Supabase.
-- O **domínio** escolhido.
-- Uma confirmação de que os *secrets* do GitHub e as variáveis da Vercel foram cadastrados (não envie os valores).
-
-Com isso eu configuro o deploy: migrações automáticas no staging a cada merge na `main`; para produção, um PR
-`main` → `producao` que, depois da sua aprovação, aplica as migrações e só então publica o app; loja de demonstração
-no staging e checagem de que nenhum seed de teste chega à produção.
+### Repositório público
+No plano gratuito do GitHub, environments e rulesets só funcionam em repositório público. Se tornar o repositório
+privado: com o GitHub Pro, environments e rulesets continuam, mas *Required reviewers* não (exige Enterprise); a
+aprovação de produção passa a ser o próprio merge do PR `main` → `producao`.

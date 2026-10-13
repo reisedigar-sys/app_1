@@ -1,0 +1,54 @@
+name: Deploy produção
+
+# Roda quando a branch producao recebe o merge do PR main → producao.
+# O environment "production" exige a aprovação do dono antes de começar.
+# Ordem: primeiro o banco, depois o app (o deploy automático da Vercel está desligado em vercel.json).
+on:
+  push:
+    branches: [producao]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-producao
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/producao'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: production
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Conectar ao projeto
+        run: pnpm exec supabase link --project-ref "$SUPABASE_PROJECT_REF"
+
+      - name: Migrações pendentes
+        run: pnpm exec supabase db push --dry-run
+
+      # Sem --include-seed: o seed de teste nunca vai para a produção.
+      - name: Aplicar migrações
+        run: pnpm exec supabase db push
+
+      - name: Publicar o app
+        run: |
+          npx --yes vercel@60.1.3 pull --yes --environment=production --token="$VERCEL_TOKEN"
+          npx --yes vercel@60.1.3 build --prod --token="$VERCEL_TOKEN"
+          npx --yes vercel@60.1.3 deploy --prebuilt --prod --token="$VERCEL_TOKEN"
