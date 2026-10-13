@@ -22,6 +22,43 @@ Fase 2 (longo prazo): marketplace estilo iFood lendo e escrevendo nas MESMAS age
 - Testes: Vitest (unitários e banco), Playwright (fluxo ponta a ponta)
 - Node 22, pnpm, ESLint, Prettier. Next.js 16: middleware se chama `proxy.ts`; leia `AGENTS.md` e `node_modules/next/dist/docs/` antes de usar APIs do Next
 
+## Como trabalhar no repositório
+Pré-requisitos: Node 22+, pnpm 10 e Docker em execução (o Supabase roda local).
+
+```bash
+pnpm install
+pnpm db:start               # sobe o Supabase local e aplica migrações + seed
+cp .env.example .env.local  # SUPABASE_SECRET_KEY = SECRET_KEY de `pnpm exec supabase status -o env`
+pnpm dev                    # http://localhost:3000
+```
+
+| Comando | Quando usar |
+| --- | --- |
+| `pnpm check` | Antes de todo commit/PR: lint + tipos + testes (o mesmo que o CI) |
+| `pnpm test` | Vitest; precisa do Supabase local rodando. Um arquivo: `pnpm test tests/db/integridade.test.ts` |
+| `pnpm db:reset` | Recria o banco do zero (migrações + `supabase/seed.sql`) após criar/alterar migração ou seed |
+| `pnpm db:types` | Regera `lib/supabase/database.types.ts` após mudar o banco; o CI falha se estiver desatualizado (`db:types:check`) |
+| `pnpm build` | Build de produção (também roda no CI) |
+
+Onde fica cada coisa:
+- `app/` — Next.js App Router (`manifest.ts` = PWA). `proxy.ts` renova a sessão do Supabase a cada requisição.
+- `lib/supabase/` — `client.ts` (navegador, sujeito ao RLS), `server.ts` (servidor com a sessão do usuário),
+  `admin.ts` (chave secreta, ignora RLS, `server-only`: nunca importar em componente de cliente),
+  `database.types.ts` (gerado; não editar à mão), `env.ts` (leitura das variáveis).
+- `supabase/migrations/` — schema, funções de autorização (schema `app`) e políticas de RLS. `supabase/seed.sql` — dados de teste
+  (usuários com senha `senha123`, listados no README).
+- `tests/rls/` isolamento entre lojas e por papel; `tests/db/` integridade (overbooking, buffer, faltas, horários);
+  `tests/api/` login e leitura pela API real. `tests/helpers/db.ts` executa SQL como um papel (`ANON`, `usuario(id)`),
+  do jeito que o PostgREST faz com o JWT.
+
+Cuidados:
+- Tabela nova com `petshop_id` precisa de RLS e de ao menos uma linha na loja Moema no seed:
+  `tests/rls/cobertura.test.ts` a descobre sozinho e falha se faltar.
+- Regra de disponibilidade e criação de agendamento ficam em funções SQL chamadas por RPC; o front-end só consome.
+- Imports usam o alias `@/` (raiz do repositório).
+- Documentação de apoio: `README.md` (setup e banco), `PLANO-MVP.md` (plano semana a semana),
+  `PROMPTS-CLAUDE-CODE.md` (prompts por semana). Ao fim de cada semana, atualize a seção "Estado atual" abaixo.
+
 ## Regras de negócio
 - Duração do serviço depende de `porte` e `pelagem` (tabela `servico_preco`).
 - Preço também varia por porte/pelagem.
