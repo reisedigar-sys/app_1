@@ -25,7 +25,7 @@ Como cada entrega chega aos clientes: PR da semana → merge na `main` (o stagin
   na Meta (passo a passo em `docs/ambientes.md`)
 - Abrir conta no gateway Pix com split (Asaas) e entender o cadastro de cada loja. **Pendente**
 - Fechar 2–3 petshops piloto e mostrar o progresso toda semana
-- Definir a marca: o app mostra "Agenda Pet" e os projetos de hospedagem se chamam `hora-do-pet`. **Pendente**
+- Marca: **Hora do Pet** (decisão provisória do dono, 13/10/2026). O app ainda mostra "Agenda Pet": trocar na semana 5
 
 ## Semana 1 — Fundação ✅
 - Repositório, Next.js + TypeScript, Supabase, deploy na Vercel (ambientes de teste e produção criados em 13/10/2026)
@@ -80,7 +80,8 @@ Como cada entrega chega aos clientes: PR da semana → merge na `main` (o stagin
 - Mudar status (confirmado → em atendimento → pronto → concluído), remarcar, cancelar
 - Marcar falta; ficha do pet com observações
 - Encaixe pela equipe (`criar_pedido(..., encaixe => true)`)
-- Se os pilotos pedirem: logo e cor da loja na página pública. Se a marca for definida: trocar o nome no app
+- Trocar o nome do app para **Hora do Pet** (títulos, manifesto do PWA, textos e README)
+- Se os pilotos pedirem: logo e cor da loja na página pública
 - Entrega: a loja opera o dia inteiro pelo painel
 
 ## Semana 6 — Anti no-show

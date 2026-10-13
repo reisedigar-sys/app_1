@@ -105,6 +105,7 @@ Fase 2 (longo prazo): marketplace estilo iFood lendo e escrevendo nas MESMAS age
   dono. Nunca fazer push direto na `producao`. Andamento das semanas em `PLANO-MVP.md` ("Andamento").
 - Hospedado ≠ local: no Supabase online a confirmação de e-mail está ligada e, sem SMTP próprio (Resend), só chegam
   e-mails para os membros da organização. Trate `signUp` sem sessão (as telas já mostram "confirme o e-mail").
+- Marca: **Hora do Pet** (provisória; o código e os textos ainda dizem "Agenda Pet" e a troca entra na semana 5).
 - Próximo: semana 5 (painel da loja: agenda do dia/semana, status, balcão, encaixe). Siga o prompt da semana 5 em
   `PROMPTS-CLAUDE-CODE.md`, numa branch nova a partir da `main` (`semana-5-…`), com PR ao final.
 
