@@ -1,0 +1,43 @@
+name: Deploy staging
+
+# A cada merge na main: aplica as migrações no banco de staging.
+# O app de staging é publicado pela própria Vercel (deploy de Preview da branch main).
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+
+jobs:
+  migracoes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: staging
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Conectar ao projeto
+        run: pnpm exec supabase link --project-ref "$SUPABASE_PROJECT_REF"
+
+      - name: Migrações pendentes
+        run: pnpm exec supabase db push --dry-run
+
+      # Sem --include-seed: o seed de teste nunca vai para um banco hospedado.
+      - name: Aplicar migrações
+        run: pnpm exec supabase db push
