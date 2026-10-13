@@ -8,19 +8,33 @@ agendamento por vários canais (app próprio, WhatsApp, balcão e, no futuro, ma
 Se quiser cortar para 8 semanas: pule a semana 7 (bot de WhatsApp). O WhatsApp ainda funciona como canal, com a
 atendente registrando o pedido pelo painel e enviando o link de agendamento no chat.
 
-## Em paralelo desde a semana 1 (não dependem de código)
-- Submeter os templates de WhatsApp para aprovação (pode levar dias)
-- Abrir conta no gateway Pix com split (Asaas) e entender o cadastro de cada loja
-- Fechar 2–3 petshops piloto e mostrar o progresso toda semana
+## Andamento (atualizado em 13/10/2026)
 
-## Semana 1 — Fundação
-- Repositório, Next.js + TypeScript, Supabase, deploy na Vercel
+| Etapa | Situação |
+| --- | --- |
+| Semanas 1 a 4 (fundação, onboarding, motor de disponibilidade, lado do tutor) | ✅ concluídas |
+| Ambientes de teste e produção | ✅ no ar: staging (prévia da `main`) e produção (`hora-do-pet.vercel.app`), com deploy automático (ver `docs/ambientes.md`) |
+| **Semana 5 — Painel da loja** | **próxima** |
+| Semanas 6 a 9 | a fazer |
+
+Como cada entrega chega aos clientes: PR da semana → merge na `main` (o staging se atualiza sozinho) → PR `main` →
+`producao` → aprovação do dono em *Actions → Deploy produção*.
+
+## Em paralelo desde a semana 1 (não dependem de código)
+- Submeter os templates de WhatsApp para aprovação (pode levar dias). **Pendente**: começar pela verificação da empresa
+  na Meta (passo a passo em `docs/ambientes.md`)
+- Abrir conta no gateway Pix com split (Asaas) e entender o cadastro de cada loja. **Pendente**
+- Fechar 2–3 petshops piloto e mostrar o progresso toda semana
+- Definir a marca: o app mostra "Agenda Pet" e os projetos de hospedagem se chamam `hora-do-pet`. **Pendente**
+
+## Semana 1 — Fundação ✅
+- Repositório, Next.js + TypeScript, Supabase, deploy na Vercel (ambientes de teste e produção criados em 13/10/2026)
 - Aplicar `schema.sql` e `002_requisitos_mvp.sql` como migrações
 - Seeds: 2 lojas de teste, cada uma com 2–3 profissionais
 - **Testes de isolamento entre lojas (RLS)**: a loja A nunca enxerga dados da loja B
 - Entrega: banco rodando, tipos gerados, CI com testes
 
-## Semana 2 — Onboarding da loja
+## Semana 2 — Onboarding da loja ✅
 - Cadastro da rede com várias unidades, de cada loja (com localização) e da equipe (dono, atendente, profissional, com foto e bio)
 - Profissionais; serviços por categoria (banho, tosa, extras)
 - Tabela de preço e duração por serviço × porte × pelagem
@@ -29,7 +43,7 @@ atendente registrando o pedido pelo painel e enviando o link de agendamento no c
 - Bloqueios (folga, almoço, feriado)
 - Entrega: uma loja consegue se configurar sozinha
 
-## Semana 3 — Motor de disponibilidade (o coração do produto)
+## Semana 3 — Motor de disponibilidade (o coração do produto) ✅
 - Três consultas, uma para cada tela do fluxo de referência: **dias com vaga no mês** (calendário),
   **horários do dia** em intervalos de 15 min (com ou sem profissional escolhido) e
   **profissionais disponíveis** num dado horário. Dados: loja + pet + serviço principal + adicionais
@@ -45,7 +59,7 @@ atendente registrando o pedido pelo painel e enviando o link de agendamento no c
 - Teste de concorrência: dois tutores tentando o mesmo horário ao mesmo tempo
 - Entrega: API de horários e de criação de agendamento, bem testada
 
-## Semana 4 — Lado do tutor
+## Semana 4 — Lado do tutor ✅
 - Referência: `fluxo-agendamento-referencia.md` (fluxo descrito em texto) e os prints em `docs/referencias/`.
   Copiar a estrutura do fluxo, não a marca nem o visual
 - Login por telefone (código) ou e-mail; o telefone identifica o tutor, mesmo que ele já tenha sido cadastrado pelo balcão ou WhatsApp
@@ -65,6 +79,8 @@ atendente registrando o pedido pelo painel e enviando o link de agendamento no c
 - Criar agendamento de balcão e por telefone/WhatsApp
 - Mudar status (confirmado → em atendimento → pronto → concluído), remarcar, cancelar
 - Marcar falta; ficha do pet com observações
+- Encaixe pela equipe (`criar_pedido(..., encaixe => true)`)
+- Se os pilotos pedirem: logo e cor da loja na página pública. Se a marca for definida: trocar o nome no app
 - Entrega: a loja opera o dia inteiro pelo painel
 
 ## Semana 6 — Anti no-show
@@ -97,6 +113,10 @@ atendente registrando o pedido pelo painel e enviando o link de agendamento no c
 - Revisão de índices, pooling de conexões, rate limit, backup, monitoramento (Sentry)
 - LGPD: consentimento, política de privacidade, exclusão de dados
 - Onboarding dos 2–3 pilotos e treinamento rápido das equipes
+- Infraestrutura antes do primeiro cliente real (ações do dono, detalhe em `docs/ambientes.md`):
+  domínio próprio (`app.` e `staging.`), e-mail de envio (Resend) nos dois projetos Supabase, Vercel Pro (o plano
+  gratuito não permite uso comercial), Supabase Pro na produção (backup diário) e proteção das prévias da Vercel
+  revista para a demonstração aos pilotos
 - Entrega: piloto no ar
 
 ## Fase 2 — Diferenciais (após o piloto, semanas 10–15)

@@ -99,6 +99,12 @@ Fase 2 (longo prazo): marketplace estilo iFood lendo e escrevendo nas MESMAS age
 - Testes de agenda usam datas relativas (`tests/helpers/datas.ts`): a janela máxima da loja é de até 365 dias.
 - Semana 4 (lado do tutor) concluída: migração 007, `/{slug}`, `/{slug}/agendar` (5 etapas), `/conta` (login por
   e-mail, perfil, pets, agendamentos com remarcar/cancelar) e E2E do fluxo com 2 pets.
+- Ambientes no ar (13/10/2026): staging = prévia da `main` na Vercel + Supabase `hora-do-pet-staging`; produção =
+  `hora-do-pet.vercel.app` + Supabase `hora-do-pet-prod`. Migrações chegam aos bancos só pelos workflows de deploy
+  (nunca rodar `db push` à mão nem o seed num banco hospedado); produção só por PR `main` → `producao`, aprovado pelo
+  dono. Nunca fazer push direto na `producao`. Andamento das semanas em `PLANO-MVP.md` ("Andamento").
+- Hospedado ≠ local: no Supabase online a confirmação de e-mail está ligada e, sem SMTP próprio (Resend), só chegam
+  e-mails para os membros da organização. Trate `signUp` sem sessão (as telas já mostram "confirme o e-mail").
 - Próximo: semana 5 (painel da loja: agenda do dia/semana, status, balcão, encaixe). Siga o prompt da semana 5 em
   `PROMPTS-CLAUDE-CODE.md`, numa branch nova a partir da `main` (`semana-5-…`), com PR ao final.
 
