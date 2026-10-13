@@ -106,9 +106,10 @@ Fase 2 (longo prazo): marketplace estilo iFood lendo e escrevendo nas MESMAS age
 - **Repositório público**: `reisedigar-sys/app_1` está público. Recomendado torná-lo privado
   (*Settings → General → Danger Zone → Change visibility*). Enquanto público, não versionar prints de terceiros,
   dados reais de pilotos nem segredos.
-- **Ambientes (staging e produção)**: ainda não criados. Passo a passo em `docs/ambientes.md`. Quando o dono enviar os
-  Reference IDs do Supabase, o domínio e a confirmação dos secrets, configurar: migrações e deploy automáticos no
-  staging a cada merge na `main`; produção por PR `main` → `producao`, com aprovação manual, banco antes do app.
+- **Ambientes (staging e produção)**: criados (Supabase, Vercel `hora-do-pet`, environments e ruleset no GitHub).
+  Deploy em `.github/workflows/deploy-staging.yml` (migrações a cada merge na `main`) e `deploy-producao.yml`
+  (PR `main` → `producao`, aprovação manual, banco antes do app). Estado e pendências (token da Vercel, Site URL do
+  Auth, domínio, SMTP) em `docs/ambientes.md`. Nunca rodar o seed num banco hospedado.
 - **Contas que demoram**: verificação da empresa na Meta (WhatsApp, semanas 6–7) e Asaas com sandbox e split (semana 8).
 - **Marca da loja**: a página pública mostra nome, endereço e telefone; logo e cor ainda não existem no cadastro.
   Incluir se os pilotos pedirem (candidato para a semana 5).
