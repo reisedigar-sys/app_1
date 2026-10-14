@@ -164,7 +164,8 @@ describe("edição direta de agendamento", () => {
     await emTransacao(async (db) => {
       await db.como(usuario(USUARIO.paulaProfissionalCentro));
       expect(
-        await db.erro("update public.agendamento set status = 'em_atendimento' where id = $1", [AGENDAMENTO.melCentroPassado]),
+        // concluído → pronto (desfazer o último passo) é uma transição válida para quem conduz o atendimento.
+        await db.erro("update public.agendamento set status = 'pronto' where id = $1", [AGENDAMENTO.melCentroPassado]),
       ).toBeNull();
       expect(await db.erro("update public.agendamento set fim = fim + interval '1 hour' where id = $1", [AGENDAMENTO.melCentroPassado])).toBe(
         "42501",

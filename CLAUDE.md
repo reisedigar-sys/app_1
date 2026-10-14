@@ -22,6 +22,43 @@ Fase 2 (longo prazo): marketplace estilo iFood lendo e escrevendo nas MESMAS age
 - Testes: Vitest (unitários e banco), Playwright (fluxo ponta a ponta)
 - Node 22, pnpm, ESLint, Prettier. Next.js 16: middleware se chama `proxy.ts`; leia `AGENTS.md` e `node_modules/next/dist/docs/` antes de usar APIs do Next
 
+## Como trabalhar no repositório
+Pré-requisitos: Node 22+, pnpm 10 e Docker em execução (o Supabase roda local).
+
+```bash
+pnpm install
+pnpm db:start               # sobe o Supabase local e aplica migrações + seed
+cp .env.example .env.local  # SUPABASE_SECRET_KEY = SECRET_KEY de `pnpm exec supabase status -o env`
+pnpm dev                    # http://localhost:3000
+```
+
+| Comando | Quando usar |
+| --- | --- |
+| `pnpm check` | Antes de todo commit/PR: lint + tipos + testes (o mesmo que o CI) |
+| `pnpm test` | Vitest; precisa do Supabase local rodando. Um arquivo: `pnpm test tests/db/integridade.test.ts` |
+| `pnpm db:reset` | Recria o banco do zero (migrações + `supabase/seed.sql`) após criar/alterar migração ou seed |
+| `pnpm db:types` | Regera `lib/supabase/database.types.ts` após mudar o banco; o CI falha se estiver desatualizado (`db:types:check`) |
+| `pnpm build` | Build de produção (também roda no CI) |
+
+Onde fica cada coisa:
+- `app/` — Next.js App Router (`manifest.ts` = PWA). `proxy.ts` renova a sessão do Supabase a cada requisição.
+- `lib/supabase/` — `client.ts` (navegador, sujeito ao RLS), `server.ts` (servidor com a sessão do usuário),
+  `admin.ts` (chave secreta, ignora RLS, `server-only`: nunca importar em componente de cliente),
+  `database.types.ts` (gerado; não editar à mão), `env.ts` (leitura das variáveis).
+- `supabase/migrations/` — schema, funções de autorização (schema `app`) e políticas de RLS. `supabase/seed.sql` — dados de teste
+  (usuários com senha `senha123`, listados no README).
+- `tests/rls/` isolamento entre lojas e por papel; `tests/db/` integridade (overbooking, buffer, faltas, horários);
+  `tests/api/` login e leitura pela API real. `tests/helpers/db.ts` executa SQL como um papel (`ANON`, `usuario(id)`),
+  do jeito que o PostgREST faz com o JWT.
+
+Cuidados:
+- Tabela nova com `petshop_id` precisa de RLS e de ao menos uma linha na loja Moema no seed:
+  `tests/rls/cobertura.test.ts` a descobre sozinho e falha se faltar.
+- Regra de disponibilidade e criação de agendamento ficam em funções SQL chamadas por RPC; o front-end só consome.
+- Imports usam o alias `@/` (raiz do repositório).
+- Documentação de apoio: `README.md` (setup e banco), `PLANO-MVP.md` (plano semana a semana),
+  `PROMPTS-CLAUDE-CODE.md` (prompts por semana). Ao fim de cada semana, atualize a seção "Estado atual" abaixo.
+
 ## Regras de negócio
 - Duração do serviço depende de `porte` e `pelagem` (tabela `servico_preco`).
 - Preço também varia por porte/pelagem.
@@ -99,8 +136,17 @@ Fase 2 (longo prazo): marketplace estilo iFood lendo e escrevendo nas MESMAS age
 - Testes de agenda usam datas relativas (`tests/helpers/datas.ts`): a janela máxima da loja é de até 365 dias.
 - Semana 4 (lado do tutor) concluída: migração 007, `/{slug}`, `/{slug}/agendar` (5 etapas), `/conta` (login por
   e-mail, perfil, pets, agendamentos com remarcar/cancelar) e E2E do fluxo com 2 pets.
-- Próximo: semana 5 (painel da loja: agenda do dia/semana, status, balcão, encaixe). Siga o prompt da semana 5 em
-  `PROMPTS-CLAUDE-CODE.md`, numa branch nova a partir da `main` (`semana-5-…`), com PR ao final.
+- Ambientes no ar (13/10/2026): staging = prévia da `main` na Vercel + Supabase `hora-do-pet-staging`; produção =
+  `hora-do-pet.vercel.app` + Supabase `hora-do-pet-prod`. Migrações chegam aos bancos só pelos workflows de deploy
+  (nunca rodar `db push` à mão nem o seed num banco hospedado); produção só por PR `main` → `producao`, aprovado pelo
+  dono. Nunca fazer push direto na `producao`. Andamento das semanas em `PLANO-MVP.md` ("Andamento").
+- Hospedado ≠ local: no Supabase online a confirmação de e-mail está ligada e, sem SMTP próprio (Resend), só chegam
+  e-mails para os membros da organização. Trate `signUp` sem sessão (as telas já mostram "confirme o e-mail").
+- Marca: **Hora do Pet** (provisória) nos títulos, manifesto do PWA e README; o nome do pacote continua `agenda-pet`.
+- Semana 5 (painel da loja) em revisão: migração 008 (`agenda_loja`, transições de status por trigger, balcão com
+  `buscar_tutor_balcao`/`cadastrar_tutor_balcao`/`cadastrar_pet_balcao`, `horario_da_loja`, `agendamento` no Realtime),
+  `/painel/{loja}/agenda` (dia/semana, filtros, ao vivo), novo atendimento com encaixe, remarcar, ficha do pet.
+- Próximo: semana 6 (anti no-show), seguindo o prompt da semana 6 em `PROMPTS-CLAUDE-CODE.md`.
 
 ## Pendências fora do código (decisão ou ação do dono do produto)
 - **Repositório público**: `reisedigar-sys/app_1` está público. Recomendado torná-lo privado
@@ -122,6 +168,18 @@ Fase 2 (longo prazo): marketplace estilo iFood lendo e escrevendo nas MESMAS age
 - Playwright: use o Chromium já instalado com `PW_CHROMIUM_PATH=/opt/pw-browsers/chromium` (está no `.env.local`
   local, que não é versionado; recrie a partir do `.env.example` se precisar).
 - Rode `pnpm db:types` só com o banco local no ar (o script não apaga mais os tipos se ele estiver fora).
+
+## Decisões da semana 5
+- **Status por trigger** (`agendamento_valida_status`): agendado ⇄ confirmado → em_atendimento → pronto → concluido;
+  cancelado/falta só de agendado ou confirmado; falta só depois do início; desfazer um passo é permitido. A profissional
+  só conduz o atendimento (em_atendimento, pronto, concluido). Vale para updates pela API; funções do back-end passam.
+- Cancelar ou marcar falta cancela as notificações pendentes do agendamento (trigger), por qualquer caminho.
+- **Balcão**: a busca por telefone só acha clientes da própria loja. Sem cliente, a loja cria um cadastro sem conta; se
+  outra loja já criou um sem conta com o número, ele é reaproveitado. Cadastro com conta nunca é ligado pelo telefone.
+- Telefone entra no canal `balcao` ("Balcão ou telefone"); não há canal `telefone`.
+- Realtime no navegador: passar o token da sessão (`realtime.setAuth`) antes de entrar no canal, senão o RLS roda
+  como anônimo e nada chega (`app/painel/[lojaId]/agenda/ao-vivo.tsx`).
+- E2E: clientes de balcão criados nos testes têm nome "E2E …" e são apagados por `e2e/limpeza.ts`.
 
 ## Decisões da semana 4
 - **Login do tutor só por e-mail** por enquanto. O telefone é obrigatório no perfil, mas não verificado: um cadastro

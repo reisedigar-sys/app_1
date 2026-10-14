@@ -1,4 +1,4 @@
-# Agenda Pet
+# Hora do Pet
 
 SaaS multi-tenant para petshops agendarem banho e tosa. Visão, regras de negócio e decisões de arquitetura estão em
 [`CLAUDE.md`](CLAUDE.md); o plano do MVP, em [`PLANO-MVP.md`](PLANO-MVP.md).
