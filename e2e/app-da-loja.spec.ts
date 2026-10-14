@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { botao, campo, texto } from "./util";
+import { botao, campo } from "./util";
 
 test("o app instalado pela página da loja tem o nome e o ícone dela", async ({ page, request }) => {
   await page.goto("/pet-feliz-centro");
@@ -19,7 +19,7 @@ test("tutor vê as lojas em que é cliente e liga ou desliga os avisos pelo What
   await campo(page, "Senha").fill("senha123");
   await botao(page, "Entrar").click();
   await expect(page.getByRole("heading", { name: "Minhas lojas" })).toBeVisible();
-  await expect(texto(page, "Avisos no celular")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Avisos no celular" }).filter({ visible: true })).toBeVisible();
 
   const centro = page.getByRole("listitem").filter({ hasText: "Pet Feliz Centro" }).filter({ visible: true });
   await expect(page.getByRole("listitem").filter({ hasText: "Banho & Cia Moema" }).filter({ visible: true })).toBeVisible();
