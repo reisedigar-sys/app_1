@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { type Estado, dadosDoForm, errosDeValidacao } from "@/lib/painel/estado";
+import { mensagemDeLogin } from "@/lib/conta/erro-login";
 import { createClient } from "@/lib/supabase/server";
 
 const credenciais = z.object({
@@ -16,7 +17,7 @@ export async function entrar(_: Estado, form: FormData): Promise<Estado> {
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email: dados.data.email, password: dados.data.senha });
-  if (error) return { ok: false, mensagem: "E-mail ou senha incorretos." };
+  if (error) return { ok: false, mensagem: mensagemDeLogin(error) };
   redirect("/painel");
 }
 
@@ -33,7 +34,8 @@ export async function cadastrar(_: Estado, form: FormData): Promise<Estado> {
     options: { data: { nome: dados.data.nome } },
   });
   if (error) {
-    if (error.code === "user_already_exists") return { ok: false, mensagem: "Já existe uma conta com esse e-mail. Entre com ela." };
+    if (error.code === "user_already_exists")
+      return { ok: false, mensagem: "Já existe uma conta com esse e-mail. Entre com ela." };
     return { ok: false, mensagem: "Não foi possível criar a conta. Tente de novo." };
   }
   if (!data.session) return { ok: true, mensagem: "Conta criada. Confirme o e-mail que enviamos e depois entre." };
