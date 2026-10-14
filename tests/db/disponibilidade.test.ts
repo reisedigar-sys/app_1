@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ANON, type Db, comConexao, emTransacao, usuario } from "../helpers/db";
+import { ANON, type Db, apagarPedidos, comConexao, emTransacao, usuario } from "../helpers/db";
 import { HOJE, proximo, somarDias } from "../helpers/datas";
 import { LOJA, PEDIDO, PET, PROFISSIONAL, TUTOR, USUARIO } from "../helpers/ids";
 
@@ -536,7 +536,7 @@ describe("concorrência", () => {
       const falha = resultados.find((r) => r.status === "rejected") as PromiseRejectedResult;
       expect((falha.reason as { code?: string }).code).toBe("AG001");
     } finally {
-      await comConexao((db) => db.query("delete from public.pedido where chave_idempotencia = any($1)", [chaves]));
+      await apagarPedidos(chaves);
     }
   });
 });

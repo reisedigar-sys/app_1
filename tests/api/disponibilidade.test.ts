@@ -3,7 +3,7 @@ import { afterAll, describe, expect, it } from "vitest";
 import { ErroAgendamento, criarPedido, diasComVaga, horariosDoDia, profissionaisDisponiveis } from "@/lib/disponibilidade";
 import type { Database } from "@/lib/supabase/database.types";
 import { proximo } from "../helpers/datas";
-import { comConexao } from "../helpers/db";
+import { apagarPedidos } from "../helpers/db";
 import { LOJA, PET, PROFISSIONAL, TUTOR } from "../helpers/ids";
 
 // Pela API de verdade (Auth + PostgREST), como o app vai chamar. Grava de fato: limpa no final.
@@ -19,7 +19,7 @@ async function clienteAna() {
 }
 
 afterAll(async () => {
-  await comConexao((db) => db.query("delete from public.pedido where chave_idempotencia = $1", [chave]));
+  await apagarPedidos([chave]);
 });
 
 describe("motor de disponibilidade pela API", () => {
