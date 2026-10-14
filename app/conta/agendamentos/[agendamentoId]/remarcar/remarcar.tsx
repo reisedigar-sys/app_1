@@ -16,6 +16,8 @@ export function Remarcar({
   profissional,
   hoje,
   slotMinutos,
+  acaoRemarcar = remarcar,
+  destino = "/conta/agendamentos?aviso=remarcado",
 }: {
   agendamentoId: string;
   lojaId: string;
@@ -23,6 +25,9 @@ export function Remarcar({
   profissional: { id: string; nome: string };
   hoje: string;
   slotMinutos: number;
+  /** Outra Server Action com a mesma assinatura (ex.: pelo link de confirmação, sem login). */
+  acaoRemarcar?: (p: { id: string; inicio: string; profissionalId?: string }) => Promise<{ ok: true } | { ok: false; erro: string }>;
+  destino?: string;
 }) {
   const router = useRouter();
   const [manter, setManter] = useState(true);
@@ -56,13 +61,13 @@ export function Remarcar({
   function confirmar() {
     if (!horario) return;
     iniciar(async () => {
-      const r = await remarcar({ id: agendamentoId, inicio: horario.inicio, profissionalId: prof });
+      const r = await acaoRemarcar({ id: agendamentoId, inicio: horario.inicio, profissionalId: prof });
       if (!r.ok) {
         setErro(r.erro);
         if (dia) escolherDia(dia);
         return;
       }
-      router.push("/conta/agendamentos?aviso=remarcado");
+      router.push(destino);
     });
   }
 

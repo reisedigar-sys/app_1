@@ -386,6 +386,10 @@ deno_version = 2
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
 
+# Worker da fila de notificações: chamado pelo pg_cron com o cabeçalho x-worker-token (não usa JWT).
+[functions.notificacoes]
+verify_jwt = false
+
 [analytics]
 enabled = true
 port = 54327

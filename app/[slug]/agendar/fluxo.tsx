@@ -17,6 +17,7 @@ import {
   confirmarPedido,
   localizarCep,
 } from "./acoes";
+import { ListaEspera } from "./lista-espera";
 
 export type ServicoCatalogo = {
   id: string;
@@ -478,6 +479,7 @@ export function FluxoAgendamento({ loja, pets, catalogo }: { loja: LojaFluxo; pe
           <Aviso>
             Não achou o dia ou horário que procura? Ligue para {telefoneLegivel(unidade?.telefone ?? loja.telefone) ?? "a loja"} e peça um encaixe.
           </Aviso>
+          <ListaEspera key={dia ?? "sem-dia"} lojaId={lojaPedido} itens={itens} hoje={loja.hoje} diaSugerido={dia} />
           {dia && (
             <>
               <h3 className="font-semibold">Escolha o horário</h3>

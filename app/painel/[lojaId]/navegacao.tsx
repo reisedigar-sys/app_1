@@ -6,6 +6,8 @@ import { usePathname } from "next/navigation";
 const ITENS = [
   ["", "Início"],
   ["/agenda", "Agenda"],
+  ["/mensagens", "Mensagens"],
+  ["/lista-espera", "Lista de espera"],
   ["/loja", "Loja"],
   ["/profissionais", "Profissionais"],
   ["/servicos", "Serviços"],
