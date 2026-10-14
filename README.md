@@ -38,13 +38,22 @@ checklist de onboarding, dados da loja, profissionais (com foto), serviços e ca
 porte × pelagem (com cópia entre portes), quem faz o quê, horários (gerais e por serviço), bloqueios e equipe.
 Dono e gerente configuram; atendente vê e cria bloqueios; só o dono administra a equipe.
 
+Anti no-show (semana 6): **Mensagens** (o que foi enviado, o que está agendado e por que algo não saiu), **Lista de
+espera** (incluir pelo telefone e remover) e, em *Loja*, hora do lembrete da véspera, lembrete X horas antes, prazo
+para confirmar e o que fazer sem confirmação (avisar a loja ou liberar o horário). A fila é processada a cada minuto
+pelo pg_cron, que chama a Edge Function `supabase/functions/notificacoes` (segredos em `docs/ambientes.md`); até a
+semana 7 o envio usa o provedor de teste (registra, não envia).
+
 ## Lado do tutor
 
 - `/{slug}`: página pública da loja (serviços "a partir de", equipe, botão Agendar).
 - `/{slug}/agendar`: fluxo em 5 etapas, seguindo `fluxo-agendamento-referencia.md`: pets (vários) → serviço principal +
   adicionais + observações por pet → unidade da rede (localização, CEP ou lista, com preço) → data e hora **ou**
   profissional → resumo editável e confirmação (pagamento na loja até a semana 8).
-- `/conta`: login por e-mail, seus dados (nome e celular), meus pets (com foto) e meus agendamentos (remarcar e cancelar).
+- `/conta`: login por e-mail, seus dados (nome e celular), meus pets (com foto), meus agendamentos (remarcar e cancelar)
+  e a lista de espera.
+- `/c/{token}`: link das mensagens; confirma o pedido inteiro, remarca ou cancela sem login.
+- Na etapa de data, "Dia lotado? Entre na lista de espera".
 
 Os testes E2E apagam o que criam (contas `@e2e.test`, lojas `e2e-…`) antes e depois de rodar (`e2e/limpeza.ts`).
 

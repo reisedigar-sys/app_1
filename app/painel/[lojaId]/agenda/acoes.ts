@@ -234,3 +234,12 @@ export async function agendarNoPainel(p: {
     return falha(e);
   }
 }
+
+/** Dono ou gerente dispensa o sinal obrigatório de um cliente com faltas (o contador continua). */
+export async function dispensarSinal(_: Estado, form: FormData): Promise<Estado> {
+  const { supabase, lojaId } = await iniciarAcao(form);
+  const { error } = await supabase.rpc("dispensar_sinal", { p_petshop_id: lojaId, p_tutor_id: id.parse(form.get("tutor_id")) });
+  if (error) return { ok: false, mensagem: mensagemDeErro(error) };
+  revalidarLoja(lojaId);
+  return { ok: true, mensagem: "Sinal dispensado para este cliente." };
+}

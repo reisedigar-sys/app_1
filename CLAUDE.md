@@ -143,10 +143,14 @@ Cuidados:
 - Hospedado ≠ local: no Supabase online a confirmação de e-mail está ligada e, sem SMTP próprio (Resend), só chegam
   e-mails para os membros da organização. Trate `signUp` sem sessão (as telas já mostram "confirme o e-mail").
 - Marca: **Hora do Pet** (provisória) nos títulos, manifesto do PWA e README; o nome do pacote continua `agenda-pet`.
-- Semana 5 (painel da loja) em revisão: migração 008 (`agenda_loja`, transições de status por trigger, balcão com
+- Semana 5 (painel da loja) concluída e em produção (14/10/2026): migração 008 (`agenda_loja`, transições de status por trigger, balcão com
   `buscar_tutor_balcao`/`cadastrar_tutor_balcao`/`cadastrar_pet_balcao`, `horario_da_loja`, `agendamento` no Realtime),
   `/painel/{loja}/agenda` (dia/semana, filtros, ao vivo), novo atendimento com encaixe, remarcar, ficha do pet.
-- Próximo: semana 6 (anti no-show), seguindo o prompt da semana 6 em `PROMPTS-CLAUDE-CODE.md`.
+- Semana 6 (anti no-show) em revisão: migrações 009–010 (fila programada por trigger em `agendamento`, worker
+  `worker_reservar`/`worker_concluir` com SKIP LOCKED, link `/c/{token}`, prazo de confirmação, lista de espera,
+  `dispensar_sinal`, pg_cron → Edge Function `notificacoes`), telas Mensagens e Lista de espera no painel, lista de
+  espera no fluxo do tutor. Envio pelo provedor de teste até a semana 7 (WhatsApp).
+- Próximo: semana 7 (WhatsApp), seguindo o prompt da semana 7 em `PROMPTS-CLAUDE-CODE.md`.
 
 ## Pendências fora do código (decisão ou ação do dono do produto)
 - **Repositório público**: `reisedigar-sys/app_1` está público. Recomendado torná-lo privado
@@ -167,7 +171,30 @@ Cuidados:
   O registro padrão de imagens (public.ecr.aws) é bloqueado aqui; o Docker Hub funciona.
 - Playwright: use o Chromium já instalado com `PW_CHROMIUM_PATH=/opt/pw-browsers/chromium` (está no `.env.local`
   local, que não é versionado; recrie a partir do `.env.example` se precisar).
+- Se o Docker Hub responder 429 (limite de downloads), puxe as imagens pelo espelho do Google e renomeie:
+  `docker pull mirror.gcr.io/supabase/postgres:<versão> && docker tag mirror.gcr.io/supabase/postgres:<versão> supabase/postgres:<versão>`.
 - Rode `pnpm db:types` só com o banco local no ar (o script não apaga mais os tipos se ele estiver fora).
+
+## Decisões da semana 6
+- **Mensagens são programadas no banco** (trigger `agendamento_notificacoes`), por qualquer caminho de criação,
+  remarcação, cancelamento ou status. Lembretes são do PEDIDO: uma mensagem ligada ao primeiro agendamento ativo,
+  listando os pets; cancelar um pet passa os lembretes para o próximo. O texto é montado na hora do envio (`app.mensagem`).
+- **Nada sai** sem `consentimento_contato_em`, depois do início do atendimento, com mais de 2 h de atraso (lembretes)
+  ou duas vezes. Lembrete da véspera entre 08:00 e 21:00 (constraint); o de X horas antes é pulado fora das 8h–21h.
+- **Confirmação imediata e lembrete da véspera levam o link** `/c/{token}` (confirmar o pedido inteiro, remarcar ou
+  cancelar sem login). Não há mensagem separada de "pedido de confirmação" (economia quando o WhatsApp cobrar).
+- **Prazo de confirmação** (`confirmar_ate_horas`) só vale para quem recebeu o link antes do prazo; o pedido é tratado
+  inteiro. `liberar_horario` cancela e avisa o tutor (não conta falta); `avisar_loja` manda o aviso ao telefone da loja
+  e marca `sem_confirmacao_em` (selo na agenda).
+- **Lista de espera sem reserva**: a cada rodada, o primeiro da fila de cada loja e dia é avisado se houver horário no
+  período dele; o próximo só 30 min depois. Agendar para o mesmo dia tira o pet da fila.
+- **Loja cancelou → tutor avisado**; o tutor que cancela não recebe mensagem.
+- **Exigir sinal** continua automático e não volta sozinho; `dispensar_sinal` (dono/gerente) desliga.
+- **Testes com relógio falso**: `worker_reservar(limite, p_agora)`. Use dias que outros testes não usam (pedidos de
+  testes paralelos no mesmo horário esperam uns pelos outros).
+- Worker em produção precisa de segredos configurados uma vez por projeto (`docs/ambientes.md`).
+- **Deadlock entre testes paralelos**: `emTransacao` refaz a transação quando o Postgres acusa deadlock (40P01), e
+  `apagarPedidos` limpa pedidos gravados de verdade (notificações antes do pedido). Não trate deadlock como resultado de teste.
 
 ## Decisões da semana 5
 - **Status por trigger** (`agendamento_valida_status`): agendado ⇄ confirmado → em_atendimento → pronto → concluido;

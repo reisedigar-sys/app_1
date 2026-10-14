@@ -1,7 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { describe, expect, it } from "vitest";
 import type { Database } from "@/lib/supabase/database.types";
-import { LOJA, PET } from "../helpers/ids";
+import { AGENDAMENTO, LOJA, PET } from "../helpers/ids";
 
 // Passa pela API de verdade (Auth + PostgREST), como o app vai fazer.
 function cliente() {
@@ -34,7 +34,8 @@ describe("API com a chave pública", () => {
     const sb = cliente();
     await sb.auth.signInWithPassword({ email: "gabriel@petfeliz.test", password: "senha123" });
     const { data: centro } = await sb.from("agendamento").select("id").eq("petshop_id", LOJA.centro);
-    expect(centro?.length).toBe(2);
+    // Outros arquivos de teste gravam pedidos temporários no Centro (e apagam no fim): confere os do seed.
+    expect(centro?.map((a) => a.id)).toEqual(expect.arrayContaining([AGENDAMENTO.thorCentro, AGENDAMENTO.melCentroPassado]));
     const { data: moema } = await sb.from("agendamento").select("id").eq("petshop_id", LOJA.moema);
     expect(moema).toEqual([]);
   });

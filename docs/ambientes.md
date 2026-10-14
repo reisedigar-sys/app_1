@@ -77,6 +77,23 @@ Nenhum dos dois roda o `supabase/seed.sql` (o `db push` só aplica migrações).
 4. No ruleset do GitHub, inclua também a branch `producao` (*Target branches → Add target → Include by pattern*),
    para que ela só mude por PR.
 
+### Worker de notificações (semana 6, uma vez em cada projeto Supabase)
+O banco chama o worker a cada minuto (pg_cron). O deploy publica a função `notificacoes`, mas ela só roda depois
+destes passos; até lá, as mensagens ficam na fila (nada é perdido, e as atrasadas não saem fora de hora).
+
+1. Gere um token aleatório (ex.: `openssl rand -hex 32`). Use um diferente para staging e para produção.
+2. *Edge Functions → Secrets* (ou `supabase secrets set --project-ref REF ...`):
+   `WORKER_TOKEN` = o token; `APP_URL` = endereço do app daquele ambiente (ex.: `https://hora-do-pet.vercel.app`).
+3. *SQL Editor*, no mesmo projeto (troque REF e TOKEN):
+   ```sql
+   select vault.create_secret('https://REF.supabase.co/functions/v1/notificacoes', 'worker_notificacoes_url');
+   select vault.create_secret('TOKEN', 'worker_notificacoes_token');
+   ```
+4. Confira em *Edge Functions → notificacoes → Logs* que há uma chamada por minuto com resposta 200.
+
+Enquanto o WhatsApp oficial não está ligado (semana 7), o worker usa o provedor de teste: a mensagem é registrada
+(painel → Mensagens) e não chega ao celular do cliente.
+
 ### Supabase Auth (cada projeto)
 *Authentication → URL Configuration*: **Site URL** = endereço do app daquele ambiente (por enquanto o da Vercel) e o
 mesmo endereço em **Redirect URLs**. Trocar pelo domínio quando ele existir.

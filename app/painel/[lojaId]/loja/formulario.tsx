@@ -76,6 +76,22 @@ export function FormularioLoja({ loja, editavel }: { loja: Loja; editavel: boole
               <Campo rotulo="Faltas antes de exigir sinal" nome="limite_faltas" type="number" inputMode="numeric" defaultValue={loja.limite_faltas} erro={erros.limite_faltas} />
             </div>
           </Cartao>
+
+          <Cartao className="flex flex-col gap-4">
+            <h2 className="font-medium">Lembretes e confirmação</h2>
+            <p className="text-xs text-neutral-500">
+              O cliente recebe a confirmação ao agendar, um lembrete na véspera com o link para confirmar e outro algumas horas antes. Só recebe quem autorizou o contato.
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              <Campo rotulo="Lembrete da véspera às" nome="lembrete_d1_hora" type="time" min="08:00" max="21:00" defaultValue={loja.lembrete_d1_hora.slice(0, 5)} erro={erros.lembrete_d1_hora} />
+              <Campo rotulo="Lembrete antes (horas)" nome="lembrete_antes_horas" type="number" inputMode="numeric" defaultValue={loja.lembrete_antes_horas} erro={erros.lembrete_antes_horas} ajuda="0 = sem esse lembrete" />
+              <Campo rotulo="Prazo para confirmar (horas antes)" nome="confirmar_ate_horas" type="number" inputMode="numeric" defaultValue={loja.confirmar_ate_horas} erro={erros.confirmar_ate_horas} ajuda="0 = sem prazo" />
+              <Selecao rotulo="Sem confirmação no prazo" nome="acao_sem_confirmacao" defaultValue={loja.acao_sem_confirmacao}>
+                <option value="avisar_loja">Avisar a loja</option>
+                <option value="liberar_horario">Liberar o horário</option>
+              </Selecao>
+            </div>
+          </Cartao>
         </fieldset>
       )}
     </FormAcao>

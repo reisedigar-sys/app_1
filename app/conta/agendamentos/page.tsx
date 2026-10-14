@@ -5,6 +5,8 @@ import { Aviso, BotaoLink, Carregando, Titulo, Vazio } from "@/components/ui";
 import { exigirTutor } from "@/lib/conta/sessao";
 import { formatarReais } from "@/lib/painel/formatos";
 import { createClient } from "@/lib/supabase/server";
+import { BotaoEnviar, FormAcao } from "@/components/form-acao";
+import { sairListaEspera } from "./acoes";
 import { CancelarAgendamento } from "./cancelar";
 
 export const metadata: Metadata = { title: "Meus agendamentos" };
@@ -18,6 +20,8 @@ const STATUS: Record<string, [string, string]> = {
   cancelado: ["Cancelado", "bg-neutral-100 text-neutral-500 dark:bg-neutral-900"],
   faltou: ["Não compareceu", "bg-red-100 text-red-900 dark:bg-red-950 dark:text-red-200"],
 };
+
+const PERIODOS: Record<string, string> = { manha: "manhã", tarde: "tarde", qualquer: "qualquer horário" };
 
 const AVISOS: Record<string, string> = {
   cancelado: "Agendamento cancelado.",
@@ -49,13 +53,40 @@ async function Lista({ searchParams }: { searchParams: Promise<Record<string, st
   const aviso = AVISOS[String((await searchParams).aviso)];
   await exigirTutor("/conta/agendamentos");
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc("meus_agendamentos");
+  const [{ data, error }, { data: espera }] = await Promise.all([
+    supabase.rpc("meus_agendamentos"),
+    supabase
+      .from("lista_espera")
+      .select("id, data, periodo, status, pet(nome), servico(nome), petshop(nome)")
+      .in("status", ["aguardando", "notificado"])
+      .order("data"),
+  ]);
   if (error) return <Vazio>Não foi possível carregar seus agendamentos.</Vazio>;
   const agora = instanteAtual();
   const proximos = data.filter((a) => new Date(a.fim).getTime() >= agora && !["cancelado", "faltou", "concluido"].includes(a.status)).reverse();
   const anteriores = data.filter((a) => !proximos.includes(a));
 
-  if (data.length === 0)
+  const filaDeEspera = espera?.length ? (
+    <section aria-labelledby="t-espera">
+      <h2 id="t-espera" className="mb-2 font-semibold">Lista de espera</h2>
+      <ul className="flex flex-col gap-2">
+        {espera.map((e) => (
+          <li key={e.id} className="flex items-center justify-between gap-3 rounded-xl border border-neutral-200 bg-white p-4 text-sm dark:border-neutral-800 dark:bg-neutral-950">
+            <p>
+              <strong>{e.pet?.nome}</strong> · {e.servico?.nome} · {e.data.split("-").reverse().join("/")} ({PERIODOS[e.periodo]}) · {e.petshop?.nome}
+              {e.status === "notificado" && <span className="block text-emerald-700 dark:text-emerald-400">Abriu vaga: agende pela página da loja.</span>}
+            </p>
+            <FormAcao acao={sairListaEspera} semBotao className="shrink-0">
+              <input type="hidden" name="id" value={e.id} />
+              <BotaoEnviar variante="secundario">Sair da fila</BotaoEnviar>
+            </FormAcao>
+          </li>
+        ))}
+      </ul>
+    </section>
+  ) : null;
+
+  if (data.length === 0 && !filaDeEspera)
     return (
       <Vazio>
         Você ainda não tem agendamentos.{" "}
@@ -109,6 +140,7 @@ async function Lista({ searchParams }: { searchParams: Promise<Record<string, st
   return (
     <div className="flex flex-col gap-6">
       {aviso && <Aviso tipo="ok">{aviso}</Aviso>}
+      {filaDeEspera}
       <section aria-labelledby="t-proximos">
         <h2 id="t-proximos" className="mb-2 font-semibold">Próximos</h2>
         {proximos.length ? <ul className="flex flex-col gap-2">{proximos.map((a) => cartao(a, true))}</ul> : <Vazio>Nenhum agendamento futuro.</Vazio>}

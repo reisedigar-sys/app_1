@@ -8,14 +8,15 @@ agendamento por vários canais (app próprio, WhatsApp, balcão e, no futuro, ma
 Se quiser cortar para 8 semanas: pule a semana 7 (bot de WhatsApp). O WhatsApp ainda funciona como canal, com a
 atendente registrando o pedido pelo painel e enviando o link de agendamento no chat.
 
-## Andamento (atualizado em 13/10/2026)
+## Andamento (atualizado em 14/10/2026)
 
 | Etapa | Situação |
 | --- | --- |
 | Semanas 1 a 4 (fundação, onboarding, motor de disponibilidade, lado do tutor) | ✅ concluídas |
 | Ambientes de teste e produção | ✅ no ar: staging (prévia da `main`) e produção (`hora-do-pet.vercel.app`), com deploy automático (ver `docs/ambientes.md`) |
-| **Semana 5 — Painel da loja** | **em revisão** (PR da semana 5) |
-| Semanas 6 a 9 | a fazer |
+| Semana 5 — Painel da loja | ✅ concluída (em produção desde 14/10/2026) |
+| **Semana 6 — Anti no-show** | **em revisão** (PR da semana 6). Mensagens com provedor de teste até o WhatsApp (semana 7) |
+| Semanas 7 a 9 | a fazer |
 
 Como cada entrega chega aos clientes: PR da semana → merge na `main` (o staging se atualiza sozinho) → PR `main` →
 `producao` → aprovação do dono em *Actions → Deploy produção*.
@@ -74,7 +75,7 @@ Como cada entrega chega aos clientes: PR da semana → merge na `main` (o stagin
 - Página pública da loja (`/{slug}`)
 - Entrega: tutor agenda pelo celular em poucos toques
 
-## Semana 5 — Painel da loja
+## Semana 5 — Painel da loja ✅
 - Agenda do dia e da semana, com colunas por profissional, atualizada em tempo real
 - Criar agendamento de balcão e por telefone/WhatsApp
 - Mudar status (confirmado → em atendimento → pronto → concluído), remarcar, cancelar

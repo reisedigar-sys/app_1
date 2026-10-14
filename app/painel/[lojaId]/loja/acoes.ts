@@ -33,6 +33,13 @@ const schema = z.object({
   cancelamento_gratuito_horas: inteiro(0, 720, "Entre 0 e 720 horas."),
   sinal_percentual: z.coerce.number().min(0, "Entre 0 e 100.").max(100, "Entre 0 e 100."),
   limite_faltas: inteiro(0, 50, "Entre 0 e 50."),
+  lembrete_d1_hora: z
+    .string()
+    .regex(/^\d{2}:\d{2}$/, "Informe a hora.")
+    .refine((h) => h >= "08:00" && h <= "21:00", "Entre 08:00 e 21:00 (nada de madrugada)."),
+  lembrete_antes_horas: inteiro(0, 24, "Entre 0 e 24 horas."),
+  confirmar_ate_horas: inteiro(0, 72, "Entre 0 e 72 horas."),
+  acao_sem_confirmacao: z.enum(["avisar_loja", "liberar_horario"]),
   ativo: checkbox,
 });
 
