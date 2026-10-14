@@ -47,6 +47,10 @@ jobs:
       - name: Aplicar migrações
         run: pnpm exec supabase db push
 
+      # Worker da fila de notificações (semana 6). Os segredos dele são configurados uma vez (docs/ambientes.md).
+      - name: Publicar o worker de notificações
+        run: pnpm exec supabase functions deploy notificacoes --project-ref "$SUPABASE_PROJECT_REF" --use-api
+
       - name: Publicar o app
         run: |
           npx --yes vercel@60.1.3 pull --yes --environment=production --token="$VERCEL_TOKEN"
