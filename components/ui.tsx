@@ -4,7 +4,7 @@ import type { ComponentProps, ReactNode } from "react";
 const base =
   "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-50";
 const variantes = {
-  primario: "bg-teal-700 text-white hover:bg-teal-800",
+  primario: "bg-marca-700 text-white hover:bg-marca-800",
   secundario: "border border-neutral-300 bg-white text-neutral-900 hover:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100",
   perigo: "border border-red-300 bg-white text-red-700 hover:bg-red-50 dark:border-red-800 dark:bg-neutral-900 dark:text-red-400",
 };
@@ -18,7 +18,7 @@ export function BotaoLink({ variante = "primario", className = "", ...props }: C
 }
 
 export const classeInput =
-  "min-h-11 w-full rounded-lg border border-neutral-300 bg-white px-3 text-base text-neutral-900 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20 aria-invalid:border-red-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100";
+  "min-h-11 w-full rounded-lg border border-neutral-300 bg-white px-3 text-base text-neutral-900 outline-none focus:border-marca-600 focus:ring-2 focus:ring-marca-600/20 aria-invalid:border-red-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100";
 
 // O rótulo envolve o campo: a associação não depende de id, que se repetiria entre páginas
 // mantidas no DOM pelo roteador (o Next preserva telas visitadas para voltar instantaneamente).
@@ -75,7 +75,7 @@ export function AreaTexto({ rotulo, nome, ...props }: ComponentProps<"textarea">
 export function Caixa({ rotulo, nome, ...props }: ComponentProps<"input"> & { rotulo: string; nome: string }) {
   return (
     <label className="flex min-h-11 items-center gap-3 text-sm">
-      <input type="checkbox" name={nome} className="size-5 accent-teal-700" {...props} />
+      <input type="checkbox" name={nome} className="size-5 accent-marca-700" {...props} />
       {rotulo}
     </label>
   );

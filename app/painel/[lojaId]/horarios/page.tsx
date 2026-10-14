@@ -60,7 +60,7 @@ async function Conteudo({
               <Link
                 href={`/painel/${lojaId}/horarios?profissional=${p.id}`}
                 aria-current={p.id === prof.id ? "page" : undefined}
-                className="flex min-h-10 items-center whitespace-nowrap rounded-full border border-neutral-300 px-3 text-sm aria-[current=page]:border-teal-700 aria-[current=page]:bg-teal-50 aria-[current=page]:text-teal-800 dark:border-neutral-700 dark:aria-[current=page]:bg-teal-950 dark:aria-[current=page]:text-teal-200"
+                className="flex min-h-10 items-center whitespace-nowrap rounded-full border border-neutral-300 px-3 text-sm aria-[current=page]:border-marca-700 aria-[current=page]:bg-marca-50 aria-[current=page]:text-marca-800 dark:border-neutral-700 dark:aria-[current=page]:bg-marca-950 dark:aria-[current=page]:text-marca-200"
               >
                 {p.nome}
               </Link>
@@ -86,7 +86,7 @@ async function Conteudo({
                     className="inline-flex min-h-9 items-center gap-1 rounded-full bg-neutral-100 pl-3 text-sm dark:bg-neutral-900"
                   >
                     {hhmm(j.inicio)}–{hhmm(j.fim)}
-                    {j.servico_id && <span className="text-teal-700 dark:text-teal-400">· só {nomeServico.get(j.servico_id) ?? "serviço inativo"}</span>}
+                    {j.servico_id && <span className="text-marca-700 dark:text-marca-400">· só {nomeServico.get(j.servico_id) ?? "serviço inativo"}</span>}
                     {editavel ? (
                       <form action={removerHorario}>
                         <input type="hidden" name="loja_id" value={lojaId} />

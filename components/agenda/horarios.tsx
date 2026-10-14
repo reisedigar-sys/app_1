@@ -53,9 +53,9 @@ export function Horarios({
                     aria-pressed={ativo}
                     className={`min-h-10 rounded-full border text-sm transition ${
                       ativo
-                        ? "border-teal-700 bg-teal-700 text-white"
+                        ? "border-marca-700 bg-marca-700 text-white"
                         : opcao
-                          ? "border-neutral-400 hover:border-teal-700 dark:border-neutral-600"
+                          ? "border-neutral-400 hover:border-marca-700 dark:border-neutral-600"
                           : "border-neutral-200 text-neutral-300 dark:border-neutral-800 dark:text-neutral-700"
                     }`}
                   >

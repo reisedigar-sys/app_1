@@ -25,7 +25,7 @@ export async function GET(_: Request, { params }: RouteContext<"/[slug]/icone/[t
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "#0f766e",
+        background: "#ef5a3c",
         color: "#ffffff",
         fontSize: Math.round(t * 0.38),
         fontWeight: 700,

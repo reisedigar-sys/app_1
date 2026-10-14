@@ -63,7 +63,7 @@ async function Conteudo({
                 <Link
                   href={`/painel/${lojaId}/precos?servico=${s.id}`}
                   aria-current={s.id === selecionado.id ? "page" : undefined}
-                  className="flex min-h-10 items-center gap-2 whitespace-nowrap rounded-full border border-neutral-300 px-3 text-sm aria-[current=page]:border-teal-700 aria-[current=page]:bg-teal-50 aria-[current=page]:text-teal-800 dark:border-neutral-700 dark:aria-[current=page]:bg-teal-950 dark:aria-[current=page]:text-teal-200"
+                  className="flex min-h-10 items-center gap-2 whitespace-nowrap rounded-full border border-neutral-300 px-3 text-sm aria-[current=page]:border-marca-700 aria-[current=page]:bg-marca-50 aria-[current=page]:text-marca-800 dark:border-neutral-700 dark:aria-[current=page]:bg-marca-950 dark:aria-[current=page]:text-marca-200"
                 >
                   {s.nome}
                   {total === 0 && s.ativo && <span className="size-2 rounded-full bg-amber-500" aria-label="sem preço" />}

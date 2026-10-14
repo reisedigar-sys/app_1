@@ -28,7 +28,7 @@ export function NovoHorario({
               {ORDEM_DIAS.map((d) => (
                 <label
                   key={d}
-                  className="flex min-h-10 cursor-pointer items-center rounded-full border border-neutral-300 px-3 text-sm has-checked:border-teal-700 has-checked:bg-teal-700 has-checked:text-white dark:border-neutral-700"
+                  className="flex min-h-10 cursor-pointer items-center rounded-full border border-neutral-300 px-3 text-sm has-checked:border-marca-700 has-checked:bg-marca-700 has-checked:text-white dark:border-neutral-700"
                 >
                   <input type="checkbox" name="dias" value={d} className="sr-only" defaultChecked={d >= 2 && d <= 6} />
                   {DIAS_SEMANA[d].slice(0, 3)}

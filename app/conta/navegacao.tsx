@@ -21,7 +21,7 @@ export function NavegacaoConta() {
             <Link
               href={href}
               aria-current={atual.startsWith(href) ? "page" : undefined}
-              className="flex min-h-10 items-center whitespace-nowrap rounded-full px-3 text-sm text-neutral-600 hover:bg-neutral-100 aria-[current=page]:bg-teal-700 aria-[current=page]:text-white dark:text-neutral-300 dark:hover:bg-neutral-900"
+              className="flex min-h-10 items-center whitespace-nowrap rounded-full px-3 text-sm text-neutral-600 hover:bg-neutral-100 aria-[current=page]:bg-marca-700 aria-[current=page]:text-white dark:text-neutral-300 dark:hover:bg-neutral-900"
             >
               {rotulo}
             </Link>

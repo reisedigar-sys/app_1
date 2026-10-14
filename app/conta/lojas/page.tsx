@@ -56,7 +56,7 @@ async function Conteudo() {
             <li key={l.petshop_id}>
               <Cartao className="flex flex-col gap-3">
                 <div className="flex items-center gap-3">
-                  <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-teal-700 font-semibold text-white">
+                  <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-marca-700 font-semibold text-white">
                     {/* eslint-disable-next-line @next/next/no-img-element -- logo do Storage, tamanho pequeno */}
                     {l.logo_url ? <img src={l.logo_url} alt="" className="size-full bg-white object-contain" /> : <span aria-hidden>{iniciais(l.nome)}</span>}
                   </div>

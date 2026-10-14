@@ -54,7 +54,7 @@ async function Conteudo({ params }: { params: Promise<{ lojaId: string; agendame
 
   return (
     <div className="flex flex-col gap-4">
-      <Link href={`/painel/${lojaId}/agenda?data=${dia}`} className="text-sm text-teal-700 dark:text-teal-400">
+      <Link href={`/painel/${lojaId}/agenda?data=${dia}`} className="text-sm text-marca-700 dark:text-marca-400">
         ‹ Agenda do dia
       </Link>
       <div className="flex flex-wrap items-start justify-between gap-2">
@@ -115,7 +115,7 @@ async function Conteudo({ params }: { params: Promise<{ lojaId: string; agendame
         <div className="mb-2 flex items-center justify-between gap-2">
           <h2 className="font-medium">Pet</h2>
           {a.pet && (
-            <Link href={`/painel/${lojaId}/pets/${a.pet.id}`} className="text-sm font-medium text-teal-700 dark:text-teal-400">
+            <Link href={`/painel/${lojaId}/pets/${a.pet.id}`} className="text-sm font-medium text-marca-700 dark:text-marca-400">
               Ficha do pet
             </Link>
           )}

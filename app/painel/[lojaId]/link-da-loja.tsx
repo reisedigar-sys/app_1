@@ -26,7 +26,7 @@ export function LinkDaLoja({ slug, nome }: { slug: string; nome: string }) {
 
   return (
     <div className="flex flex-col gap-3">
-      <a href={`/${slug}`} target="_blank" rel="noreferrer" className="break-all font-medium text-teal-700 underline dark:text-teal-400" data-link-da-loja>
+      <a href={`/${slug}`} target="_blank" rel="noreferrer" className="break-all font-medium text-marca-700 underline dark:text-marca-400" data-link-da-loja>
         {origem ? url : `/${slug}`}
       </a>
       <div className="flex flex-wrap gap-2">

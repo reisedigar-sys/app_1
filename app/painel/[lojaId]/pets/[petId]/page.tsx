@@ -108,7 +108,7 @@ async function Conteudo({ params }: { params: Promise<{ lojaId: string; petId: s
               <li key={a.id}>
                 <Link
                   href={`/painel/${lojaId}/agenda/${a.id}`}
-                  className="flex flex-col gap-0.5 rounded-xl border border-neutral-200 bg-white px-4 py-2 text-sm hover:border-teal-600 dark:border-neutral-800 dark:bg-neutral-950"
+                  className="flex flex-col gap-0.5 rounded-xl border border-neutral-200 bg-white px-4 py-2 text-sm hover:border-marca-600 dark:border-neutral-800 dark:bg-neutral-950"
                 >
                   <span className="flex items-center justify-between gap-2">
                     <span className="font-medium">

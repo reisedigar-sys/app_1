@@ -41,7 +41,7 @@ export function FormularioHabilitacao({
                 name="servico"
                 value={s.id}
                 defaultChecked={s.id in habilitados}
-                className="size-5 accent-teal-700"
+                className="size-5 accent-marca-700"
               />
               <label htmlFor={id} className="flex-1 text-sm">
                 {s.nome}

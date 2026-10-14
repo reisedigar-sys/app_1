@@ -1,24 +1,67 @@
 @import "tailwindcss";
 
+/*
+ * Identidade Hora do Pet: tinta (azul-escuro) para texto e base, coral para a marca e a seleção.
+ * - `marca-*` é o coral. `marca-700` é o tom para botões e links sobre fundo claro (contraste AA com branco);
+ *   `marca-400` é o tom de links e destaques sobre fundo escuro.
+ * - A escala `neutral-*` do Tailwind é trocada por cinzas puxados para a tinta: todas as telas usam
+ *   `neutral-*` e passam a ter a cor da marca sem mudar classe.
+ */
+@theme {
+  --color-marca-50: #fff3ef;
+  --color-marca-100: #ffe3da;
+  --color-marca-200: #ffc6b5;
+  --color-marca-300: #ffa28a;
+  --color-marca-400: #ff7a5c;
+  --color-marca-500: #ef5a3c;
+  --color-marca-600: #e04a2c;
+  --color-marca-700: #d03f26;
+  --color-marca-800: #a8321d;
+  --color-marca-900: #84291a;
+  --color-marca-950: #3a1610;
+
+  --color-neutral-50: #f6f7fa;
+  --color-neutral-100: #eef0f5;
+  --color-neutral-200: #e2e5ee;
+  --color-neutral-300: #cdd1de;
+  --color-neutral-400: #9da3b8;
+  --color-neutral-500: #6a7089;
+  --color-neutral-600: #555b75;
+  --color-neutral-700: #3f455e;
+  --color-neutral-800: #2a3048;
+  --color-neutral-900: #1c2340;
+  --color-neutral-950: #12162a;
+}
+
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #1c2340;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --font-sans: var(--font-texto), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-titulo: var(--font-bricolage), var(--font-texto), ui-sans-serif, system-ui, sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #12162a;
+    --foreground: #eceef7;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-sans);
+}
+
+/* Títulos com a fonte da marca; o resto do texto fica na fonte de leitura. */
+h1,
+h2 {
+  font-family: var(--font-titulo);
+  letter-spacing: -0.01em;
+  text-wrap: balance;
 }

@@ -10,7 +10,7 @@ export default function EntrarPage({ searchParams }: PageProps<"/entrar">) {
   return (
     <main className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center gap-6 px-4 py-10">
       <div>
-        <h1 className="text-2xl font-semibold text-teal-700 dark:text-teal-400">Hora do Pet</h1>
+        <h1 className="text-2xl font-semibold text-marca-700 dark:text-marca-400">Hora do Pet</h1>
         <p className="text-sm text-neutral-500">Painel da loja</p>
       </div>
       <Suspense fallback={<Carregando />}>

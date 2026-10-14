@@ -38,7 +38,7 @@ export function CampoFoto({ lojaId, inicial }: { lojaId: string; inicial?: strin
         {url && <img src={url} alt="Foto do profissional" className="size-full object-cover" />}
       </div>
       <div className="flex flex-col gap-1 text-sm">
-        <label className="cursor-pointer font-medium text-teal-700 dark:text-teal-400">
+        <label className="cursor-pointer font-medium text-marca-700 dark:text-marca-400">
           {estado === "enviando" ? "Enviando…" : url ? "Trocar foto" : "Adicionar foto"}
           <input
             type="file"

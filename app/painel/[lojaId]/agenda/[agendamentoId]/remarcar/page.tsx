@@ -44,7 +44,7 @@ async function Conteudo({ params }: { params: Promise<{ lojaId: string; agendame
       <p className="text-sm text-neutral-500">
         {a.pet?.nome} · {itens.map((i) => i.servico?.nome).join(" + ")} · hoje marcado para{" "}
         {dataNoFuso(a.inicio, loja.fuso).split("-").reverse().join("/")} às {horaNoFuso(a.inicio, loja.fuso)} com {a.profissional?.nome}.{" "}
-        <Link href={`/painel/${lojaId}/agenda/${a.id}`} className="text-teal-700 underline dark:text-teal-400">
+        <Link href={`/painel/${lojaId}/agenda/${a.id}`} className="text-marca-700 underline dark:text-marca-400">
           Voltar
         </Link>
       </p>
