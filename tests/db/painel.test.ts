@@ -188,7 +188,9 @@ describe("status pelo painel", () => {
       expect(await db.erro("update public.agendamento set status = 'faltou' where id = $1", [AGENDAMENTO.thorCentro])).toBe("AG005");
       await db.query("update public.agendamento set status = 'cancelado' where id = $1", [AGENDAMENTO.thorCentro]);
       await db.comoSuperusuario();
-      expect(await db.count("select 1 from public.notificacao_agendada where agendamento_id = $1 and status = 'pendente'", [AGENDAMENTO.thorCentro])).toBe(0);
+      expect(await db.count("select 1 from public.notificacao_agendada where agendamento_id = $1 and status = 'pendente' and tipo <> 'cancelamento'", [AGENDAMENTO.thorCentro])).toBe(0);
+      // A loja cancelou: o tutor recebe o aviso de cancelamento (semana 6).
+      expect(await db.count("select 1 from public.notificacao_agendada where agendamento_id = $1 and status = 'pendente' and tipo = 'cancelamento'", [AGENDAMENTO.thorCentro])).toBe(1);
     });
   });
 
