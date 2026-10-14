@@ -3,10 +3,20 @@
 import { useActionState } from "react";
 import { BotaoEnviar } from "@/components/form-acao";
 import { Aviso } from "@/components/ui";
+import type { Estado } from "@/lib/painel/estado";
 import { cancelar } from "./acoes";
 
-export function CancelarAgendamento({ id, politica }: { id: string; politica: string }) {
-  const [estado, acao] = useActionState(cancelar, {});
+/** `acaoCancelar`: outra Server Action com a mesma assinatura (ex.: pelo link de confirmação, sem login). */
+export function CancelarAgendamento({
+  id,
+  politica,
+  acaoCancelar = cancelar,
+}: {
+  id: string;
+  politica: string;
+  acaoCancelar?: (estado: Estado, form: FormData) => Promise<Estado>;
+}) {
+  const [estado, acao] = useActionState(acaoCancelar, {});
   return (
     <details className="text-sm">
       <summary className="cursor-pointer font-medium text-red-700 dark:text-red-400">Cancelar</summary>

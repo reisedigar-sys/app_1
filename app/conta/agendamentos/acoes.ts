@@ -31,3 +31,17 @@ export async function remarcar(p: { id: string; inicio: string; profissionalId?:
   revalidatePath("/conta/agendamentos");
   return { ok: true as const };
 }
+
+export async function sairListaEspera(_: Estado, form: FormData): Promise<Estado> {
+  if (!(await tutorAtual())) return { ok: false, mensagem: "Entre na sua conta." };
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("lista_espera")
+    .update({ status: "cancelado" })
+    .eq("id", z.guid().parse(form.get("id")))
+    .in("status", ["aguardando", "notificado"])
+    .select("id");
+  if (error || !data?.length) return { ok: false, mensagem: "Não foi possível sair da lista de espera." };
+  revalidatePath("/conta/agendamentos");
+  return { ok: true };
+}

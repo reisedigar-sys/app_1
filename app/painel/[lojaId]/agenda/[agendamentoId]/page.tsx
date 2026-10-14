@@ -2,11 +2,15 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { BotaoLink, Cartao, Carregando } from "@/components/ui";
+import { BotaoEnviar, FormAcao } from "@/components/form-acao";
+import { Aviso, BotaoLink, Cartao, Carregando } from "@/components/ui";
 import { COR_STATUS, NOME_CANAL, NOME_STATUS, acoesDeStatus, dataNoFuso, diaPorExtenso, horaNoFuso, podeRemarcarOuCancelar } from "@/lib/painel/agenda";
 import { NOME_PELAGEM, NOME_PORTE, formatarReais, telefoneLegivel } from "@/lib/painel/formatos";
-import { exigirLoja, podeOperar } from "@/lib/painel/sessao";
+import { COLUNAS_MENSAGEM, type LinhaMensagem } from "@/lib/painel/mensagens";
+import { exigirLoja, podeConfigurar, podeOperar } from "@/lib/painel/sessao";
 import { createClient } from "@/lib/supabase/server";
+import { ListaMensagens } from "../../mensagens/lista";
+import { dispensarSinal } from "../acoes";
 import { AcoesStatus, Cancelar, Observacoes } from "./acoes-atendimento";
 
 export const metadata: Metadata = { title: "Atendimento" };
@@ -29,15 +33,17 @@ async function Conteudo({ params }: { params: Promise<{ lojaId: string; agendame
   const { data: a } = await supabase
     .from("agendamento")
     .select(
-      "id, status, canal, encaixe, inicio, fim, observacoes, preco_total_centavos, criado_em, profissional(id, nome), pet(id, nome, raca, porte, pelagem, alergias, temperamento), tutor(id, nome, telefone_e164), agendamento_item(ordem, preco_centavos, duracao_minutos, servico(nome))",
+      "id, pedido_id, status, canal, encaixe, inicio, fim, observacoes, sem_confirmacao_em, preco_total_centavos, criado_em, profissional(id, nome), pet(id, nome, raca, porte, pelagem, alergias, temperamento), tutor(id, nome, telefone_e164), agendamento_item(ordem, preco_centavos, duracao_minutos, servico(nome))",
     )
     .eq("id", agendamentoId)
     .eq("petshop_id", lojaId)
     .maybeSingle();
   if (!a) notFound();
-  const [{ data: vinculo }, { data: obsPet }] = await Promise.all([
-    supabase.from("tutor_petshop").select("faltas, exige_sinal, observacoes").eq("petshop_id", lojaId).eq("tutor_id", a.tutor?.id ?? "").maybeSingle(),
+  const [{ data: vinculo }, { data: obsPet }, { data: mensagens }] = await Promise.all([
+    supabase.from("tutor_petshop").select("faltas, exige_sinal, observacoes, consentimento_contato_em").eq("petshop_id", lojaId).eq("tutor_id", a.tutor?.id ?? "").maybeSingle(),
     supabase.from("pet_petshop").select("observacoes").eq("petshop_id", lojaId).eq("pet_id", a.pet?.id ?? "").maybeSingle(),
+    // Mensagens do pedido (os lembretes valem para todos os pets do pedido).
+    supabase.from("notificacao_agendada").select(COLUNAS_MENSAGEM).eq("petshop_id", lojaId).eq("pedido_id", a.pedido_id).order("enviar_em"),
   ]);
 
   const operacao = podeOperar(papel);
@@ -62,6 +68,9 @@ async function Conteudo({ params }: { params: Promise<{ lojaId: string; agendame
         </div>
         <span className={`rounded-full border px-3 py-1 text-sm font-medium ${COR_STATUS[a.status]}`}>{NOME_STATUS[a.status]}</span>
       </div>
+      {a.status === "agendado" && a.sem_confirmacao_em && (
+        <Aviso tipo="alerta">O cliente não confirmou dentro do prazo da loja. Vale ligar para confirmar.</Aviso>
+      )}
 
       {(acoes.length > 0 || (operacao && podeRemarcarOuCancelar(a.status))) && (
         <Cartao>
@@ -132,8 +141,23 @@ async function Conteudo({ params }: { params: Promise<{ lojaId: string; agendame
             {vinculo.faltas} falta(s) nesta loja{vinculo.exige_sinal && " · exige sinal"}
           </p>
         )}
+        {vinculo && !vinculo.consentimento_contato_em && <p className="text-sm text-neutral-500">Sem autorização de contato: não recebe lembretes.</p>}
+        {vinculo?.exige_sinal && podeConfigurar(papel) && a.tutor && (
+          <FormAcao acao={dispensarSinal} semBotao className="mt-2">
+            <input type="hidden" name="loja_id" value={lojaId} />
+            <input type="hidden" name="tutor_id" value={a.tutor.id} />
+            <BotaoEnviar variante="secundario">Dispensar o sinal deste cliente</BotaoEnviar>
+          </FormAcao>
+        )}
         {vinculo?.observacoes && <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">{vinculo.observacoes}</p>}
       </Cartao>
+
+      {operacao && (
+        <Cartao>
+          <h2 className="mb-2 font-medium">Mensagens ao cliente</h2>
+          <ListaMensagens mensagens={(mensagens ?? []) as LinhaMensagem[]} fuso={loja.fuso} comTutor={false} />
+        </Cartao>
+      )}
 
       <Cartao>
         <h2 className="mb-2 font-medium">Observações do atendimento</h2>

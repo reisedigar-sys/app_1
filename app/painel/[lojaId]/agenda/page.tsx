@@ -72,6 +72,7 @@ async function Conteudo({ params, searchParams }: { params: Promise<{ lojaId: st
   const colunas = profs.data.filter((p) => (proprio ? p.id === proprio : !filtroProf || p.id === filtroProf));
   const itens = agenda.data.filter((a) => passaNoFiltro(a.status, filtroStatus) && colunas.some((c) => c.id === a.profissional_id));
   const aConfirmar = itens.filter((a) => a.status === "agendado" && new Date(a.inicio) > new Date()).length;
+  const semConfirmacao = itens.filter((a) => a.status === "agendado" && a.sem_confirmacao_em && new Date(a.inicio) > new Date()).length;
 
   const base = `/painel/${lojaId}/agenda`;
   const link = (p: Record<string, string>) => {
@@ -95,6 +96,12 @@ async function Conteudo({ params, searchParams }: { params: Promise<{ lojaId: st
                 <>
                   {" · "}
                   <span className="font-medium text-amber-700 dark:text-amber-400">{aConfirmar} a confirmar</span>
+                </>
+              )}
+              {semConfirmacao > 0 && (
+                <>
+                  {" · "}
+                  <span className="font-medium text-red-700 dark:text-red-400">{semConfirmacao} sem confirmação no prazo</span>
                 </>
               )}
             </span>
@@ -163,6 +170,7 @@ type Item = {
   tutor_nome: string | null;
   servicos: string[] | null;
   tutor_faltas: number | null;
+  sem_confirmacao_em: string | null;
 };
 
 function minutosHora(h: string) {
@@ -286,6 +294,7 @@ function CartaoAtendimento({ a, fuso }: { a: Item; fuso: string }) {
           {horaNoFuso(a.inicio, fuso)}–{horaNoFuso(a.fim, fuso)} {a.pet_nome}
         </span>
         {a.encaixe && <span className="rounded bg-black/10 px-1 text-[10px] uppercase">encaixe</span>}
+        {a.status === "agendado" && a.sem_confirmacao_em && <span className="rounded bg-red-600 px-1 text-[10px] uppercase text-white">sem confirmação</span>}
       </span>
       <span className="block truncate">{(a.servicos ?? []).join(" + ")}</span>
       <span className="block truncate opacity-80">
@@ -346,7 +355,7 @@ function AgendaSemana({
                           <Link href={`/painel/${lojaId}/agenda/${a.id}`} className={`block rounded border-l-4 px-1.5 py-1 ${COR_STATUS[a.status]}`}>
                             <span className="font-semibold">{horaNoFuso(a.inicio, fuso)}</span> {a.pet_nome}
                             <span className="sr-only"> · {NOME_STATUS[a.status]}</span>
-                            {a.status === "agendado" && <span aria-hidden> · a confirmar</span>}
+                            {a.status === "agendado" && <span aria-hidden> · {a.sem_confirmacao_em ? "sem confirmação" : "a confirmar"}</span>}
                           </Link>
                         </li>
                       ))}

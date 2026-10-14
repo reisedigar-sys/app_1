@@ -3,6 +3,7 @@
 import { z } from "zod";
 import {
   ErroAgendamento,
+  erroDeAgendamento,
   type ItemPedido,
   criarPedido,
   diasComVaga,
@@ -112,5 +113,31 @@ export async function confirmarPedido(p: {
     // Só registra quando o tutor marca a opção: desmarcar aqui não apaga uma autorização dada antes.
     if (p.consentimentoContato) await supabase.rpc("registrar_consentimento", { p_petshop_id: lojaId, p_contato: true, p_marketing: false });
     return resumo;
+  });
+}
+
+/** Lista de espera: cada pet do pedido entra na fila do dia, com o serviço principal escolhido. */
+export async function entrarListaEspera(p: { lojaId: string; itens: ItemPedido[]; data: string; periodo: string; consentimentoContato: boolean }) {
+  return executar(async () => {
+    const tutor = await tutorAtual();
+    if (!tutor) throw new ErroAgendamento("sem_permissao");
+    const supabase = await createClient();
+    const lojaId = id.parse(p.lojaId);
+    const itens = z.array(z.object({ pet_id: id, servicos: z.array(id).min(1) })).min(1).max(10).parse(p.itens);
+    const data = z.iso.date().parse(p.data);
+    const periodo = z.enum(["manha", "tarde", "qualquer"]).parse(p.periodo);
+    for (const item of itens) {
+      const { error } = await supabase.rpc("entrar_lista_espera", {
+        p_petshop_id: lojaId,
+        p_tutor_id: tutor.id,
+        p_pet_id: item.pet_id,
+        p_servico_id: item.servicos[0],
+        p_data: data,
+        p_periodo: periodo,
+      });
+      if (error) throw erroDeAgendamento(error);
+    }
+    if (p.consentimentoContato) await supabase.rpc("registrar_consentimento", { p_petshop_id: lojaId, p_contato: true, p_marketing: false });
+    return true;
   });
 }

@@ -215,9 +215,7 @@ update public.pedido p
 -- ---------------------------------------------------------------------------
 -- Anti no-show, lista de espera, WhatsApp e avaliações
 -- ---------------------------------------------------------------------------
-insert into public.notificacao_agendada (petshop_id, pedido_id, agendamento_id, tutor_id, tipo, enviar_em)
-select a.petshop_id, a.pedido_id, a.id, a.tutor_id, 'lembrete_d1', a.inicio - interval '1 day'
-  from public.agendamento a where a.status in ('agendado', 'confirmado');
+-- A fila de notificações é preenchida pelos triggers de agendamento (migração 010).
 
 insert into public.mensagem_log (petshop_id, tutor_id, direcao, destino, conteudo, status) values
   ('20000000-0000-0000-0000-000000000001', '40000000-0000-0000-0000-000000000001', 'saida', '+5511988880001', '{"template":"confirmacao"}', 'entregue'),
