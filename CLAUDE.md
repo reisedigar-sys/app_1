@@ -142,9 +142,11 @@ Cuidados:
   dono. Nunca fazer push direto na `producao`. Andamento das semanas em `PLANO-MVP.md` ("Andamento").
 - Hospedado ≠ local: no Supabase online a confirmação de e-mail está ligada e, sem SMTP próprio (Resend), só chegam
   e-mails para os membros da organização. Trate `signUp` sem sessão (as telas já mostram "confirme o e-mail").
-- Marca: **Hora do Pet** (provisória; o código e os textos ainda dizem "Agenda Pet" e a troca entra na semana 5).
-- Próximo: semana 5 (painel da loja: agenda do dia/semana, status, balcão, encaixe). Siga o prompt da semana 5 em
-  `PROMPTS-CLAUDE-CODE.md`, numa branch nova a partir da `main` (`semana-5-…`), com PR ao final.
+- Marca: **Hora do Pet** (provisória) nos títulos, manifesto do PWA e README; o nome do pacote continua `agenda-pet`.
+- Semana 5 (painel da loja) em revisão: migração 008 (`agenda_loja`, transições de status por trigger, balcão com
+  `buscar_tutor_balcao`/`cadastrar_tutor_balcao`/`cadastrar_pet_balcao`, `horario_da_loja`, `agendamento` no Realtime),
+  `/painel/{loja}/agenda` (dia/semana, filtros, ao vivo), novo atendimento com encaixe, remarcar, ficha do pet.
+- Próximo: semana 6 (anti no-show), seguindo o prompt da semana 6 em `PROMPTS-CLAUDE-CODE.md`.
 
 ## Pendências fora do código (decisão ou ação do dono do produto)
 - **Repositório público**: `reisedigar-sys/app_1` está público. Recomendado torná-lo privado
@@ -166,6 +168,18 @@ Cuidados:
 - Playwright: use o Chromium já instalado com `PW_CHROMIUM_PATH=/opt/pw-browsers/chromium` (está no `.env.local`
   local, que não é versionado; recrie a partir do `.env.example` se precisar).
 - Rode `pnpm db:types` só com o banco local no ar (o script não apaga mais os tipos se ele estiver fora).
+
+## Decisões da semana 5
+- **Status por trigger** (`agendamento_valida_status`): agendado ⇄ confirmado → em_atendimento → pronto → concluido;
+  cancelado/falta só de agendado ou confirmado; falta só depois do início; desfazer um passo é permitido. A profissional
+  só conduz o atendimento (em_atendimento, pronto, concluido). Vale para updates pela API; funções do back-end passam.
+- Cancelar ou marcar falta cancela as notificações pendentes do agendamento (trigger), por qualquer caminho.
+- **Balcão**: a busca por telefone só acha clientes da própria loja. Sem cliente, a loja cria um cadastro sem conta; se
+  outra loja já criou um sem conta com o número, ele é reaproveitado. Cadastro com conta nunca é ligado pelo telefone.
+- Telefone entra no canal `balcao` ("Balcão ou telefone"); não há canal `telefone`.
+- Realtime no navegador: passar o token da sessão (`realtime.setAuth`) antes de entrar no canal, senão o RLS roda
+  como anônimo e nada chega (`app/painel/[lojaId]/agenda/ao-vivo.tsx`).
+- E2E: clientes de balcão criados nos testes têm nome "E2E …" e são apagados por `e2e/limpeza.ts`.
 
 ## Decisões da semana 4
 - **Login do tutor só por e-mail** por enquanto. O telefone é obrigatório no perfil, mas não verificado: um cadastro

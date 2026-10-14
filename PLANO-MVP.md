@@ -14,7 +14,7 @@ atendente registrando o pedido pelo painel e enviando o link de agendamento no c
 | --- | --- |
 | Semanas 1 a 4 (fundação, onboarding, motor de disponibilidade, lado do tutor) | ✅ concluídas |
 | Ambientes de teste e produção | ✅ no ar: staging (prévia da `main`) e produção (`hora-do-pet.vercel.app`), com deploy automático (ver `docs/ambientes.md`) |
-| **Semana 5 — Painel da loja** | **próxima** |
+| **Semana 5 — Painel da loja** | **em revisão** (PR da semana 5) |
 | Semanas 6 a 9 | a fazer |
 
 Como cada entrega chega aos clientes: PR da semana → merge na `main` (o staging se atualiza sozinho) → PR `main` →
@@ -25,7 +25,7 @@ Como cada entrega chega aos clientes: PR da semana → merge na `main` (o stagin
   na Meta (passo a passo em `docs/ambientes.md`)
 - Abrir conta no gateway Pix com split (Asaas) e entender o cadastro de cada loja. **Pendente**
 - Fechar 2–3 petshops piloto e mostrar o progresso toda semana
-- Marca: **Hora do Pet** (decisão provisória do dono, 13/10/2026). O app ainda mostra "Agenda Pet": trocar na semana 5
+- Marca: **Hora do Pet** (decisão provisória do dono, 13/10/2026). Já aparece no app desde a semana 5
 
 ## Semana 1 — Fundação ✅
 - Repositório, Next.js + TypeScript, Supabase, deploy na Vercel (ambientes de teste e produção criados em 13/10/2026)

@@ -2,9 +2,9 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: { default: "Agenda Pet", template: "%s · Agenda Pet" },
+  title: { default: "Hora do Pet", template: "%s · Hora do Pet" },
   description: "Agende banho e tosa no seu petshop em poucos toques.",
-  appleWebApp: { capable: true, title: "Agenda Pet", statusBarStyle: "default" },
+  appleWebApp: { capable: true, title: "Hora do Pet", statusBarStyle: "default" },
 };
 
 export const viewport: Viewport = {
