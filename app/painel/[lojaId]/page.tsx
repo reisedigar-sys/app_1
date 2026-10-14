@@ -4,6 +4,7 @@ import { AvisosPush } from "@/components/avisos-push";
 import { Aviso, Cartao, Carregando, Titulo } from "@/components/ui";
 import { exigirLoja } from "@/lib/painel/sessao";
 import { createClient } from "@/lib/supabase/server";
+import { LinkDaLoja } from "./link-da-loja";
 
 type Checklist = {
   completo: boolean;
@@ -48,9 +49,13 @@ async function Conteudo({ params }: { params: Promise<{ lojaId: string }> }) {
     <>
       <Titulo>Configuração da loja</Titulo>
       {c.completo ? (
-        <Aviso tipo="ok">
-          Tudo pronto! A página de agendamento fica em <strong>/{loja.slug}</strong>.
-        </Aviso>
+        <>
+          <Aviso tipo="ok">Tudo pronto! Mande o link abaixo para os seus clientes agendarem.</Aviso>
+          <Cartao className="mt-4">
+            <h2 className="mb-2 font-medium">Link da loja</h2>
+            <LinkDaLoja slug={loja.slug} nome={loja.nome} />
+          </Cartao>
+        </>
       ) : (
         <Aviso tipo="alerta">Complete os itens abaixo para começar a receber agendamentos.</Aviso>
       )}
