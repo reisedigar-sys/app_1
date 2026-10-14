@@ -1269,6 +1269,62 @@ export type Database = {
         };
         Returns: string;
       };
+      agenda_loja: {
+        Args: { p_ate: string; p_de: string; p_petshop_id: string };
+        Returns: {
+          canal: Database["public"]["Enums"]["canal_agendamento"];
+          encaixe: boolean;
+          fim: string;
+          id: string;
+          inicio: string;
+          observacoes: string;
+          ocupado_ate: string;
+          pedido_id: string;
+          pet_id: string;
+          pet_nome: string;
+          pet_observacoes: string;
+          pet_pelagem: Database["public"]["Enums"]["pelagem"];
+          pet_porte: Database["public"]["Enums"]["porte"];
+          preco_total_centavos: number;
+          profissional_id: string;
+          profissional_nome: string;
+          servicos: string[];
+          status: Database["public"]["Enums"]["status_agendamento"];
+          tutor_exige_sinal: boolean;
+          tutor_faltas: number;
+          tutor_id: string;
+          tutor_nome: string;
+          tutor_telefone: string;
+        }[];
+      };
+      buscar_tutor_balcao: {
+        Args: { p_petshop_id: string; p_telefone: string };
+        Returns: {
+          exige_sinal: boolean;
+          faltas: number;
+          nome: string;
+          pets: Json;
+          telefone: string;
+          tem_conta: boolean;
+          tutor_id: string;
+        }[];
+      };
+      cadastrar_pet_balcao: {
+        Args: {
+          p_especie?: string;
+          p_nome: string;
+          p_pelagem: Database["public"]["Enums"]["pelagem"];
+          p_petshop_id: string;
+          p_porte: Database["public"]["Enums"]["porte"];
+          p_raca?: string;
+          p_tutor_id: string;
+        };
+        Returns: string;
+      };
+      cadastrar_tutor_balcao: {
+        Args: { p_consentimento_contato?: boolean; p_nome: string; p_petshop_id: string; p_telefone: string };
+        Returns: string;
+      };
       cancelar_agendamento: { Args: { p_agendamento_id: string }; Returns: Json };
       checklist_onboarding: { Args: { p_petshop_id: string }; Returns: Json };
       copiar_catalogo: { Args: { p_destino: string; p_origem: string; p_substituir?: boolean }; Returns: Json };
@@ -1308,6 +1364,7 @@ export type Database = {
           dia: string;
         }[];
       };
+      horario_da_loja: { Args: { p_local: string; p_petshop_id: string }; Returns: string };
       horarios_do_dia: {
         Args: { p_data: string; p_itens: Json; p_petshop_id: string; p_profissional_id?: string };
         Returns: {

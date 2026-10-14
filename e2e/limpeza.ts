@@ -1,7 +1,7 @@
 import { config } from "dotenv";
 import pg from "pg";
 
-// Remove o que os testes E2E criam (contas @e2e.test, lojas e redes novas), para o banco local voltar ao estado
+// Remove o que os testes E2E criam (contas @e2e.test, clientes de balcão "E2E …", lojas e redes novas), para o banco local voltar ao estado
 // do seed e os testes de banco (pnpm test) não dependerem da ordem em que as suítes rodam.
 export default async function limparDadosE2E() {
   config({ path: [".env.local", ".env.example"], quiet: true });
@@ -13,7 +13,9 @@ export default async function limparDadosE2E() {
       create temporary table _usuarios on commit drop as
         select id from auth.users where email like '%@e2e.test';
       create temporary table _tutores on commit drop as
-        select id from public.tutor where user_id in (select id from _usuarios);
+        select id from public.tutor
+         where user_id in (select id from _usuarios)
+            or (user_id is null and nome like 'E2E %'); -- clientes cadastrados no balcão pelos testes
       create temporary table _lojas on commit drop as
         select id, rede_id from public.petshop where slug like 'e2e-%';
     `);
