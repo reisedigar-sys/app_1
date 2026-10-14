@@ -15,7 +15,6 @@ import {
   buscarProfissionaisDisponiveis,
   buscarUnidades,
   confirmarPedido,
-  localizarCep,
 } from "./acoes";
 import { ListaEspera } from "./lista-espera";
 
@@ -107,12 +106,17 @@ function Fluxo({ loja, pets, catalogo, reiniciar }: PropsFluxo & { reiniciar: ()
   }
 
   // ---- carregamentos -------------------------------------------------------
-  function carregarUnidades(local?: { lat: number; lng: number }) {
+  // Com uma unidade só (loja sem rede), ela já vem escolhida e a etapa é pulada.
+  function carregarUnidades() {
     iniciar(async () => {
       setErro(null);
-      const r = await buscarUnidades(loja.id, itensOrigem, local);
+      const r = await buscarUnidades(loja.id, itensOrigem);
       if (!r.ok) return mostrarErro(r);
       setUnidades(r.dados);
+      if (r.dados.length === 1) {
+        setUnidade(r.dados[0]);
+        setEtapa("modo");
+      }
     });
   }
 
@@ -221,8 +225,11 @@ function Fluxo({ loja, pets, catalogo, reiniciar }: PropsFluxo & { reiniciar: ()
       case "servicos":
         if (petAtual < selecionados.length - 1) setPetAtual(petAtual + 1);
         else {
-          setEtapa("unidade");
-          if (!unidades) carregarUnidades();
+          if (unidades?.length === 1) setEtapa("modo");
+          else {
+            setEtapa("unidade");
+            if (!unidades) carregarUnidades();
+          }
         }
         break;
       case "unidade":
@@ -257,7 +264,7 @@ function Fluxo({ loja, pets, catalogo, reiniciar }: PropsFluxo & { reiniciar: ()
         setEtapa("servicos");
         break;
       case "modo":
-        setEtapa("unidade");
+        setEtapa(unidades?.length === 1 ? "servicos" : "unidade");
         break;
       case "data":
         setEtapa(modo === "data" ? "modo" : "profissional");
@@ -440,8 +447,6 @@ function Fluxo({ loja, pets, catalogo, reiniciar }: PropsFluxo & { reiniciar: ()
           unidades={unidades}
           unidade={unidade}
           carregando={carregando}
-          onBuscar={carregarUnidades}
-          onErro={setErro}
           onEscolher={(u) => {
             setUnidade(u);
             limparDaAgendaEmDiante();
@@ -618,85 +623,21 @@ function ItemResumo({ rotulo, children, onEditar }: { rotulo: string; children: 
   );
 }
 
+/** Lista das unidades da rede que atendem o pedido (busca por localização e CEP fica para o marketplace). */
 function EtapaUnidade({
   unidades,
   unidade,
   carregando,
-  onBuscar,
-  onErro,
   onEscolher,
 }: {
   unidades: Unidade[] | null;
   unidade: Unidade | null;
   carregando: boolean;
-  onBuscar: (local?: { lat: number; lng: number }) => void;
-  onErro: (e: string | null) => void;
   onEscolher: (u: Unidade) => void;
 }) {
-  const [forma, setForma] = useState<"loja" | "localizacao" | "cep">("loja");
-  const [cep, setCep] = useState("");
-  const [buscandoCep, iniciarCep] = useTransition();
-
-  function usarLocalizacao() {
-    setForma("localizacao");
-    if (!("geolocation" in navigator)) return onErro("Seu aparelho não informa a localização. Use o CEP ou a lista.");
-    navigator.geolocation.getCurrentPosition(
-      (p) => onBuscar({ lat: p.coords.latitude, lng: p.coords.longitude }),
-      () => onErro("Não conseguimos sua localização. Use o CEP ou a lista."),
-      { timeout: 8000 },
-    );
-  }
-
-  function buscarCep() {
-    iniciarCep(async () => {
-      const r = await localizarCep(cep);
-      if (!r.ok) return onErro(r.erro);
-      if (!r.dados) {
-        onErro("Não achamos a localização desse CEP; mostramos todas as unidades.");
-        return onBuscar();
-      }
-      onErro(null);
-      onBuscar(r.dados);
-    });
-  }
-
   return (
     <section aria-labelledby="t-unidade" className="flex flex-col gap-3">
-      <h2 id="t-unidade" className="text-lg font-semibold">Onde vai ser o atendimento?</h2>
-      <div className="flex gap-2" role="group" aria-label="Buscar unidade por">
-        {(
-          [
-            ["localizacao", "Localização", usarLocalizacao],
-            ["cep", "CEP", () => setForma("cep")],
-            ["loja", "Loja", () => { setForma("loja"); onBuscar(); }],
-          ] as const
-        ).map(([valor, rotulo, acao]) => (
-          <button
-            key={valor}
-            type="button"
-            onClick={acao}
-            aria-pressed={forma === valor}
-            className="min-h-10 rounded-full border border-neutral-300 px-4 text-sm aria-pressed:border-teal-700 aria-pressed:bg-teal-50 aria-pressed:text-teal-800 dark:border-neutral-700 dark:aria-pressed:bg-teal-950 dark:aria-pressed:text-teal-200"
-          >
-            {rotulo}
-          </button>
-        ))}
-      </div>
-      {forma === "cep" && (
-        <div className="flex gap-2">
-          <input
-            aria-label="CEP"
-            inputMode="numeric"
-            placeholder="00000-000"
-            value={cep}
-            onChange={(e) => setCep(e.target.value)}
-            className={classeInput}
-          />
-          <Botao type="button" variante="secundario" onClick={buscarCep} disabled={buscandoCep}>
-            Buscar
-          </Botao>
-        </div>
-      )}
+      <h2 id="t-unidade" className="text-lg font-semibold">Em qual unidade?</h2>
       {carregando && !unidades && <p className="text-sm text-neutral-500">Buscando unidades…</p>}
       {unidades?.length === 0 && <Aviso tipo="alerta">Nenhuma unidade atende esses serviços para os seus pets.</Aviso>}
       <div className="flex flex-col gap-2" role="radiogroup" aria-label="Unidades">
