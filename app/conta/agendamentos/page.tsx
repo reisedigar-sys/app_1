@@ -53,7 +53,7 @@ async function Lista({ searchParams }: { searchParams: Promise<Record<string, st
   const aviso = AVISOS[String((await searchParams).aviso)];
   await exigirTutor("/conta/agendamentos");
   const supabase = await createClient();
-  const [{ data, error }, { data: espera }, { count: pets }] = await Promise.all([
+  const [{ data, error }, { data: espera }, { count: pets }, { data: lojas }] = await Promise.all([
     supabase.rpc("meus_agendamentos"),
     supabase
       .from("lista_espera")
@@ -61,8 +61,16 @@ async function Lista({ searchParams }: { searchParams: Promise<Record<string, st
       .in("status", ["aguardando", "notificado"])
       .order("data"),
     supabase.from("pet").select("id", { count: "exact", head: true }).eq("ativo", true),
+    supabase.rpc("minhas_lojas"),
   ]);
   if (error) return <Vazio>Não foi possível carregar seus agendamentos.</Vazio>;
+  // Uma loja: direto para o agendamento dela; várias: escolher em Minhas lojas.
+  const novo = lojas?.length === 1 ? `/${lojas[0].slug}/agendar` : lojas?.length ? "/conta/lojas" : null;
+  const botaoNovo = novo && (
+    <BotaoLink href={novo} prefetch={false} className="self-start">
+      + Novo agendamento
+    </BotaoLink>
+  );
   const agora = instanteAtual();
   const proximos = data.filter((a) => new Date(a.fim).getTime() >= agora && !["cancelado", "faltou", "concluido"].includes(a.status)).reverse();
   const anteriores = data.filter((a) => !proximos.includes(a));
@@ -87,7 +95,7 @@ async function Lista({ searchParams }: { searchParams: Promise<Record<string, st
     </section>
   ) : null;
 
-  if (data.length === 0 && !filaDeEspera)
+  if (data.length === 0 && !filaDeEspera && !botaoNovo)
     return (
       <Vazio>
         Você ainda não tem agendamentos.{" "}
@@ -147,6 +155,7 @@ async function Lista({ searchParams }: { searchParams: Promise<Record<string, st
   return (
     <div className="flex flex-col gap-6">
       {aviso && <Aviso tipo="ok">{aviso}</Aviso>}
+      {botaoNovo}
       {filaDeEspera}
       <section aria-labelledby="t-proximos">
         <h2 id="t-proximos" className="mb-2 font-semibold">Próximos</h2>

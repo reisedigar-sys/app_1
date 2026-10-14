@@ -124,4 +124,11 @@ test("tutor novo agenda 2 pets pelo fluxo e vê os agendamentos gravados", async
   await page.getByRole("button", { name: /Remarcar para .* às 15:00/ }).click();
   await expect(texto(page, "Agendamento remarcado.")).toBeVisible();
   await expect(proximos.getByRole("listitem").filter({ hasText: "Rex" })).toContainText("15:00");
+
+  // Novo agendamento: o fluxo recomeça do início, não reabre a confirmação anterior.
+  await page.getByRole("link", { name: "+ Novo agendamento" }).click();
+  await page.waitForURL(/\/(pet-feliz-centro\/agendar|conta\/lojas)$/);
+  if (page.url().endsWith("/conta/lojas")) await page.goto("/pet-feliz-centro/agendar");
+  await expect(page.getByRole("progressbar", { name: "Etapas do agendamento" }).filter({ visible: true })).toHaveAttribute("aria-valuenow", "1");
+  await expect(texto(page, "Agendamento confirmado!")).toHaveCount(0);
 });
