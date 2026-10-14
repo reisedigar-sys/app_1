@@ -53,13 +53,14 @@ async function Lista({ searchParams }: { searchParams: Promise<Record<string, st
   const aviso = AVISOS[String((await searchParams).aviso)];
   await exigirTutor("/conta/agendamentos");
   const supabase = await createClient();
-  const [{ data, error }, { data: espera }] = await Promise.all([
+  const [{ data, error }, { data: espera }, { count: pets }] = await Promise.all([
     supabase.rpc("meus_agendamentos"),
     supabase
       .from("lista_espera")
       .select("id, data, periodo, status, pet(nome), servico(nome), petshop(nome)")
       .in("status", ["aguardando", "notificado"])
       .order("data"),
+    supabase.from("pet").select("id", { count: "exact", head: true }).eq("ativo", true),
   ]);
   if (error) return <Vazio>Não foi possível carregar seus agendamentos.</Vazio>;
   const agora = instanteAtual();
@@ -90,10 +91,16 @@ async function Lista({ searchParams }: { searchParams: Promise<Record<string, st
     return (
       <Vazio>
         Você ainda não tem agendamentos.{" "}
-        <Link className="text-teal-700 underline dark:text-teal-400" href="/conta/pets">
-          Cadastre seus pets
-        </Link>{" "}
-        e agende pela página da sua loja.
+        {pets ? (
+          "Agende pela página da sua loja (o link que o petshop passou)."
+        ) : (
+          <>
+            <Link className="text-teal-700 underline dark:text-teal-400" href="/conta/pets">
+              Cadastre seus pets
+            </Link>{" "}
+            e agende pela página da sua loja.
+          </>
+        )}
       </Vazio>
     );
 
