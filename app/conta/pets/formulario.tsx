@@ -28,12 +28,12 @@ function FotoPet({ tutorId, inicial }: { tutorId: string; inicial?: string | nul
   return (
     <div className="flex items-center gap-3">
       <input type="hidden" name="foto_url" value={url} />
-      <div className="flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-full bg-teal-50 text-2xl dark:bg-teal-950">
+      <div className="flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-full bg-marca-50 text-2xl dark:bg-marca-950">
         {/* eslint-disable-next-line @next/next/no-img-element -- foto do Storage */}
         {url ? <img src={url} alt="Foto do pet" className="size-full object-cover" /> : <span aria-hidden>🐾</span>}
       </div>
       <div className="flex flex-col gap-1 text-sm">
-        <label className="cursor-pointer font-medium text-teal-700 dark:text-teal-400">
+        <label className="cursor-pointer font-medium text-marca-700 dark:text-marca-400">
           {url ? "Trocar foto" : "Adicionar foto"}
           <input type="file" accept="image/*" className="sr-only" onChange={(e) => e.target.files?.[0] && enviar(e.target.files[0])} />
         </label>
@@ -65,7 +65,7 @@ export function FormularioPet({ tutorId, pet, voltar }: { tutorId: string; pet?:
               {PORTES_PET.map(([valor, nome, peso]) => (
                 <label
                   key={valor}
-                  className="flex min-h-14 cursor-pointer flex-col justify-center rounded-lg border border-neutral-300 px-3 text-sm has-checked:border-teal-700 has-checked:bg-teal-50 dark:border-neutral-700 dark:has-checked:bg-teal-950"
+                  className="flex min-h-14 cursor-pointer flex-col justify-center rounded-lg border border-neutral-300 px-3 text-sm has-checked:border-marca-700 has-checked:bg-marca-50 dark:border-neutral-700 dark:has-checked:bg-marca-950"
                 >
                   <input type="radio" name="porte" value={valor} defaultChecked={pet?.porte === valor} className="sr-only" />
                   <span className="font-medium">{nome}</span>
@@ -81,7 +81,7 @@ export function FormularioPet({ tutorId, pet, voltar }: { tutorId: string; pet?:
               {PELAGENS_PET.map(([valor, nome]) => (
                 <label
                   key={valor}
-                  className="flex min-h-11 cursor-pointer items-center justify-center rounded-lg border border-neutral-300 text-sm has-checked:border-teal-700 has-checked:bg-teal-50 dark:border-neutral-700 dark:has-checked:bg-teal-950"
+                  className="flex min-h-11 cursor-pointer items-center justify-center rounded-lg border border-neutral-300 text-sm has-checked:border-marca-700 has-checked:bg-marca-50 dark:border-neutral-700 dark:has-checked:bg-marca-950"
                 >
                   <input type="radio" name="pelagem" value={valor} defaultChecked={pet?.pelagem === valor} className="sr-only" />
                   {nome}

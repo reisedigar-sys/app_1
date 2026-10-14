@@ -5,10 +5,10 @@ const botao = "flex min-h-11 items-center justify-center rounded-md px-4 font-me
 export default function Home() {
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center gap-4 px-6 py-12">
-      <h1 className="text-3xl font-semibold text-teal-700 dark:text-teal-400">Hora do Pet</h1>
+      <h1 className="text-3xl font-semibold text-marca-700 dark:text-marca-400">Hora do Pet</h1>
       <p className="text-lg">Banho e tosa agendados em poucos toques.</p>
       <nav aria-label="Acesso" className="mt-4 flex flex-col gap-3">
-        <Link href="/conta" className={`${botao} bg-teal-700 text-white hover:bg-teal-800`}>
+        <Link href="/conta" className={`${botao} bg-marca-700 text-white hover:bg-marca-800`}>
           Sou tutor: meus pets e agendamentos
         </Link>
         <Link

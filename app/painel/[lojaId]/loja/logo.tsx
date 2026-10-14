@@ -32,7 +32,7 @@ export function CampoLogo({ lojaId, inicial }: { lojaId: string; inicial?: strin
         {url ? <img src={url} alt="Logo da loja" className="size-full object-contain" /> : "Sem logo"}
       </div>
       <div className="flex flex-col gap-1 text-sm">
-        <label className="cursor-pointer font-medium text-teal-700 dark:text-teal-400">
+        <label className="cursor-pointer font-medium text-marca-700 dark:text-marca-400">
           {enviando ? "Enviando…" : url ? "Trocar logo" : "Enviar logo"}
           <input
             type="file"

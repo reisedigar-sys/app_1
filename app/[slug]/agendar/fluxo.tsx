@@ -300,7 +300,7 @@ function Fluxo({ loja, pets, catalogo, reiniciar }: PropsFluxo & { reiniciar: ()
           );
         })}
         {total > 0 && (
-          <p className="self-end rounded-lg bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-800 dark:bg-teal-950 dark:text-teal-200">
+          <p className="self-end rounded-lg bg-marca-50 px-3 py-1 text-sm font-semibold text-marca-800 dark:bg-marca-950 dark:text-marca-200">
             {formatarReais(total)}
           </p>
         )}
@@ -321,7 +321,7 @@ function Fluxo({ loja, pets, catalogo, reiniciar }: PropsFluxo & { reiniciar: ()
         <Botao variante="secundario" onClick={reiniciar}>
           Fazer outro agendamento
         </Botao>
-        <Link href="/conta/agendamentos" className="text-center font-medium text-teal-700 underline dark:text-teal-400">
+        <Link href="/conta/agendamentos" className="text-center font-medium text-marca-700 underline dark:text-marca-400">
           Ver meus agendamentos
         </Link>
       </div>
@@ -332,7 +332,7 @@ function Fluxo({ loja, pets, catalogo, reiniciar }: PropsFluxo & { reiniciar: ()
     <div className="flex flex-col pb-28">
       <div className="mb-4 grid grid-cols-5 gap-2" role="progressbar" aria-label="Etapas do agendamento" aria-valuemin={1} aria-valuemax={5} aria-valuenow={PROGRESSO[etapa]}>
         {[1, 2, 3, 4, 5].map((n) => (
-          <span key={n} className={`h-1 rounded-full ${n <= PROGRESSO[etapa] ? "bg-teal-700" : "bg-neutral-200 dark:bg-neutral-800"}`} />
+          <span key={n} className={`h-1 rounded-full ${n <= PROGRESSO[etapa] ? "bg-marca-700" : "bg-neutral-200 dark:bg-neutral-800"}`} />
         ))}
       </div>
 
@@ -353,7 +353,7 @@ function Fluxo({ loja, pets, catalogo, reiniciar }: PropsFluxo & { reiniciar: ()
               return (
                 <label
                   key={p.id}
-                  className={`flex cursor-pointer flex-col items-center gap-1 rounded-xl border bg-white p-3 text-center dark:bg-neutral-950 ${marcado ? "border-teal-700 ring-1 ring-teal-700" : "border-neutral-200 dark:border-neutral-800"}`}
+                  className={`flex cursor-pointer flex-col items-center gap-1 rounded-xl border bg-white p-3 text-center dark:bg-neutral-950 ${marcado ? "border-marca-700 ring-1 ring-marca-700" : "border-neutral-200 dark:border-neutral-800"}`}
                 >
                   <input
                     type="checkbox"
@@ -373,7 +373,7 @@ function Fluxo({ loja, pets, catalogo, reiniciar }: PropsFluxo & { reiniciar: ()
           </div>
           <Link
             href={`/conta/pets/novo?voltar=${encodeURIComponent(`/${loja.slug}/agendar`)}`}
-            className="mt-3 flex min-h-11 items-center justify-center rounded-full border border-teal-700 text-sm font-medium text-teal-700 dark:text-teal-400"
+            className="mt-3 flex min-h-11 items-center justify-center rounded-full border border-marca-700 text-sm font-medium text-marca-700 dark:text-marca-400"
           >
             + Cadastrar novo pet
           </Link>
@@ -395,13 +395,13 @@ function Fluxo({ loja, pets, catalogo, reiniciar }: PropsFluxo & { reiniciar: ()
               <legend className="mb-2 text-sm font-medium">Serviço principal</legend>
               {disponiveis(principais).length === 0 && <Aviso tipo="alerta">A loja não tem serviços para o porte e a pelagem de {pet.nome}.</Aviso>}
               {disponiveis(principais).map((s) => (
-                <label key={s.id} className={`flex min-h-14 cursor-pointer items-center gap-3 rounded-xl border bg-white px-4 dark:bg-neutral-950 ${escolhaAtual.principal === s.id ? "border-teal-700" : "border-neutral-200 dark:border-neutral-800"}`}>
+                <label key={s.id} className={`flex min-h-14 cursor-pointer items-center gap-3 rounded-xl border bg-white px-4 dark:bg-neutral-950 ${escolhaAtual.principal === s.id ? "border-marca-700" : "border-neutral-200 dark:border-neutral-800"}`}>
                   <span className="flex flex-1 flex-col">
                     <span className="font-medium">{s.nome}</span>
                     {s.descricao && <span className="text-xs text-neutral-500">{s.descricao}</span>}
                   </span>
                   <span className="text-sm text-neutral-600 dark:text-neutral-300">{formatarReais(precoDe(s, pet)!.preco)}</span>
-                  <input type="radio" name={`principal-${pet.id}`} checked={escolhaAtual.principal === s.id} onChange={() => atualizar({ principal: s.id })} className="size-5 accent-teal-700" />
+                  <input type="radio" name={`principal-${pet.id}`} checked={escolhaAtual.principal === s.id} onChange={() => atualizar({ principal: s.id })} className="size-5 accent-marca-700" />
                 </label>
               ))}
             </fieldset>
@@ -411,7 +411,7 @@ function Fluxo({ loja, pets, catalogo, reiniciar }: PropsFluxo & { reiniciar: ()
                 {disponiveis(adicionais).map((s) => {
                   const marcado = escolhaAtual.adicionais.includes(s.id);
                   return (
-                    <label key={s.id} className={`flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border bg-white px-4 dark:bg-neutral-950 ${marcado ? "border-teal-700" : "border-neutral-200 dark:border-neutral-800"}`}>
+                    <label key={s.id} className={`flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border bg-white px-4 dark:bg-neutral-950 ${marcado ? "border-marca-700" : "border-neutral-200 dark:border-neutral-800"}`}>
                       <span className="flex-1 font-medium">{s.nome}</span>
                       <span className="text-sm text-neutral-600 dark:text-neutral-300">+ {formatarReais(precoDe(s, pet)!.preco)}</span>
                       <input
@@ -420,7 +420,7 @@ function Fluxo({ loja, pets, catalogo, reiniciar }: PropsFluxo & { reiniciar: ()
                         onChange={(e) =>
                           atualizar({ adicionais: e.target.checked ? [...escolhaAtual.adicionais, s.id] : escolhaAtual.adicionais.filter((x) => x !== s.id) })
                         }
-                        className="size-5 accent-teal-700"
+                        className="size-5 accent-marca-700"
                       />
                     </label>
                   );
@@ -464,7 +464,7 @@ function Fluxo({ loja, pets, catalogo, reiniciar }: PropsFluxo & { reiniciar: ()
                 ["profissional", "Profissional", "👤"],
               ] as const
             ).map(([valor, rotulo, icone]) => (
-              <label key={valor} className={`flex min-h-28 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border bg-white dark:bg-neutral-950 ${modo === valor ? "border-teal-700 ring-1 ring-teal-700" : "border-neutral-200 dark:border-neutral-800"}`}>
+              <label key={valor} className={`flex min-h-28 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border bg-white dark:bg-neutral-950 ${modo === valor ? "border-marca-700 ring-1 ring-marca-700" : "border-neutral-200 dark:border-neutral-800"}`}>
                 <span aria-hidden className="text-2xl">{icone}</span>
                 <span className="font-medium">{rotulo}</span>
                 <input
@@ -475,7 +475,7 @@ function Fluxo({ loja, pets, catalogo, reiniciar }: PropsFluxo & { reiniciar: ()
                     limparDaAgendaEmDiante();
                     setModo(valor);
                   }}
-                  className="size-5 accent-teal-700"
+                  className="size-5 accent-marca-700"
                 />
               </label>
             ))}
@@ -523,10 +523,10 @@ function Fluxo({ loja, pets, catalogo, reiniciar }: PropsFluxo & { reiniciar: ()
         <section aria-labelledby="t-prof" className="flex flex-col gap-2">
           <h2 id="t-prof" className="mb-1 text-lg font-semibold">Escolha o profissional</h2>
           {modo === "data" && (
-            <label className={`flex min-h-16 cursor-pointer items-center gap-3 rounded-xl border bg-white px-3 dark:bg-neutral-950 ${profissionalId === SEM_PREFERENCIA ? "border-teal-700" : "border-neutral-200 dark:border-neutral-800"}`}>
-              <span className="flex size-12 items-center justify-center rounded-full bg-teal-50 text-xl dark:bg-teal-950" aria-hidden>✂️</span>
+            <label className={`flex min-h-16 cursor-pointer items-center gap-3 rounded-xl border bg-white px-3 dark:bg-neutral-950 ${profissionalId === SEM_PREFERENCIA ? "border-marca-700" : "border-neutral-200 dark:border-neutral-800"}`}>
+              <span className="flex size-12 items-center justify-center rounded-full bg-marca-50 text-xl dark:bg-marca-950" aria-hidden>✂️</span>
               <span className="flex-1 font-medium">Sem profissional de preferência</span>
-              <input type="radio" name="profissional" checked={profissionalId === SEM_PREFERENCIA} onChange={() => setProfissionalId(SEM_PREFERENCIA)} className="size-5 accent-teal-700" />
+              <input type="radio" name="profissional" checked={profissionalId === SEM_PREFERENCIA} onChange={() => setProfissionalId(SEM_PREFERENCIA)} className="size-5 accent-marca-700" />
             </label>
           )}
           {profissionais.length === 0 && <p className="text-sm text-neutral-500">Nenhum profissional disponível para esse pedido.</p>}
@@ -592,11 +592,11 @@ function Fluxo({ loja, pets, catalogo, reiniciar }: PropsFluxo & { reiniciar: ()
       <div className="fixed inset-x-0 bottom-0 border-t border-neutral-200 bg-white/95 backdrop-blur dark:border-neutral-800 dark:bg-neutral-950/95">
         <div className="mx-auto flex max-w-2xl items-center justify-between gap-3 px-4 py-3">
           {etapa === "pets" ? (
-            <Link href={`/${loja.slug}`} className="min-h-11 px-2 py-3 text-sm font-medium text-teal-700 underline dark:text-teal-400">
+            <Link href={`/${loja.slug}`} className="min-h-11 px-2 py-3 text-sm font-medium text-marca-700 underline dark:text-marca-400">
               Voltar
             </Link>
           ) : (
-            <button type="button" onClick={voltar} className="min-h-11 px-2 text-sm font-medium text-teal-700 underline dark:text-teal-400">
+            <button type="button" onClick={voltar} className="min-h-11 px-2 text-sm font-medium text-marca-700 underline dark:text-marca-400">
               Voltar
             </button>
           )}
@@ -616,7 +616,7 @@ function ItemResumo({ rotulo, children, onEditar }: { rotulo: string; children: 
         <p className="mb-1 text-xs uppercase tracking-wide text-neutral-500">{rotulo}</p>
         {children}
       </div>
-      <button type="button" onClick={onEditar} className="flex size-10 items-center justify-center rounded-full text-teal-700 hover:bg-teal-50 dark:text-teal-400 dark:hover:bg-teal-950" aria-label={`Editar ${rotulo.toLowerCase()}`}>
+      <button type="button" onClick={onEditar} className="flex size-10 items-center justify-center rounded-full text-marca-700 hover:bg-marca-50 dark:text-marca-400 dark:hover:bg-marca-950" aria-label={`Editar ${rotulo.toLowerCase()}`}>
         ✎
       </button>
     </div>
@@ -644,7 +644,7 @@ function EtapaUnidade({
         {unidades?.map((u) => (
           <label
             key={u.id}
-            className={`flex cursor-pointer flex-col gap-2 rounded-xl border bg-white p-4 dark:bg-neutral-950 ${unidade?.id === u.id ? "border-teal-700 ring-1 ring-teal-700" : "border-neutral-200 dark:border-neutral-800"}`}
+            className={`flex cursor-pointer flex-col gap-2 rounded-xl border bg-white p-4 dark:bg-neutral-950 ${unidade?.id === u.id ? "border-marca-700 ring-1 ring-marca-700" : "border-neutral-200 dark:border-neutral-800"}`}
           >
             <span className="flex items-start justify-between gap-2">
               <span className="font-medium">{u.nome}</span>
@@ -657,7 +657,7 @@ function EtapaUnidade({
             {u.endereco && <span className="text-sm text-neutral-500">{u.endereco}</span>}
             <span className="flex items-center justify-between">
               <span className="text-sm font-semibold">{formatarReais(u.totalCentavos)}</span>
-              <input type="radio" name="unidade" checked={unidade?.id === u.id} onChange={() => onEscolher(u)} className="size-5 accent-teal-700" />
+              <input type="radio" name="unidade" checked={unidade?.id === u.id} onChange={() => onEscolher(u)} className="size-5 accent-marca-700" />
             </span>
           </label>
         ))}

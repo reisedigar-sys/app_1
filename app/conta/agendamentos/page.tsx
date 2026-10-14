@@ -103,7 +103,7 @@ async function Lista({ searchParams }: { searchParams: Promise<Record<string, st
           "Agende pela página da sua loja (o link que o petshop passou)."
         ) : (
           <>
-            <Link className="text-teal-700 underline dark:text-teal-400" href="/conta/pets">
+            <Link className="text-marca-700 underline dark:text-marca-400" href="/conta/pets">
               Cadastre seus pets
             </Link>{" "}
             e agende pela página da sua loja.

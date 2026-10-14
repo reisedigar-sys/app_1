@@ -43,11 +43,11 @@ async function Conteudo({ params }: { params: Promise<{ slug: string }> }) {
           // eslint-disable-next-line @next/next/no-img-element -- logo do Storage, tamanho pequeno
           <img src={loja.logo_url} alt={`Logo de ${loja.nome}`} className="mb-2 size-20 rounded-2xl border border-neutral-200 bg-white object-contain dark:border-neutral-800" />
         )}
-        <p className="text-sm font-medium text-teal-700 dark:text-teal-400">Banho e tosa</p>
+        <p className="text-sm font-medium text-marca-700 dark:text-marca-400">Banho e tosa</p>
         <h1 className="text-2xl font-semibold">{loja.nome}</h1>
         <p className="text-sm text-neutral-500">{enderecoDaLoja(loja)}</p>
         {telefone && (
-          <a href={`tel:${loja.telefone_e164}`} className="text-sm text-teal-700 underline dark:text-teal-400">
+          <a href={`tel:${loja.telefone_e164}`} className="text-sm text-marca-700 underline dark:text-marca-400">
             {telefone}
           </a>
         )}

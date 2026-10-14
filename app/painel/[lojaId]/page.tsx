@@ -75,7 +75,7 @@ async function Conteudo({ params }: { params: Promise<{ lojaId: string }> }) {
                 <span className="sr-only">{i.ok ? " (concluído)" : " (pendente)"}</span>
               </span>
               {!i.ok && (
-                <Link href={i.href} className="text-sm font-medium text-teal-700 dark:text-teal-400">
+                <Link href={i.href} className="text-sm font-medium text-marca-700 dark:text-marca-400">
                   Resolver
                 </Link>
               )}
@@ -102,7 +102,7 @@ async function Conteudo({ params }: { params: Promise<{ lojaId: string }> }) {
                 {s.faltando.map((f, i) => (
                   <span key={f}>
                     {i > 0 && " e "}
-                    <Link className="text-teal-700 underline dark:text-teal-400" href={f === "preco" ? `${base}/precos?servico=${s.id}` : `${base}/habilitacao`}>
+                    <Link className="text-marca-700 underline dark:text-marca-400" href={f === "preco" ? `${base}/precos?servico=${s.id}` : `${base}/habilitacao`}>
                       {f === "preco" ? "preço" : "profissional habilitado"}
                     </Link>
                   </span>
@@ -119,7 +119,7 @@ async function Conteudo({ params }: { params: Promise<{ lojaId: string }> }) {
           <ul className="flex flex-col gap-1 text-sm">
             {c.profissionais_sem_horario.map((p) => (
               <li key={p.id}>
-                <Link className="text-teal-700 underline dark:text-teal-400" href={`${base}/horarios?profissional=${p.id}`}>
+                <Link className="text-marca-700 underline dark:text-marca-400" href={`${base}/horarios?profissional=${p.id}`}>
                   {p.nome}
                 </Link>
               </li>

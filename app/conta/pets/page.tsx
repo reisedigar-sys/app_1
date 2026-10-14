@@ -37,9 +37,9 @@ async function Lista() {
         <li key={p.id}>
           <Link
             href={`/conta/pets/${p.id}`}
-            className="flex min-h-16 items-center gap-3 rounded-xl border border-neutral-200 bg-white px-4 py-2 hover:border-teal-600 dark:border-neutral-800 dark:bg-neutral-950"
+            className="flex min-h-16 items-center gap-3 rounded-xl border border-neutral-200 bg-white px-4 py-2 hover:border-marca-600 dark:border-neutral-800 dark:bg-neutral-950"
           >
-            <span className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-teal-50 dark:bg-teal-950">
+            <span className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-marca-50 dark:bg-marca-950">
               {/* eslint-disable-next-line @next/next/no-img-element -- foto do Storage */}
               {p.foto_url ? <img src={p.foto_url} alt="" className="size-full object-cover" /> : <span aria-hidden>🐾</span>}
             </span>

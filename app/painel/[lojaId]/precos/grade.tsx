@@ -44,7 +44,7 @@ export function GradePrecos({ lojaId, servicoId, inicial, editavel }: { lojaId: 
                 {editavel && (
                   <button
                     type="button"
-                    className="min-h-10 px-2 text-sm text-teal-700 dark:text-teal-400"
+                    className="min-h-10 px-2 text-sm text-marca-700 dark:text-marca-400"
                     onClick={() => {
                       setCopiando(copiando === porte ? null : porte);
                       setDestinos([]);
@@ -61,7 +61,7 @@ export function GradePrecos({ lojaId, servicoId, inicial, editavel }: { lojaId: 
                     <label key={p} className="flex min-h-10 items-center gap-2 px-1">
                       <input
                         type="checkbox"
-                        className="size-5 accent-teal-700"
+                        className="size-5 accent-marca-700"
                         checked={destinos.includes(p)}
                         onChange={(e) => setDestinos((d) => (e.target.checked ? [...d, p] : d.filter((x) => x !== p)))}
                       />

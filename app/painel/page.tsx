@@ -31,7 +31,7 @@ async function ListaLojas() {
           <li key={l.id}>
             <Link
               href={`/painel/${l.id}`}
-              className="flex min-h-14 items-center justify-between rounded-xl border border-neutral-200 bg-white px-4 hover:border-teal-600 dark:border-neutral-800 dark:bg-neutral-950"
+              className="flex min-h-14 items-center justify-between rounded-xl border border-neutral-200 bg-white px-4 hover:border-marca-600 dark:border-neutral-800 dark:bg-neutral-950"
             >
               <span className="font-medium">{l.nome}</span>
               <span className="text-xs text-neutral-500">

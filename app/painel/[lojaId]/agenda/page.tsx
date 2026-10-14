@@ -129,7 +129,7 @@ async function Conteudo({ params, searchParams }: { params: Promise<{ lojaId: st
               key={v}
               href={link({ visao: v })}
               aria-current={visao === v ? "page" : undefined}
-              className="flex min-h-9 items-center rounded-md px-3 text-sm aria-[current=page]:bg-teal-700 aria-[current=page]:text-white"
+              className="flex min-h-9 items-center rounded-md px-3 text-sm aria-[current=page]:bg-marca-700 aria-[current=page]:text-white"
             >
               {v === "dia" ? "Dia" : "Semana"}
             </Link>
@@ -331,7 +331,7 @@ function AgendaSemana({
           <tr>
             <th className="w-24" />
             {dias.map((d) => (
-              <th key={d} scope="col" className={`rounded-md py-1 font-medium ${d === hoje ? "bg-teal-700 text-white" : ""}`}>
+              <th key={d} scope="col" className={`rounded-md py-1 font-medium ${d === hoje ? "bg-marca-700 text-white" : ""}`}>
                 <Link href={linkDia(d)} className="capitalize hover:underline">
                   {diaCurto(d)}
                 </Link>

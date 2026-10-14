@@ -27,7 +27,7 @@ export function ListaEspera({ lojaId, itens, hoje, diaSugerido }: { lojaId: stri
 
   return (
     <details className="rounded-xl border border-neutral-200 bg-white p-3 text-sm dark:border-neutral-800 dark:bg-neutral-950">
-      <summary className="cursor-pointer font-medium text-teal-700 dark:text-teal-400">Dia lotado? Entre na lista de espera</summary>
+      <summary className="cursor-pointer font-medium text-marca-700 dark:text-marca-400">Dia lotado? Entre na lista de espera</summary>
       <div className="mt-3 flex flex-col gap-3">
         <div className="grid grid-cols-2 gap-3">
           <Campo rotulo="Dia" nome="data_espera" type="date" min={hoje} value={data} onChange={(e) => setData(e.target.value)} />
