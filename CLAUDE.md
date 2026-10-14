@@ -193,6 +193,8 @@ Cuidados:
 - **Testes com relógio falso**: `worker_reservar(limite, p_agora)`. Use dias que outros testes não usam (pedidos de
   testes paralelos no mesmo horário esperam uns pelos outros).
 - Worker em produção precisa de segredos configurados uma vez por projeto (`docs/ambientes.md`).
+- **Deadlock entre testes paralelos**: `emTransacao` refaz a transação quando o Postgres acusa deadlock (40P01), e
+  `apagarPedidos` limpa pedidos gravados de verdade (notificações antes do pedido). Não trate deadlock como resultado de teste.
 
 ## Decisões da semana 5
 - **Status por trigger** (`agendamento_valida_status`): agendado ⇄ confirmado → em_atendimento → pronto → concluido;

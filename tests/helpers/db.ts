@@ -52,6 +52,7 @@ export class Db {
       return { codigo: null, linhas: r.rowCount ?? 0 };
     } catch (e) {
       await this.query(`rollback to savepoint ${nome}`);
+      if (eDeadlock(e)) throw e; // não é o resultado do teste: emTransacao refaz a transação
       return { codigo: (e as { code?: string }).code ?? "erro", linhas: 0 };
     }
   }
@@ -62,15 +63,26 @@ export class Db {
   }
 }
 
-/** Roda o teste numa transação que sempre é desfeita: o banco volta ao estado do seed. */
+const eDeadlock = (e: unknown) => (e as { code?: string }).code === "40P01";
+
+/**
+ * Roda o teste numa transação que sempre é desfeita: o banco volta ao estado do seed.
+ * Testes em paralelo mexem nas mesmas linhas do seed (a loja Centro, o agendamento do Thor) em ordens diferentes;
+ * quando o Postgres acusa deadlock e derruba uma delas, a transação é refeita do zero, como uma aplicação faria.
+ */
 export async function emTransacao(fn: (db: Db) => Promise<void>) {
-  const client = await pool.connect();
-  try {
-    await client.query("begin");
-    await fn(new Db(client));
-  } finally {
-    await client.query("rollback");
-    client.release();
+  for (let tentativa = 1; ; tentativa++) {
+    const client = await pool.connect();
+    try {
+      await client.query("begin");
+      await fn(new Db(client));
+      return;
+    } catch (e) {
+      if (!eDeadlock(e) || tentativa >= 3) throw e;
+    } finally {
+      await client.query("rollback");
+      client.release();
+    }
   }
 }
 
@@ -81,6 +93,38 @@ export async function comConexao<T>(fn: (db: Db) => Promise<T>): Promise<T> {
     return await fn(new Db(client));
   } finally {
     client.release();
+  }
+}
+
+/**
+ * Apaga pedidos gravados de verdade por um teste (com commit). As notificações vão primeiro: um teste da fila
+ * (worker_reservar/worker_concluir numa transação aberta) pode estar segurando uma delas, e apagar o pedido antes
+ * travaria agendamento e notificação em ordem inversa à do worker (deadlock). Se mesmo assim houver deadlock, tenta de novo.
+ */
+export async function apagarPedidos(chaves: string[]) {
+  for (let tentativa = 1; ; tentativa++) {
+    try {
+      await comConexao(async (db) => {
+        await db.query("begin");
+        try {
+          await db.query(
+            `delete from public.notificacao_agendada n
+              using public.pedido p
+              where p.chave_idempotencia = any($1)
+                and (n.pedido_id = p.id or n.agendamento_id in (select a.id from public.agendamento a where a.pedido_id = p.id))`,
+            [chaves],
+          );
+          await db.query("delete from public.pedido where chave_idempotencia = any($1)", [chaves]);
+          await db.query("commit");
+        } catch (e) {
+          await db.query("rollback");
+          throw e;
+        }
+      });
+      return;
+    } catch (e) {
+      if (!eDeadlock(e) || tentativa >= 3) throw e;
+    }
   }
 }
 
