@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { ANON, type Db, emTransacao, usuario } from "../helpers/db";
 import { proximo } from "../helpers/datas";
@@ -71,13 +72,16 @@ describe("modelos do WhatsApp", () => {
     });
   });
 
-  it("todo modelo começa e termina com texto fixo (regra da Meta)", async () => {
+  it("todo modelo começa e termina com texto fixo (regra da Meta) e está igual em docs/modelos-whatsapp.md", async () => {
     await emTransacao(async (db) => {
       const modelos = await db.rows<{ nome: string; corpo: string }>("select nome, corpo from public.modelo_mensagem");
       expect(modelos.length).toBeGreaterThanOrEqual(9);
+      const doc = readFileSync("docs/modelos-whatsapp.md", "utf8");
       for (const m of modelos) {
         expect(m.corpo, m.nome).not.toMatch(/^\s*\{\{/);
         expect(m.corpo, m.nome).not.toMatch(/\}\}\s*$/);
+        expect(doc, m.nome).toContain(`## \`${m.nome}\`\n`);
+        expect(doc, m.nome).toContain("```text\n" + m.corpo + "\n```");
       }
     });
   });
@@ -87,11 +91,11 @@ describe("push", () => {
   it("tutor sem autorização de WhatsApp, mas com push ligado: o aviso sai só pelo push", async () => {
     await emTransacao(async (db) => {
       await db.query("update public.tutor_petshop set consentimento_contato_em = null where petshop_id = $1 and tutor_id = $2", [LOJA.centro, TUTOR.ana]);
-      await ligarPush(db, ana, "tutor", "https://push.exemplo/ana");
+      await ligarPush(db, ana, "tutor", "https://fcm.googleapis.com/fcm/send/ana");
       const p = await pedidoDaAna(db);
       const [m] = await reservar(db, p.pedido_id);
       expect(m.destino).toBeNull();
-      expect(m.push.map((i) => i.endpoint)).toEqual(["https://push.exemplo/ana"]);
+      expect(m.push.map((i) => i.endpoint)).toEqual(["https://fcm.googleapis.com/fcm/send/ana"]);
 
       await db.query("select public.worker_push($1, $2::jsonb)", [m.id, JSON.stringify([{ id: m.push[0].id, ok: true }])]);
       await db.query("select public.worker_concluir($1, true, 'push', null, null, now(), false)", [m.id]);
@@ -102,16 +106,17 @@ describe("push", () => {
 
   it("a inscrição é de quem está logado; expirada é apagada", async () => {
     await emTransacao(async (db) => {
-      await ligarPush(db, bruno, "tutor", "https://push.exemplo/celular");
-      await ligarPush(db, ana, "tutor", "https://push.exemplo/celular");
+      await ligarPush(db, bruno, "tutor", "https://fcm.googleapis.com/fcm/send/celular");
+      await ligarPush(db, ana, "tutor", "https://fcm.googleapis.com/fcm/send/celular");
       await db.como(bruno);
       expect(await db.count("select 1 from public.push_inscricao")).toBe(0);
       await db.como(ana);
       const [{ id }] = await db.rows<{ id: string }>("select id from public.push_inscricao");
       await db.como(ANON);
-      expect((await db.tentar("select public.registrar_push('tutor', 'https://push.exemplo/x', 'a', 'b')")).codigo).toBe("42501");
+      expect((await db.tentar("select public.registrar_push('tutor', 'https://fcm.googleapis.com/fcm/send/x', 'a', 'b')")).codigo).toBe("42501");
       await db.como(ana);
-      expect((await db.tentar("select public.registrar_push('equipe', 'https://push.exemplo/x', 'a', 'b')")).codigo).toBe("42501");
+      expect((await db.tentar("select public.registrar_push('equipe', 'https://fcm.googleapis.com/fcm/send/x', 'a', 'b')")).codigo).toBe("42501");
+      expect((await db.tentar("select public.registrar_push('tutor', 'https://meu-servidor.com/x', 'a', 'b')")).codigo).toBe("22023");
       expect((await db.tentar("insert into public.push_inscricao (user_id, escopo, endpoint, p256dh, auth) values ($1, 'tutor', 'https://x', 'a', 'b')", [USUARIO.anaTutora])).codigo).toBe("42501");
 
       const p = await pedidoDaAna(db);
@@ -128,7 +133,7 @@ describe("push", () => {
       expect(await db.count("select 1 from public.notificacao_agendada where pedido_id = $1 and tipo = 'equipe_novo_pedido'", [sem.pedido_id])).toBe(0);
       await db.query("delete from public.pedido where id = $1", [sem.pedido_id]);
 
-      await ligarPush(db, alice, "equipe", "https://push.exemplo/alice");
+      await ligarPush(db, alice, "equipe", "https://fcm.googleapis.com/fcm/send/alice");
       const balcao = await pedidoDaAna(db, "balcao");
       expect(await db.count("select 1 from public.notificacao_agendada where pedido_id = $1 and tipo::text like 'equipe%'", [balcao.pedido_id])).toBe(0);
       await db.query("delete from public.pedido where id = $1", [balcao.pedido_id]);
@@ -136,7 +141,7 @@ describe("push", () => {
       const p = await pedidoDaAna(db);
       const novo = (await reservar(db, p.pedido_id)).find((m) => m.tipo === "equipe_novo_pedido")!;
       expect(novo.destino).toBeNull();
-      expect(novo.push.map((i) => i.endpoint)).toEqual(["https://push.exemplo/alice"]);
+      expect(novo.push.map((i) => i.endpoint)).toEqual(["https://fcm.googleapis.com/fcm/send/alice"]);
       expect(novo.conteudo.push.titulo).toBe("Novo agendamento · Pet Feliz Centro");
       expect(novo.conteudo.push.corpo).toMatch(/^Ana Souza: Thor, sex, \d\d\/\d\d às 10:00 \(pelo app\)\.$/);
       expect(novo.conteudo.push.url).toBe(`/painel/${LOJA.centro}/agenda?data=${DIA}`);

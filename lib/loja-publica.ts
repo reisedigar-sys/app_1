@@ -8,7 +8,7 @@ export const lojaPorSlug = cache(async (slug: string) => {
   const supabase = await createClient();
   const { data } = await supabase
     .from("petshop")
-    .select("id, nome, slug, telefone_e164, logradouro, numero, bairro, cidade, uf, fuso, slot_minutos, ativo, cancelamento_gratuito_horas")
+    .select("id, nome, slug, logo_url, telefone_e164, logradouro, numero, bairro, cidade, uf, fuso, slot_minutos, ativo, cancelamento_gratuito_horas")
     .eq("slug", slug)
     .eq("ativo", true)
     .maybeSingle();

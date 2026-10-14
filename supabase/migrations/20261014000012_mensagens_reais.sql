@@ -116,6 +116,10 @@ begin
   if p_escopo = 'equipe' and cardinality(app.lojas_visiveis()) = 0 then
     raise exception 'sem permissão' using errcode = '42501';
   end if;
+  -- Só serviços de push dos navegadores (o worker faz um POST no endereço).
+  if p_endpoint !~ '^https://(fcm\.googleapis\.com|updates\.push\.services\.mozilla\.com|push\.services\.mozilla\.com|web\.push\.apple\.com|[a-z0-9.-]+\.notify\.windows\.com)/' then
+    raise exception 'endereço de push não aceito' using errcode = '22023';
+  end if;
   insert into public.push_inscricao (user_id, escopo, endpoint, p256dh, auth)
   values (auth.uid(), p_escopo, p_endpoint, p_p256dh, p_auth)
   on conflict (endpoint, escopo) do update

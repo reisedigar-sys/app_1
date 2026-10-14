@@ -41,12 +41,18 @@ Dono e gerente configuram; atendente vê e cria bloqueios; só o dono administra
 Anti no-show (semana 6): **Mensagens** (o que foi enviado, o que está agendado e por que algo não saiu), **Lista de
 espera** (incluir pelo telefone e remover) e, em *Loja*, hora do lembrete da véspera, lembrete X horas antes, prazo
 para confirmar e o que fazer sem confirmação (avisar a loja ou liberar o horário). A fila é processada a cada minuto
-pelo pg_cron, que chama a Edge Function `supabase/functions/notificacoes` (segredos em `docs/ambientes.md`); até a
-semana 7 o envio usa o provedor de teste (registra, não envia).
+pelo pg_cron, que chama a Edge Function `supabase/functions/notificacoes` (segredos em `docs/ambientes.md`).
+
+Mensagens de verdade (semana 7a): o worker envia pelo WhatsApp (modelos da Meta, número central do Hora do Pet) e por
+push (Web Push). Sem os segredos da Meta, usa o provedor de teste (registra, não envia). A Edge Function
+`supabase/functions/whatsapp` recebe o webhook da Meta: status de entrega, "PARAR" e mensagens enviadas ao número
+central. Em *Loja*, o logo; na tela inicial do painel, "Avisos no celular" para a equipe.
 
 ## Lado do tutor
 
-- `/{slug}`: página pública da loja (serviços "a partir de", equipe, botão Agendar).
+- `/{slug}`: página pública da loja (logo, serviços "a partir de", equipe, botão Agendar). Instalado a partir dela, o
+  app aparece com o nome e o ícone da loja (`/{slug}/manifest.webmanifest`, `/{slug}/icone/{tamanho}`).
+- `/conta/lojas`: Minhas lojas (próximo agendamento, avisos pelo WhatsApp por loja) e avisos no celular (push).
 - `/{slug}/agendar`: fluxo em 5 etapas, seguindo `fluxo-agendamento-referencia.md`: pets (vários) → serviço principal +
   adicionais + observações por pet → unidade da rede (localização, CEP ou lista, com preço) → data e hora **ou**
   profissional → resumo editável e confirmação (pagamento na loja até a semana 8).

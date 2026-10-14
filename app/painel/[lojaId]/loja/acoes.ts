@@ -1,6 +1,8 @@
 "use server";
 
 import { z } from "zod";
+import { prefixoDasFotos } from "@/lib/app-da-loja";
+import { supabaseUrl } from "@/lib/supabase/env";
 import { SEM_PERMISSAO, checkbox, iniciarAcao, opcional, revalidarLoja } from "@/lib/painel/acao";
 import { mensagemDeErro } from "@/lib/painel/erros";
 import { type Estado, dadosDoForm, errosDeValidacao } from "@/lib/painel/estado";
@@ -10,6 +12,7 @@ const inteiro = (min: number, max: number, msg: string) => z.coerce.number().int
 
 const schema = z.object({
   nome: z.string().trim().min(2, "Informe o nome da loja."),
+  logo_url: opcional(z.url("Logo inválido.").refine((u) => u.startsWith(prefixoDasFotos(supabaseUrl())), "Envie o logo pelo botão.")),
   slug: z.string().trim().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, "Use só letras minúsculas, números e hífens."),
   telefone: opcional(
     z

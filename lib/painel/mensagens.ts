@@ -34,7 +34,11 @@ export const NOME_STATUS_ESPERA: Record<Enums["status_lista_espera"], string> = 
 };
 
 /** Colunas da fila que o painel mostra. */
-export const COLUNAS_MENSAGEM = "id, tipo, status, enviar_em, enviada_em, tentativas, ultimo_erro, conteudo, tutor(nome)" as const;
+export const COLUNAS_MENSAGEM =
+  "id, tipo, status, enviar_em, enviada_em, tentativas, ultimo_erro, conteudo, destino, entrega, push_enviados, tutor(nome)" as const;
+
+/** Situação no WhatsApp, informada pela Meta. */
+export const NOME_ENTREGA: Record<string, string> = { enviada: "enviada", entregue: "entregue", lida: "lida", falhou: "não entregue" };
 
 export type LinhaMensagem = {
   id: string;
@@ -45,5 +49,8 @@ export type LinhaMensagem = {
   tentativas: number;
   ultimo_erro: string | null;
   conteudo: unknown;
+  destino: string | null;
+  entrega: string | null;
+  push_enviados: number;
   tutor: { nome: string } | null;
 };
