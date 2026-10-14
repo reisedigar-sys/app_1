@@ -11,6 +11,8 @@ export const NOME_TIPO_MENSAGEM: Record<Enums["tipo_notificacao"], string> = {
   vaga_lista_espera: "Vaga da lista de espera",
   aviso_loja_sem_confirmacao: "Aviso à loja: sem confirmação",
   cancelamento: "Cancelamento",
+  equipe_novo_pedido: "Aviso à equipe: novo agendamento",
+  equipe_cancelamento: "Aviso à equipe: cancelamento",
 };
 
 export const NOME_STATUS_MENSAGEM: Record<Enums["status_notificacao"], [string, string]> = {

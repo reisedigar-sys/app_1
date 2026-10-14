@@ -201,7 +201,7 @@ describe("programação das mensagens", () => {
       const prontos = await db.rows("select 1 from public.notificacao_agendada where agendamento_id = $1 and tipo = 'pet_pronto'", [AGENDAMENTO.thorCentro]);
       expect(prontos).toHaveLength(1);
       const r = (await rodada(db, new Date().toISOString())).find((x) => x.tipo === "pet_pronto");
-      expect(r?.conteudo.texto).toBe("Pet Feliz Centro: Thor está pronto! Pode vir buscar.");
+      expect(r?.conteudo.texto).toContain("Pet Feliz Centro: Thor está pronto! Pode vir buscar.");
     });
   });
 

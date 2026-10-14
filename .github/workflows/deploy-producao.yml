@@ -47,9 +47,10 @@ jobs:
       - name: Aplicar migrações
         run: pnpm exec supabase db push
 
-      # Worker da fila de notificações (semana 6). Os segredos dele são configurados uma vez (docs/ambientes.md).
-      - name: Publicar o worker de notificações
-        run: pnpm exec supabase functions deploy notificacoes --project-ref "$SUPABASE_PROJECT_REF" --use-api
+      # Worker da fila de notificações (semana 6) e webhook do WhatsApp (semana 7). Os segredos deles são configurados
+      # uma vez (docs/ambientes.md).
+      - name: Publicar o worker de notificações e o webhook do WhatsApp
+        run: pnpm exec supabase functions deploy notificacoes whatsapp --project-ref "$SUPABASE_PROJECT_REF" --use-api
 
       - name: Publicar o app
         run: |
