@@ -74,7 +74,7 @@ test("tutor novo agenda 2 pets pelo fluxo e vê os agendamentos gravados", async
   await avancar.click();
 
   // Etapa 3: unidade (lista da rede, com preço para os dois pets)
-  await expect(page.getByRole("heading", { name: "Onde vai ser o atendimento?" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Em qual unidade?" })).toBeVisible();
   const centro = page.getByRole("radiogroup", { name: "Unidades" }).locator("label").filter({ hasText: "Pet Feliz Centro" });
   await expect(page.getByRole("radiogroup", { name: "Unidades" }).locator("label").filter({ hasText: "Pet Feliz Zona Sul" })).toBeVisible();
   await centro.click();
@@ -131,4 +131,13 @@ test("tutor novo agenda 2 pets pelo fluxo e vê os agendamentos gravados", async
   if (page.url().endsWith("/conta/lojas")) await page.goto("/pet-feliz-centro/agendar");
   await expect(page.getByRole("progressbar", { name: "Etapas do agendamento" }).filter({ visible: true })).toHaveAttribute("aria-valuenow", "1");
   await expect(texto(page, "Agendamento confirmado!")).toHaveCount(0);
+
+  // Loja com uma unidade só: a etapa de unidade é pulada.
+  await page.goto("/banho-e-cia-moema/agendar");
+  await page.locator("label").filter({ hasText: "Rex" }).filter({ visible: true }).click();
+  await botao(page, "Avançar ›").click();
+  await page.locator("label").filter({ hasText: /^BanhoBanho com shampoo/ }).filter({ visible: true }).click();
+  await botao(page, "Avançar ›").click();
+  await expect(page.getByRole("heading", { name: "Como prefere seguir?" }).filter({ visible: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Em qual unidade?" }).filter({ visible: true })).toHaveCount(0);
 });
