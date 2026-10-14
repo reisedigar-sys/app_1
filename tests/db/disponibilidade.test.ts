@@ -391,6 +391,28 @@ describe("criar_pedido", () => {
     });
   });
 
+  it("horário que já passou não é oferecido, nem para a equipe", async () => {
+    await emTransacao(async (db) => {
+      const s = await preparar(db);
+      // Júlia trabalha o dia inteiro hoje (horário local da loja), para haver horários antes e depois de agora.
+      const [{ hoje, dow, agora }] = await db.rows<{ hoje: string; dow: number; agora: string }>(
+        `select (now() at time zone 'America/Sao_Paulo')::date::text as hoje,
+                extract(dow from now() at time zone 'America/Sao_Paulo')::int as dow,
+                to_char(now() at time zone 'America/Sao_Paulo', 'HH24:MI') as agora`,
+      );
+      await db.query("delete from public.horario_trabalho where profissional_id = $1 and dia_semana = $2", [PROFISSIONAL.julia, dow]);
+      await db.query(
+        "insert into public.horario_trabalho (petshop_id, profissional_id, dia_semana, inicio, fim) values ($1, $2, $3, '00:00', '23:59')",
+        [LOJA.centro, PROFISSIONAL.julia, dow],
+      );
+      await db.como(alice);
+      const horas = await horarios(db, [item(PET.mel, s.banho)], hoje, PROFISSIONAL.julia);
+      expect(horas.filter((h) => h < agora)).toEqual([]);
+      // A equipe ainda vê os próximos minutos (sem antecedência mínima), salvo perto da meia-noite.
+      if (agora < "23:00") expect(horas.length).toBeGreaterThan(0);
+    });
+  });
+
   it("encaixe: só a equipe, fora da grade, mas nunca sobrepondo", async () => {
     await emTransacao(async (db) => {
       const s = await preparar(db);

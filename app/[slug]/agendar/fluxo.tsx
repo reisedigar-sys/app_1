@@ -43,7 +43,18 @@ function horaLegivel(iso: string, fuso = "America/Sao_Paulo") {
   return new Intl.DateTimeFormat("pt-BR", { timeZone: fuso, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(iso));
 }
 
-export function FluxoAgendamento({ loja, pets, catalogo }: { loja: LojaFluxo; pets: PetTutor[]; catalogo: ServicoCatalogo[] }) {
+type PropsFluxo = { loja: LojaFluxo; pets: PetTutor[]; catalogo: ServicoCatalogo[] };
+
+/**
+ * O roteador guarda a tela visitada (com o estado) para voltar instantaneamente. Depois de um agendamento
+ * concluído, o fluxo recomeça do zero (com nova chave de idempotência) em vez de reabrir a confirmação anterior.
+ */
+export function FluxoAgendamento(props: PropsFluxo) {
+  const [versao, setVersao] = useState(0);
+  return <Fluxo key={versao} {...props} reiniciar={() => setVersao(versao + 1)} />;
+}
+
+function Fluxo({ loja, pets, catalogo, reiniciar }: PropsFluxo & { reiniciar: () => void }) {
   const [etapa, setEtapa] = useState<Etapa>("pets");
   const [selecionados, setSelecionados] = useState<string[]>([]);
   const [escolhas, setEscolhas] = useState<Record<string, Escolha>>({});
@@ -63,6 +74,11 @@ export function FluxoAgendamento({ loja, pets, catalogo }: { loja: LojaFluxo; pe
   const [erro, setErro] = useState<string | null>(null);
   const [carregando, iniciar] = useTransition();
   const [chave] = useState(() => crypto.randomUUID());
+
+  // Ao sair da tela de confirmação (inclusive quando o roteador só a esconde), o próximo acesso começa do zero.
+  useEffect(() => {
+    if (etapa === "pronto") return reiniciar;
+  }, [etapa, reiniciar]);
 
   const petPorId = useMemo(() => new Map(pets.map((p) => [p.id, p])), [pets]);
   const servicoPorId = useMemo(() => new Map(catalogo.map((s) => [s.id, s])), [catalogo]);
@@ -295,6 +311,9 @@ export function FluxoAgendamento({ loja, pets, catalogo }: { loja: LojaFluxo; pe
           <p>Retirada estimada: <strong>{horaLegivel(resumo.retirada_estimada)}</strong></p>
           <p>Total: <strong>{formatarReais(resumo.total_centavos)}</strong>, pago na loja.</p>
         </div>
+        <Botao variante="secundario" onClick={reiniciar}>
+          Fazer outro agendamento
+        </Botao>
         <Link href="/conta/agendamentos" className="text-center font-medium text-teal-700 underline dark:text-teal-400">
           Ver meus agendamentos
         </Link>
