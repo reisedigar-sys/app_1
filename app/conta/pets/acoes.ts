@@ -37,10 +37,7 @@ export async function salvarPet(_: Estado, form: FormData): Promise<Estado> {
   const supabase = await createClient();
   const r = id
     ? await supabase.from("pet").update(pet).eq("id", id).select("id")
-    : await supabase
-        .from("pet")
-        .insert({ ...pet, tutor_id: tutor.id })
-        .select("id");
+    : await supabase.from("pet").insert({ ...pet, tutor_id: tutor.id }).select("id");
   if (r.error) return { ok: false, mensagem: mensagemDeErro(r.error) };
   if (!r.data?.length) return { ok: false, mensagem: "Pet não encontrado." };
   revalidatePath("/conta/pets");

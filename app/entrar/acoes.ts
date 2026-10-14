@@ -34,8 +34,7 @@ export async function cadastrar(_: Estado, form: FormData): Promise<Estado> {
     options: { data: { nome: dados.data.nome } },
   });
   if (error) {
-    if (error.code === "user_already_exists")
-      return { ok: false, mensagem: "Já existe uma conta com esse e-mail. Entre com ela." };
+    if (error.code === "user_already_exists") return { ok: false, mensagem: "Já existe uma conta com esse e-mail. Entre com ela." };
     return { ok: false, mensagem: "Não foi possível criar a conta. Tente de novo." };
   }
   if (!data.session) return { ok: true, mensagem: "Conta criada. Confirme o e-mail que enviamos e depois entre." };

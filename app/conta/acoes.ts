@@ -30,8 +30,7 @@ export async function cadastrarTutor(_: Estado, form: FormData): Promise<Estado>
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signUp({ email: dados.data.email, password: dados.data.senha });
   if (error) {
-    if (error.code === "user_already_exists")
-      return { ok: false, mensagem: "Já existe uma conta com esse e-mail. Entre com ela." };
+    if (error.code === "user_already_exists") return { ok: false, mensagem: "Já existe uma conta com esse e-mail. Entre com ela." };
     return { ok: false, mensagem: "Não foi possível criar a conta. Tente de novo." };
   }
   if (!data.session) return { ok: true, mensagem: "Conta criada. Confirme o e-mail que enviamos e depois entre." };
@@ -50,17 +49,10 @@ export async function salvarPerfil(_: Estado, form: FormData): Promise<Estado> {
     .safeParse(dadosDoForm(form));
   if (!dados.success) return errosDeValidacao(dados.error);
   const supabase = await createClient();
-  const { error } = await supabase.rpc("salvar_perfil_tutor", {
-    p_nome: dados.data.nome,
-    p_telefone: dados.data.telefone!,
-  });
+  const { error } = await supabase.rpc("salvar_perfil_tutor", { p_nome: dados.data.nome, p_telefone: dados.data.telefone! });
   if (error) {
     const duplicado = "Esse celular já está em outra conta. Use outro número ou entre com a outra conta.";
-    return {
-      ok: false,
-      mensagem: mensagemDeErro(error, { duplicado }),
-      erros: error.code === "23505" ? { telefone: duplicado } : undefined,
-    };
+    return { ok: false, mensagem: mensagemDeErro(error, { duplicado }), erros: error.code === "23505" ? { telefone: duplicado } : undefined };
   }
   return { ok: true, destino: caminhoSeguro(form.get("voltar")) };
 }
