@@ -6,6 +6,7 @@ import { caminhoSeguro, comVoltar } from "@/lib/conta/voltar";
 import { mensagemDeErro } from "@/lib/painel/erros";
 import { type Estado, dadosDoForm, errosDeValidacao } from "@/lib/painel/estado";
 import { telefoneParaE164 } from "@/lib/painel/formatos";
+import { mensagemDeLogin } from "@/lib/conta/erro-login";
 import { createClient } from "@/lib/supabase/server";
 
 const credenciais = z.object({
@@ -18,7 +19,7 @@ export async function entrarTutor(_: Estado, form: FormData): Promise<Estado> {
   if (!dados.success) return errosDeValidacao(dados.error);
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email: dados.data.email, password: dados.data.senha });
-  if (error) return { ok: false, mensagem: "E-mail ou senha incorretos." };
+  if (error) return { ok: false, mensagem: mensagemDeLogin(error) };
   // Carga completa: telas visitadas antes do login (que mandavam para o login) não podem ser reaproveitadas.
   return { ok: true, destino: caminhoSeguro(form.get("voltar")) };
 }
