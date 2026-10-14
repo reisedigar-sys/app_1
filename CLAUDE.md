@@ -56,7 +56,7 @@ Cuidados:
   `tests/rls/cobertura.test.ts` a descobre sozinho e falha se faltar.
 - Regra de disponibilidade e criação de agendamento ficam em funções SQL chamadas por RPC; o front-end só consome.
 - Imports usam o alias `@/` (raiz do repositório).
-- Documentação de apoio: `README.md` (setup e banco), `PLANO-MVP.md` (plano semana a semana),
+- Documentação de apoio: `README.md` (setup e banco), `PLANO-MVP.md` (plano semana a semana), `PLANO-CRESCIMENTO.md` (Meta 1),
   `PROMPTS-CLAUDE-CODE.md` (prompts por semana). Ao fim de cada semana, atualize a seção "Estado atual" abaixo.
 
 ## Regras de negócio
@@ -88,8 +88,9 @@ Cuidados:
 6. Lembretes WhatsApp + notificação "pet pronto"
 7. Pix com sinal
 **Fase 2 — Diferenciais (após o piloto, ver PLANO-MVP.md)**: painel de resultados ("faltas evitadas" sempre como estimativa), retorno automático, financeiro leve, fotos antes/depois, pacotes e recorrência, desconto em horários ociosos. Estoque, nota fiscal e taxi dog só se as lojas pedirem. Mensagens de retorno e promoção são de marketing: exigem consentimento próprio, opt-out e controle de custo.
-**Fase 3 — Escala (meses 4–6)**: onboarding self-service, cobrança de mensalidade, 15–30 lojas.
-**Fase 4 — Marketplace (6–12+ meses)**: busca por região, avaliações, comissão, app nativo se necessário.
+**Fase 3 — Escala (meses 4–6)**: onboarding self-service, cobrança de mensalidade, importação de clientes, página de vendas e indicação, 15–30 lojas.
+**Meta 1 — 240 lojas pagando (até ~18 meses após o piloto)**: primeira meta do projeto (decidida em 14/10/2026), com três frentes: recursos que vendem, qualidade e consistência, campanha regional e depois nacional. Detalhe em `PLANO-CRESCIMENTO.md`.
+**Fase 4 — Marketplace**: depende de densidade regional de lojas (consequência da Meta 1); busca por região, avaliações, comissão, app nativo se necessário.
 
 ## Requisitos adicionais (migração 002)
 - Uma visita tem UM profissional e pode ter vários serviços; só pode ser escolhido quem estiver habilitado em todos eles (`profissional_servico`). O overbooking é travado em `agendamento`.

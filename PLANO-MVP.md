@@ -161,6 +161,11 @@ e pule o que as lojas não pedirem. Cada item é uma fatia que funciona sozinha.
 - Divulgação por mensagem de marketing só para tutores com consentimento, mostrando o custo estimado antes de enviar
 - Medir receita incremental e preenchimento
 
+## Meta 1 — 240 lojas pagando
+Primeira meta do projeto (14/10/2026): cerca de 240 petshops pagando até uns 18 meses depois do piloto. Fase 2,
+Fase 3 e tudo o que vem depois são priorizados por quanto aproximam essa meta. Marcos, indicadores e as três frentes
+(recursos que vendem, qualidade, divulgação) em `PLANO-CRESCIMENTO.md`.
+
 ## Depois (conforme a demanda)
 Onboarding self-service, cobrança de mensalidade, taxi dog, estoque (só se as lojas pedirem, ou por integração
 com o sistema que já usam) e avaliações com estrelas. Marketplace só depois de provar retenção nas lojas.
