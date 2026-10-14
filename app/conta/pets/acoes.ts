@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { exigirTutor } from "@/lib/conta/sessao";
+import { nascimentoParaIso } from "@/lib/conta/data-nascimento";
 import { caminhoSeguro } from "@/lib/conta/voltar";
 import { checkbox, opcional } from "@/lib/painel/acao";
 import { mensagemDeErro } from "@/lib/painel/erros";
@@ -16,7 +17,12 @@ const schema = z.object({
   raca: opcional(z.string().trim().max(80)),
   porte: z.enum(["mini", "pequeno", "medio", "grande", "gigante"], "Escolha o porte."),
   pelagem: z.enum(["curta", "media", "longa"], "Escolha a pelagem."),
-  nascimento: opcional(z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Data inválida.")),
+  nascimento: opcional(
+    z
+      .string()
+      .refine((v) => nascimentoParaIso(v) !== null, "Use DD/MM/AAAA, com uma data que já passou.")
+      .transform((v) => nascimentoParaIso(v)),
+  ),
   alergias: opcional(z.string().trim().max(300)),
   temperamento: opcional(z.string().trim().max(300)),
   vacinas: opcional(z.string().trim().max(300)),
@@ -31,7 +37,10 @@ export async function salvarPet(_: Estado, form: FormData): Promise<Estado> {
   const supabase = await createClient();
   const r = id
     ? await supabase.from("pet").update(pet).eq("id", id).select("id")
-    : await supabase.from("pet").insert({ ...pet, tutor_id: tutor.id }).select("id");
+    : await supabase
+        .from("pet")
+        .insert({ ...pet, tutor_id: tutor.id })
+        .select("id");
   if (r.error) return { ok: false, mensagem: mensagemDeErro(r.error) };
   if (!r.data?.length) return { ok: false, mensagem: "Pet não encontrado." };
   revalidatePath("/conta/pets");

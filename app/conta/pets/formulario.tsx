@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { FormAcao } from "@/components/form-acao";
 import { AreaTexto, Campo, Selecao } from "@/components/ui";
+import { mascaraData, nascimentoDeIso } from "@/lib/conta/data-nascimento";
 import { PELAGENS_PET, PORTES_PET, type Pet } from "@/lib/conta/pet";
 import { createClient } from "@/lib/supabase/client";
 import { salvarPet } from "./acoes";
@@ -35,7 +36,12 @@ function FotoPet({ tutorId, inicial }: { tutorId: string; inicial?: string | nul
       <div className="flex flex-col gap-1 text-sm">
         <label className="cursor-pointer font-medium text-teal-700 dark:text-teal-400">
           {url ? "Trocar foto" : "Adicionar foto"}
-          <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={(e) => e.target.files?.[0] && enviar(e.target.files[0])} />
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="sr-only"
+            onChange={(e) => e.target.files?.[0] && enviar(e.target.files[0])}
+          />
         </label>
         {estado && <span className="text-xs text-neutral-500">{estado}</span>}
       </div>
@@ -67,7 +73,13 @@ export function FormularioPet({ tutorId, pet, voltar }: { tutorId: string; pet?:
                   key={valor}
                   className="flex min-h-14 cursor-pointer flex-col justify-center rounded-lg border border-neutral-300 px-3 text-sm has-checked:border-teal-700 has-checked:bg-teal-50 dark:border-neutral-700 dark:has-checked:bg-teal-950"
                 >
-                  <input type="radio" name="porte" value={valor} defaultChecked={pet?.porte === valor} className="sr-only" />
+                  <input
+                    type="radio"
+                    name="porte"
+                    value={valor}
+                    defaultChecked={pet?.porte === valor}
+                    className="sr-only"
+                  />
                   <span className="font-medium">{nome}</span>
                   <span className="text-xs text-neutral-500">{peso}</span>
                 </label>
@@ -83,17 +95,44 @@ export function FormularioPet({ tutorId, pet, voltar }: { tutorId: string; pet?:
                   key={valor}
                   className="flex min-h-11 cursor-pointer items-center justify-center rounded-lg border border-neutral-300 text-sm has-checked:border-teal-700 has-checked:bg-teal-50 dark:border-neutral-700 dark:has-checked:bg-teal-950"
                 >
-                  <input type="radio" name="pelagem" value={valor} defaultChecked={pet?.pelagem === valor} className="sr-only" />
+                  <input
+                    type="radio"
+                    name="pelagem"
+                    value={valor}
+                    defaultChecked={pet?.pelagem === valor}
+                    className="sr-only"
+                  />
                   {nome}
                 </label>
               ))}
             </div>
             {erros.pelagem && <p className="text-xs text-red-600">{erros.pelagem}</p>}
           </fieldset>
-          <Campo rotulo="Nascimento (opcional)" nome="nascimento" type="date" defaultValue={pet?.nascimento ?? ""} />
+          <Campo
+            rotulo="Nascimento (opcional)"
+            nome="nascimento"
+            inputMode="numeric"
+            placeholder="DD/MM/AAAA"
+            maxLength={10}
+            defaultValue={nascimentoDeIso(pet?.nascimento)}
+            onChange={(e) => (e.currentTarget.value = mascaraData(e.currentTarget.value))}
+            erro={erros.nascimento}
+          />
           <AreaTexto rotulo="Alergias" nome="alergias" defaultValue={pet?.alergias ?? ""} maxLength={300} />
-          <AreaTexto rotulo="Temperamento" nome="temperamento" defaultValue={pet?.temperamento ?? ""} maxLength={300} placeholder="Dócil, medroso com secador…" />
-          <AreaTexto rotulo="Vacinas" nome="vacinas" defaultValue={pet?.vacinas ?? ""} maxLength={300} placeholder="V10 e antirrábica em dia" />
+          <AreaTexto
+            rotulo="Temperamento"
+            nome="temperamento"
+            defaultValue={pet?.temperamento ?? ""}
+            maxLength={300}
+            placeholder="Dócil, medroso com secador…"
+          />
+          <AreaTexto
+            rotulo="Vacinas"
+            nome="vacinas"
+            defaultValue={pet?.vacinas ?? ""}
+            maxLength={300}
+            placeholder="V10 e antirrábica em dia"
+          />
         </>
       )}
     </FormAcao>
