@@ -4,6 +4,7 @@ import { FormAcao } from "@/components/form-acao";
 import { Caixa, Campo, Cartao, Selecao } from "@/components/ui";
 import type { Loja } from "@/lib/painel/sessao";
 import { salvarLoja } from "./acoes";
+import { CampoLogo } from "./logo";
 
 const FUSOS = [
   ["America/Sao_Paulo", "Brasília (SP, RJ, MG, Sul, Nordeste…)"],
@@ -20,6 +21,7 @@ export function FormularioLoja({ loja, editavel }: { loja: Loja; editavel: boole
           <input type="hidden" name="loja_id" value={loja.id} />
           <Cartao className="flex flex-col gap-4">
             <h2 className="font-medium">Identificação</h2>
+            <CampoLogo lojaId={loja.id} inicial={loja.logo_url} />
             <Campo rotulo="Nome da loja" nome="nome" defaultValue={loja.nome} erro={erros.nome} />
             <Campo rotulo="Endereço da página (slug)" nome="slug" defaultValue={loja.slug} erro={erros.slug} autoCapitalize="none" />
             <Campo rotulo="Telefone / WhatsApp" nome="telefone" type="tel" defaultValue={loja.telefone_e164 ?? ""} erro={erros.telefone} placeholder="(11) 3333-4444" />

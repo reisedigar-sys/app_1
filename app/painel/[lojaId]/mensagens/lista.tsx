@@ -1,9 +1,18 @@
 import { Vazio } from "@/components/ui";
 import { horaNoFuso } from "@/lib/painel/agenda";
-import { type LinhaMensagem, NOME_STATUS_MENSAGEM, NOME_TIPO_MENSAGEM } from "@/lib/painel/mensagens";
+import { type LinhaMensagem, NOME_ENTREGA, NOME_STATUS_MENSAGEM, NOME_TIPO_MENSAGEM } from "@/lib/painel/mensagens";
 
 function quando(iso: string, fuso: string) {
   return new Intl.DateTimeFormat("pt-BR", { timeZone: fuso, day: "2-digit", month: "2-digit" }).format(new Date(iso)) + " " + horaNoFuso(iso, fuso);
+}
+
+/** Por onde a mensagem saiu: "WhatsApp (lida) · push em 2 celulares". */
+function canais(m: LinhaMensagem) {
+  if (m.status !== "enviada" && m.status !== "falhou") return "";
+  const partes = [];
+  if (m.destino) partes.push(m.entrega ? `WhatsApp (${NOME_ENTREGA[m.entrega] ?? m.entrega})` : "WhatsApp");
+  if (m.push_enviados > 0) partes.push(`push em ${m.push_enviados} ${m.push_enviados === 1 ? "celular" : "celulares"}`);
+  return partes.join(" · ");
 }
 
 /** Mensagens da fila (agendadas, enviadas e as que não saíram, com o motivo). */
@@ -28,6 +37,7 @@ export function ListaMensagens({ mensagens, fuso, comTutor = true }: { mensagens
               {m.tentativas > 1 && ` · ${m.tentativas} tentativas`}
               {m.ultimo_erro && ` · ${m.ultimo_erro}`}
             </p>
+            {canais(m) && <p className="text-xs text-neutral-600 dark:text-neutral-400">{canais(m)}</p>}
             {texto && <p className="whitespace-pre-line text-neutral-700 dark:text-neutral-300">{texto.replace("{link}", "(link)")}</p>}
           </li>
         );

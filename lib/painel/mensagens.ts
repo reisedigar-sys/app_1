@@ -11,6 +11,8 @@ export const NOME_TIPO_MENSAGEM: Record<Enums["tipo_notificacao"], string> = {
   vaga_lista_espera: "Vaga da lista de espera",
   aviso_loja_sem_confirmacao: "Aviso à loja: sem confirmação",
   cancelamento: "Cancelamento",
+  equipe_novo_pedido: "Aviso à equipe: novo agendamento",
+  equipe_cancelamento: "Aviso à equipe: cancelamento",
 };
 
 export const NOME_STATUS_MENSAGEM: Record<Enums["status_notificacao"], [string, string]> = {
@@ -32,7 +34,11 @@ export const NOME_STATUS_ESPERA: Record<Enums["status_lista_espera"], string> = 
 };
 
 /** Colunas da fila que o painel mostra. */
-export const COLUNAS_MENSAGEM = "id, tipo, status, enviar_em, enviada_em, tentativas, ultimo_erro, conteudo, tutor(nome)" as const;
+export const COLUNAS_MENSAGEM =
+  "id, tipo, status, enviar_em, enviada_em, tentativas, ultimo_erro, conteudo, destino, entrega, push_enviados, tutor(nome)" as const;
+
+/** Situação no WhatsApp, informada pela Meta. */
+export const NOME_ENTREGA: Record<string, string> = { enviada: "enviada", entregue: "entregue", lida: "lida", falhou: "não entregue" };
 
 export type LinhaMensagem = {
   id: string;
@@ -43,5 +49,8 @@ export type LinhaMensagem = {
   tentativas: number;
   ultimo_erro: string | null;
   conteudo: unknown;
+  destino: string | null;
+  entrega: string | null;
+  push_enviados: number;
   tutor: { nome: string } | null;
 };

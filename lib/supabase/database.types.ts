@@ -413,7 +413,7 @@ export type Database = {
           erro: string | null;
           id: string;
           notificacao_id: string | null;
-          petshop_id: string;
+          petshop_id: string | null;
           provedor: string;
           provedor_mensagem_id: string | null;
           status: string;
@@ -430,7 +430,7 @@ export type Database = {
           erro?: string | null;
           id?: string;
           notificacao_id?: string | null;
-          petshop_id: string;
+          petshop_id?: string | null;
           provedor?: string;
           provedor_mensagem_id?: string | null;
           status: string;
@@ -446,7 +446,7 @@ export type Database = {
           erro?: string | null;
           id?: string;
           notificacao_id?: string | null;
-          petshop_id?: string;
+          petshop_id?: string | null;
           provedor?: string;
           provedor_mensagem_id?: string | null;
           status?: string;
@@ -476,6 +476,25 @@ export type Database = {
           },
         ];
       };
+      modelo_mensagem: {
+        Row: {
+          corpo: string;
+          descricao: string;
+          nome: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          corpo: string;
+          descricao: string;
+          nome: string;
+        };
+        Update: {
+          corpo?: string;
+          descricao?: string;
+          nome?: string;
+        };
+        Relationships: [];
+      };
       notificacao_agendada: {
         Row: {
           agendamento_id: string | null;
@@ -484,6 +503,7 @@ export type Database = {
           criado_em: string;
           dados: NonNullable<Json>;
           destino: string | null;
+          entrega: string | null;
           enviada_em: string | null;
           enviar_em: string;
           id: string;
@@ -491,7 +511,9 @@ export type Database = {
           pedido_id: string | null;
           petshop_id: string;
           processando_desde: string | null;
+          provedor_mensagem_id: string | null;
           proxima_tentativa_em: string | null;
+          push_enviados: number;
           status: Database["public"]["Enums"]["status_notificacao"];
           tentativas: number;
           tipo: Database["public"]["Enums"]["tipo_notificacao"];
@@ -506,6 +528,7 @@ export type Database = {
           criado_em?: string;
           dados?: NonNullable<Json>;
           destino?: string | null;
+          entrega?: string | null;
           enviada_em?: string | null;
           enviar_em: string;
           id?: string;
@@ -513,7 +536,9 @@ export type Database = {
           pedido_id?: string | null;
           petshop_id: string;
           processando_desde?: string | null;
+          provedor_mensagem_id?: string | null;
           proxima_tentativa_em?: string | null;
+          push_enviados?: number;
           status?: Database["public"]["Enums"]["status_notificacao"];
           tentativas?: number;
           tipo: Database["public"]["Enums"]["tipo_notificacao"];
@@ -527,6 +552,7 @@ export type Database = {
           criado_em?: string;
           dados?: NonNullable<Json>;
           destino?: string | null;
+          entrega?: string | null;
           enviada_em?: string | null;
           enviar_em?: string;
           id?: string;
@@ -534,7 +560,9 @@ export type Database = {
           pedido_id?: string | null;
           petshop_id?: string;
           processando_desde?: string | null;
+          provedor_mensagem_id?: string | null;
           proxima_tentativa_em?: string | null;
+          push_enviados?: number;
           status?: Database["public"]["Enums"]["status_notificacao"];
           tentativas?: number;
           tipo?: Database["public"]["Enums"]["tipo_notificacao"];
@@ -740,6 +768,7 @@ export type Database = {
           lembrete_antes_horas: number;
           lembrete_d1_hora: string;
           limite_faltas: number;
+          logo_url: string | null;
           logradouro: string | null;
           longitude: number | null;
           nome: string;
@@ -771,6 +800,7 @@ export type Database = {
           lembrete_antes_horas?: number;
           lembrete_d1_hora?: string;
           limite_faltas?: number;
+          logo_url?: string | null;
           logradouro?: string | null;
           longitude?: number | null;
           nome: string;
@@ -801,6 +831,7 @@ export type Database = {
           lembrete_antes_horas?: number;
           lembrete_d1_hora?: string;
           limite_faltas?: number;
+          logo_url?: string | null;
           logradouro?: string | null;
           longitude?: number | null;
           nome?: string;
@@ -977,6 +1008,37 @@ export type Database = {
           },
         ];
       };
+      push_inscricao: {
+        Row: {
+          auth: string;
+          criado_em: string;
+          endpoint: string;
+          escopo: string;
+          id: string;
+          p256dh: string;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          auth: string;
+          criado_em?: string;
+          endpoint: string;
+          escopo: string;
+          id?: string;
+          p256dh: string;
+          user_id: string;
+        };
+        Update: {
+          auth?: string;
+          criado_em?: string;
+          endpoint?: string;
+          escopo?: string;
+          id?: string;
+          p256dh?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       rede: {
         Row: {
           ativo: boolean;
@@ -1148,6 +1210,7 @@ export type Database = {
       tutor_petshop: {
         Row: {
           consentimento_contato_em: string | null;
+          consentimento_contato_revogado_em: string | null;
           consentimento_marketing_em: string | null;
           criado_em: string;
           exige_sinal: boolean;
@@ -1159,6 +1222,7 @@ export type Database = {
         ComputedFields: never;
         Insert: {
           consentimento_contato_em?: string | null;
+          consentimento_contato_revogado_em?: string | null;
           consentimento_marketing_em?: string | null;
           criado_em?: string;
           exige_sinal?: boolean;
@@ -1169,6 +1233,7 @@ export type Database = {
         };
         Update: {
           consentimento_contato_em?: string | null;
+          consentimento_contato_revogado_em?: string | null;
           consentimento_marketing_em?: string | null;
           criado_em?: string;
           exige_sinal?: boolean;
@@ -1198,24 +1263,33 @@ export type Database = {
         Row: {
           mensagem_id: string;
           payload: NonNullable<Json>;
-          petshop_id: string;
+          petshop_id: string | null;
+          phone_number_id: string | null;
           processado_em: string | null;
           recebido_em: string;
+          respondida_em: string | null;
+          telefone_e164: string | null;
         };
         ComputedFields: never;
         Insert: {
           mensagem_id: string;
           payload: NonNullable<Json>;
-          petshop_id: string;
+          petshop_id?: string | null;
+          phone_number_id?: string | null;
           processado_em?: string | null;
           recebido_em?: string;
+          respondida_em?: string | null;
+          telefone_e164?: string | null;
         };
         Update: {
           mensagem_id?: string;
           payload?: NonNullable<Json>;
-          petshop_id?: string;
+          petshop_id?: string | null;
+          phone_number_id?: string | null;
           processado_em?: string | null;
           recebido_em?: string;
+          respondida_em?: string | null;
+          telefone_e164?: string | null;
         };
         Relationships: [
           {
@@ -1383,6 +1457,7 @@ export type Database = {
         Returns: string;
       };
       criar_unidade: { Args: { p_nome: string; p_rede_id: string; p_slug: string }; Returns: string };
+      definir_avisos_whatsapp: { Args: { p_ligado: boolean; p_petshop_id: string }; Returns: undefined };
       dias_com_vaga: {
         Args: { p_itens: Json; p_mes: string; p_petshop_id: string; p_profissional_id?: string };
         Returns: {
@@ -1420,6 +1495,14 @@ export type Database = {
           user_id: string;
         }[];
       };
+      mensagens_do_mes: {
+        Args: { p_mes?: string; p_petshop_id: string };
+        Returns: {
+          push: number;
+          simuladas: number;
+          whatsapp: number;
+        }[];
+      };
       meus_agendamentos: {
         Args: Record<PropertyKey, never>;
         Returns: {
@@ -1440,6 +1523,19 @@ export type Database = {
           profissional_nome: string;
           servicos: string[];
           status: Database["public"]["Enums"]["status_agendamento"];
+        }[];
+      };
+      minhas_lojas: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          avisos_whatsapp: boolean;
+          fuso: string;
+          logo_url: string;
+          nome: string;
+          petshop_id: string;
+          proximo_inicio: string;
+          slug: string;
+          telefone_e164: string;
         }[];
       };
       pedido_por_token: { Args: { p_token: string }; Returns: Json };
@@ -1470,6 +1566,10 @@ export type Database = {
         Args: { p_contato: boolean; p_marketing?: boolean; p_petshop_id: string };
         Returns: undefined;
       };
+      registrar_push: {
+        Args: { p_auth: string; p_endpoint: string; p_escopo: string; p_p256dh: string };
+        Returns: undefined;
+      };
       remarcar_agendamento: {
         Args: { p_agendamento_id: string; p_inicio: string; p_profissional_id?: string };
         Returns: Json;
@@ -1478,6 +1578,7 @@ export type Database = {
         Args: { p_agendamento_id: string; p_inicio: string; p_profissional_id?: string; p_token: string };
         Returns: Json;
       };
+      remover_push: { Args: { p_endpoint: string; p_escopo: string }; Returns: undefined };
       salvar_perfil_tutor: { Args: { p_nome: string; p_telefone: string }; Returns: string };
       timemultirange: { Args: Record<PropertyKey, never>; Returns: unknown };
       unidades_para_pedido: {
@@ -1493,6 +1594,21 @@ export type Database = {
           total_centavos: number;
         }[];
       };
+      whatsapp_receber: {
+        Args: {
+          p_agora?: string;
+          p_de: string;
+          p_mensagem_id: string;
+          p_payload: Json;
+          p_phone_number_id: string;
+          p_texto: string;
+        };
+        Returns: Json;
+      };
+      whatsapp_status: {
+        Args: { p_erro?: string; p_provedor_mensagem_id: string; p_status: string };
+        Returns: undefined;
+      };
       worker_concluir: {
         Args: {
           p_agora?: string;
@@ -1501,15 +1617,18 @@ export type Database = {
           p_ok: boolean;
           p_provedor: string;
           p_provedor_mensagem_id?: string;
+          p_registrar?: boolean;
         };
         Returns: undefined;
       };
+      worker_push: { Args: { p_id: string; p_resultados: Json }; Returns: undefined };
       worker_reservar: {
         Args: { p_agora?: string; p_limite?: number };
         Returns: {
           conteudo: Json;
           destino: string;
           id: string;
+          push: Json;
           tentativas: number;
           tipo: Database["public"]["Enums"]["tipo_notificacao"];
         }[];
@@ -1537,7 +1656,9 @@ export type Database = {
         | "pet_pronto"
         | "vaga_lista_espera"
         | "aviso_loja_sem_confirmacao"
-        | "cancelamento";
+        | "cancelamento"
+        | "equipe_novo_pedido"
+        | "equipe_cancelamento";
       tipo_servico: "principal" | "adicional";
     };
     CompositeTypes: {
@@ -1667,6 +1788,8 @@ export const Constants = {
         "vaga_lista_espera",
         "aviso_loja_sem_confirmacao",
         "cancelamento",
+        "equipe_novo_pedido",
+        "equipe_cancelamento",
       ],
       tipo_servico: ["principal", "adicional"],
     },

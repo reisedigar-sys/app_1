@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Suspense } from "react";
+import { AvisosPush } from "@/components/avisos-push";
 import { Aviso, Cartao, Carregando, Titulo } from "@/components/ui";
 import { exigirLoja } from "@/lib/painel/sessao";
 import { createClient } from "@/lib/supabase/server";
@@ -76,6 +77,14 @@ async function Conteudo({ params }: { params: Promise<{ lojaId: string }> }) {
             </li>
           ))}
         </ul>
+      </Cartao>
+
+      <Cartao className="mt-4">
+        <h2 className="mb-2 font-medium">Avisos no celular</h2>
+        <AvisosPush
+          escopo="equipe"
+          texto="Receba um aviso quando um cliente agendar ou cancelar pelo app e quando alguém não confirmar. Cada pessoa liga no próprio celular."
+        />
       </Cartao>
 
       {c.servicos_incompletos.length > 0 && (
