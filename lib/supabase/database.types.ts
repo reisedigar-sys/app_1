@@ -1425,6 +1425,23 @@ export type Database = {
       cancelar_agendamento: { Args: { p_agendamento_id: string }; Returns: Json };
       cancelar_por_token: { Args: { p_agendamento_id: string; p_token: string }; Returns: Json };
       checklist_onboarding: { Args: { p_petshop_id: string }; Returns: Json };
+      clientes_da_loja: {
+        Args: { p_busca?: string; p_limite?: number; p_petshop_id: string; p_pular?: number };
+        Returns: {
+          atendimentos: number;
+          contato_autorizado: boolean;
+          exige_sinal: boolean;
+          faltas: number;
+          nome: string;
+          pets: string[];
+          proximo_atendimento: string;
+          telefone: string;
+          tem_conta: boolean;
+          total: number;
+          tutor_id: string;
+          ultimo_atendimento: string;
+        }[];
+      };
       confirmar_por_token: { Args: { p_token: string }; Returns: number };
       copiar_catalogo: { Args: { p_destino: string; p_origem: string; p_substituir?: boolean }; Returns: Json };
       criar_bloqueio: {

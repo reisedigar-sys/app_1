@@ -79,7 +79,14 @@ async function Conteudo({ params }: { params: Promise<{ lojaId: string; petId: s
       </Cartao>
 
       <Cartao>
-        <h2 className="mb-2 font-medium">Tutor</h2>
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <h2 className="font-medium">Tutor</h2>
+          {editavel && (
+            <Link href={`/painel/${lojaId}/clientes/${pet.tutor.id}`} className="text-sm font-medium text-marca-700 dark:text-marca-400">
+              Ficha do cliente
+            </Link>
+          )}
+        </div>
         <p className="text-sm">
           <strong>{pet.tutor.nome}</strong> · {telefoneLegivel(pet.tutor.telefone_e164)}
         </p>
