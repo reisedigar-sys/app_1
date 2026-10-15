@@ -25,3 +25,36 @@ export type Pet = {
   vacinas: string | null;
   foto_url: string | null;
 };
+
+/**
+ * Raças comuns com o porte e a pelagem mais frequentes, só para sugerir no cadastro (o tutor confirma).
+ * Ordem: o que mais aparece nos petshops primeiro.
+ */
+export const RACAS_SUGERIDAS: Record<string, readonly [Pet["porte"], Pet["pelagem"]]> = {
+  SRD: ["medio", "curta"],
+  "Shih Tzu": ["pequeno", "longa"],
+  "Yorkshire Terrier": ["mini", "longa"],
+  "Lhasa Apso": ["pequeno", "longa"],
+  Poodle: ["pequeno", "media"],
+  "Spitz Alemão (Lulu da Pomerânia)": ["mini", "longa"],
+  Maltês: ["mini", "longa"],
+  Pinscher: ["mini", "curta"],
+  Chihuahua: ["mini", "curta"],
+  "Bulldog Francês": ["pequeno", "curta"],
+  Pug: ["pequeno", "curta"],
+  Dachshund: ["pequeno", "curta"],
+  Beagle: ["medio", "curta"],
+  Schnauzer: ["pequeno", "media"],
+  "Cocker Spaniel": ["medio", "longa"],
+  "Border Collie": ["medio", "media"],
+  "Golden Retriever": ["grande", "longa"],
+  Labrador: ["grande", "curta"],
+  "Pastor Alemão": ["grande", "media"],
+  "Husky Siberiano": ["grande", "media"],
+  Rottweiler: ["grande", "curta"],
+  "Chow Chow": ["grande", "longa"],
+  "São Bernardo": ["gigante", "longa"],
+  "Gato SRD": ["pequeno", "curta"],
+  Persa: ["pequeno", "longa"],
+  "Maine Coon": ["medio", "longa"],
+};

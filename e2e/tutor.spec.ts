@@ -178,3 +178,34 @@ test("tutor com histórico vê a contagem do próximo, desiste de cancelar e age
   await expect(page).toHaveURL(/\/agendar\?repetir=/);
   await expect(page.getByRole("heading", { name: "Para Mel" })).toBeVisible();
 });
+
+test("em Meus pets, o cartão mostra o último atendimento e agenda direto para o pet", async ({ page }) => {
+  await page.goto("/conta/entrar?voltar=/conta/pets");
+  await campo(page, "E-mail").fill("ana@tutor.test");
+  await campo(page, "Senha").fill("senha123");
+  await botao(page, "Entrar").click();
+  await expect(page.getByRole("heading", { name: "Meus pets" })).toBeVisible();
+
+  const mel = page.getByRole("listitem").filter({ hasText: "Mel" }).filter({ visible: true });
+  await expect(mel).toContainText(/Último atendimento: há \d+ (dias|meses)/);
+  await mel.getByRole("link", { name: "Agendar para Mel" }).click();
+  await expect(page).toHaveURL(/\/pet-feliz-centro\/agendar\?pet=/);
+  await expect(page.getByRole("heading", { name: "Para Mel" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Para Thor" })).toHaveCount(0);
+});
+
+test("no cadastro, a raça sugere porte e pelagem e o resto fica recolhido", async ({ page }) => {
+  await page.goto("/conta/entrar?voltar=/conta/pets/novo");
+  await campo(page, "E-mail").fill("bruno@tutor.test");
+  await campo(page, "Senha").fill("senha123");
+  await botao(page, "Entrar").click();
+  await expect(page.getByRole("heading", { name: "Cadastrar pet" })).toBeVisible();
+
+  await expect(campo(page, "Alergias")).toBeHidden();
+  await campo(page, "Raça").fill("Shih Tzu");
+  await expect(texto(page, /Marcamos Pequeno e pelagem longa/)).toBeVisible();
+  await expect(page.getByRole("radio", { name: /^Pequeno / })).toBeChecked();
+  await expect(page.getByRole("radio", { name: "Longa", exact: true })).toBeChecked();
+  await page.getByText("Saúde e jeito do pet").filter({ visible: true }).click();
+  await expect(campo(page, "Alergias")).toBeVisible();
+});
