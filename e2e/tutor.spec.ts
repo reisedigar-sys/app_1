@@ -153,3 +153,28 @@ test("tutor novo agenda 2 pets pelo fluxo e vê os agendamentos gravados", async
   await botao(page, "Ver horários").click();
   await expect(page.getByRole("heading", { name: "Quando fica bom?" }).filter({ visible: true })).toBeVisible();
 });
+
+test("tutor com histórico vê a contagem do próximo, desiste de cancelar e agenda de novo o último banho", async ({ page }) => {
+  await page.goto("/conta/entrar?voltar=/conta/agendamentos");
+  await campo(page, "E-mail").fill("ana@tutor.test");
+  await campo(page, "Senha").fill("senha123");
+  await botao(page, "Entrar").click();
+  await expect(page.getByRole("heading", { name: "Meus agendamentos" })).toBeVisible();
+
+  const proximos = page.locator("section").filter({ has: page.getByRole("heading", { name: "Próximos" }) });
+  const primeiro = proximos.locator(":scope > ul > li").first();
+  await expect(primeiro.getByText(/^(Hoje|Amanhã|Daqui a \d+ dias)$/)).toBeVisible();
+
+  // Cancelar abre a folha com o prazo; "Manter horário" fecha sem cancelar.
+  await primeiro.getByRole("button", { name: "Cancelar" }).click();
+  const folha = page.getByRole("dialog", { name: /^Cancelar o horário de / });
+  await expect(folha).toContainText(/Cancelamento gratuito até|prazo de cancelamento gratuito/);
+  await folha.getByRole("button", { name: "Manter horário" }).click();
+  await expect(folha).toHaveCount(0);
+
+  // O banho concluído da Mel volta para o fluxo já com a Mel e o serviço escolhidos.
+  const anteriores = page.locator("section").filter({ has: page.getByRole("heading", { name: "Anteriores e cancelados" }) });
+  await anteriores.locator(":scope > ul > li").filter({ hasText: "Mel" }).getByRole("link", { name: "Agendar de novo" }).first().click();
+  await expect(page).toHaveURL(/\/agendar\?repetir=/);
+  await expect(page.getByRole("heading", { name: "Para Mel" })).toBeVisible();
+});
