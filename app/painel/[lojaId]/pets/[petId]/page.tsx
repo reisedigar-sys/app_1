@@ -50,7 +50,7 @@ async function Conteudo({ params }: { params: Promise<{ lojaId: string; petId: s
       <div>
         <h1 className="text-xl font-semibold">{pet.nome}</h1>
         <p className="text-sm text-neutral-500">
-          {pet.especie === "gato" ? "Gato" : "Cão"}
+          {pet.especie === "gato" ? "Gato" : "Cachorro"}
           {pet.raca && ` · ${pet.raca}`} · {NOME_PORTE[pet.porte]} · pelagem {NOME_PELAGEM[pet.pelagem].toLowerCase()}
           {pet.nascimento && ` · nasceu em ${pet.nascimento.split("-").reverse().join("/")}`}
         </p>

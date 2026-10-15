@@ -1,12 +1,12 @@
 "use client";
 
-import { useId, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { AvatarPet } from "@/components/avatar-pet";
 import { FormAcao } from "@/components/form-acao";
 import { AreaTexto, Campo, Selecao } from "@/components/ui";
 import { mascaraData, nascimentoDeIso } from "@/lib/conta/data-nascimento";
 import { reduzirFoto } from "@/lib/imagem";
-import { PELAGENS_PET, PORTES_PET, RACAS_SUGERIDAS, type Pet } from "@/lib/conta/pet";
+import { ESPECIES_PET, PELAGENS_PET, PORTES_PET, RACAS, type Pet } from "@/lib/conta/pet";
 import { createClient } from "@/lib/supabase/client";
 import { salvarPet } from "./acoes";
 
@@ -42,19 +42,32 @@ function FotoPet({ tutorId, inicial, nome }: { tutorId: string; inicial?: string
   );
 }
 
+const OUTRA = "outra";
+
+/** Raça gravada → opção da lista (ou "Outra", com o texto livre). "Gato SRD" é o nome antigo do SRD de gato. */
+function racaInicial(especie: "cao" | "gato", raca?: string | null): [string, string] {
+  if (!raca) return ["", ""];
+  const nome = especie === "gato" && raca === "Gato SRD" ? "SRD" : raca;
+  const achada = Object.keys(RACAS[especie]).find((r) => r.toLocaleLowerCase("pt-BR") === nome.trim().toLocaleLowerCase("pt-BR"));
+  return achada ? [achada, ""] : [OUTRA, raca];
+}
+
 export function FormularioPet({ tutorId, pet, voltar }: { tutorId: string; pet?: Pet; voltar?: string }) {
   const [nome, setNome] = useState(pet?.nome ?? "");
+  const [especie, setEspecie] = useState<"cao" | "gato">(pet?.especie === "gato" ? "gato" : "cao");
+  const [inicial] = useState(() => racaInicial(especie, pet?.raca));
+  const [raca, setRaca] = useState(inicial[0]);
   const [sugestao, setSugestao] = useState("");
-  const idRacas = useId();
   const portes = useRef<HTMLDivElement>(null);
   const pelagens = useRef<HTMLDivElement>(null);
   const temDetalhes = Boolean(pet?.nascimento || pet?.alergias || pet?.temperamento || pet?.vacinas);
 
-  // Raça conhecida: marca porte e pelagem mais comuns, só se o tutor ainda não escolheu (ele confirma ou troca).
-  function sugerir(raca: string) {
-    const achada = Object.entries(RACAS_SUGERIDAS).find(([r]) => r.toLocaleLowerCase("pt-BR") === raca.trim().toLocaleLowerCase("pt-BR"));
+  // Raça da lista: marca porte e pelagem mais comuns, só se o tutor ainda não escolheu (ele confirma ou troca).
+  function escolherRaca(escolhida: string) {
+    setRaca(escolhida);
+    const achada = RACAS[especie][escolhida];
     if (!achada) return setSugestao("");
-    const [porte, pelagem] = achada[1];
+    const [porte, pelagem] = achada;
     const marcar = (grupo: HTMLDivElement | null, valor: string) => {
       if (!grupo || grupo.querySelector("input:checked")) return false;
       const radio = grupo.querySelector<HTMLInputElement>(`input[value="${valor}"]`);
@@ -66,8 +79,8 @@ export function FormularioPet({ tutorId, pet, voltar }: { tutorId: string; pet?:
     if (marcouPorte || marcouPelagem) {
       const nomePorte = PORTES_PET.find(([v]) => v === porte)![1];
       const nomePelagem = PELAGENS_PET.find(([v]) => v === pelagem)![1].toLowerCase();
-      setSugestao(`Marcamos ${nomePorte} e pelagem ${nomePelagem}, o mais comum para ${achada[0]}. Confira abaixo.`);
-    }
+      setSugestao(`Marcamos ${nomePorte} e pelagem ${nomePelagem}, o mais comum para ${escolhida}. Confira abaixo.`);
+    } else setSugestao("");
   }
 
   return (
@@ -79,17 +92,33 @@ export function FormularioPet({ tutorId, pet, voltar }: { tutorId: string; pet?:
           <FotoPet tutorId={tutorId} inicial={pet?.foto_url} nome={nome} />
           <Campo rotulo="Nome" nome="nome" defaultValue={pet?.nome} erro={erros.nome} onChange={(e) => setNome(e.currentTarget.value)} />
           <div className="grid grid-cols-2 gap-3">
-            <Selecao rotulo="Espécie" nome="especie" defaultValue={pet?.especie ?? "cao"}>
-              <option value="cao">Cão</option>
-              <option value="gato">Gato</option>
-            </Selecao>
-            <Campo rotulo="Raça" nome="raca" defaultValue={pet?.raca ?? ""} placeholder="SRD, Shih Tzu…" list={idRacas} onChange={(e) => sugerir(e.currentTarget.value)} />
-            <datalist id={idRacas}>
-              {Object.keys(RACAS_SUGERIDAS).map((r) => (
-                <option key={r} value={r} />
+            <Selecao
+              rotulo="Espécie"
+              nome="especie"
+              value={especie}
+              onChange={(e) => {
+                setEspecie(e.currentTarget.value === "gato" ? "gato" : "cao");
+                setRaca("");
+                setSugestao("");
+              }}
+            >
+              {ESPECIES_PET.map(([valor, rotulo]) => (
+                <option key={valor} value={valor}>
+                  {rotulo}
+                </option>
               ))}
-            </datalist>
+            </Selecao>
+            <Selecao rotulo="Raça" nome={raca === OUTRA ? "raca_lista" : "raca"} value={raca} onChange={(e) => escolherRaca(e.currentTarget.value)} erro={raca === OUTRA ? undefined : erros.raca}>
+              <option value="">Escolha</option>
+              {Object.keys(RACAS[especie]).map((r) => (
+                <option key={r} value={r}>
+                  {r === "SRD" ? "SRD (sem raça definida)" : r}
+                </option>
+              ))}
+              <option value={OUTRA}>Outra raça</option>
+            </Selecao>
           </div>
+          {raca === OUTRA && <Campo rotulo="Qual raça?" nome="raca" defaultValue={inicial[1]} erro={erros.raca} autoFocus={!inicial[1]} />}
           {sugestao && (
             <p role="status" className="-mt-1 rounded-lg bg-marca-50 px-3 py-2 text-xs text-marca-900 dark:bg-marca-950 dark:text-marca-200">
               {sugestao}
