@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { buscarDias, buscarHorarios } from "@/app/[slug]/agendar/acoes";
 import { Calendario } from "@/components/agenda/calendario";
-import { Horarios } from "@/components/agenda/horarios";
+import { HorariosLivres } from "@/components/agenda/horarios";
 import { Aviso, Botao, Caixa } from "@/components/ui";
 import type { Horario, ItemPedido } from "@/lib/disponibilidade";
 import { remarcar } from "../../acoes";
@@ -15,7 +15,6 @@ export function Remarcar({
   itens,
   profissional,
   hoje,
-  slotMinutos,
   acaoRemarcar = remarcar,
   destino = "/conta/agendamentos?aviso=remarcado",
 }: {
@@ -24,7 +23,6 @@ export function Remarcar({
   itens: ItemPedido[];
   profissional: { id: string; nome: string };
   hoje: string;
-  slotMinutos: number;
   /** Outra Server Action com a mesma assinatura (ex.: pelo link de confirmação, sem login). */
   acaoRemarcar?: (p: { id: string; inicio: string; profissionalId?: string }) => Promise<{ ok: true } | { ok: false; erro: string }>;
   destino?: string;
@@ -88,7 +86,7 @@ export function Remarcar({
       <Calendario mes={mes} hoje={hoje} diasComVaga={dias} selecionado={dia} carregando={carregando && !dia} onMes={setMes} onDia={escolherDia} />
       {dia && horarios.length === 0 && !carregando && <p className="text-sm text-neutral-500">Sem horários neste dia.</p>}
       {dia && horarios.length > 0 && (
-        <Horarios disponiveis={horarios} passo={slotMinutos} selecionado={horario?.inicio} onEscolher={(h) => setHorario(horarios.find((x) => x.inicio === h.inicio)!)} />
+        <HorariosLivres disponiveis={horarios} selecionado={horario?.inicio} onEscolher={(h) => setHorario(horarios.find((x) => x.inicio === h.inicio)!)} />
       )}
       <Botao type="button" onClick={confirmar} disabled={!horario || carregando}>
         {carregando && horario ? "Remarcando…" : horario ? `Remarcar para ${dia?.split("-").reverse().join("/")} às ${horario.hora}` : "Escolha o novo horário"}

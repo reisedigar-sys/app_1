@@ -40,7 +40,6 @@ async function Conteudo({ params }: { params: Promise<{ token: string; agendamen
         itens={itens}
         profissional={{ id: a.profissional_id, nome: a.profissional_nome }}
         hoje={hoje}
-        slotMinutos={pedido.loja.slot_minutos}
         acaoRemarcar={remarcar.bind(null, token)}
         destino={`/c/${token}?aviso=remarcado`}
       />
