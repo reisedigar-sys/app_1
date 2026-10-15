@@ -10,7 +10,7 @@ test("senha errada mostra erro e não entra", async ({ page }) => {
 
 test("atendente vê a configuração sem poder alterar", async ({ page }) => {
   await entrar(page, "alice@petfeliz.test");
-  await expect(page.getByRole("heading", { name: "Configuração da loja" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Hoje", exact: true })).toBeVisible();
   await page.goto(`/painel/${CENTRO}/precos`);
   await expect(texto(page, "Só o dono ou o gerente altera os preços.")).toBeVisible();
   await expect(botao(page, "Salvar preços")).toHaveCount(0);
@@ -19,7 +19,7 @@ test("atendente vê a configuração sem poder alterar", async ({ page }) => {
 
 test("equipe de outra loja não abre o painel dela", async ({ page }) => {
   await entrar(page, "diego@banhoecia.test");
-  await expect(page.getByRole("heading", { name: "Configuração da loja" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Hoje", exact: true })).toBeVisible();
   await page.goto(`/painel/${CENTRO}/loja`);
   await expect(page.getByRole("heading", { name: "Página não encontrada" })).toBeVisible();
   await expect(page.getByLabel("Nome da loja")).toHaveCount(0);
@@ -27,7 +27,7 @@ test("equipe de outra loja não abre o painel dela", async ({ page }) => {
 
 test("bloqueio de almoço aparece na lista no horário da loja", async ({ page }) => {
   await entrar(page, "gabriel@petfeliz.test");
-  await expect(page.getByRole("heading", { name: "Configuração da loja" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Hoje", exact: true })).toBeVisible();
   await page.goto(`/painel/${CENTRO}/bloqueios`);
   await campo(page, "Quem").selectOption({ label: "Paula" });
   await campo(page, "Tipo").selectOption("almoco");
@@ -45,7 +45,7 @@ test("bloqueio de almoço aparece na lista no horário da loja", async ({ page }
 
 test("gerente vê a equipe, mas só o dono adiciona pessoas", async ({ page }) => {
   await entrar(page, "gabriel@petfeliz.test");
-  await expect(page.getByRole("heading", { name: "Configuração da loja" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Hoje", exact: true })).toBeVisible();
   await page.goto(`/painel/${CENTRO}/equipe`);
   await expect(texto(page, "alice@petfeliz.test")).toBeVisible();
   await expect(texto(page, "Só o dono adiciona ou remove pessoas da equipe.")).toBeVisible();

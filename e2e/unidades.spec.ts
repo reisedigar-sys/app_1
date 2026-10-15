@@ -28,7 +28,7 @@ test("dona da rede abre uma unidade nova e copia o catálogo da outra", async ({
 
 test("gerente de uma unidade só não vê a opção de copiar", async ({ page }) => {
   await entrar(page, "gabriel@petfeliz.test");
-  await expect(page.getByRole("heading", { name: "Configuração da loja" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Hoje", exact: true })).toBeVisible();
   await abrir(page, "Serviços");
   await expect(page.getByRole("heading", { name: "Novo serviço" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Copiar de outra unidade" })).toHaveCount(0);
