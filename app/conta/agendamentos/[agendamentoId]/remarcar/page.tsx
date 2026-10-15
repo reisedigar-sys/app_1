@@ -28,7 +28,7 @@ async function Conteudo({ params }: { params: Promise<{ agendamentoId: string }>
   if (!a || !["agendado", "confirmado"].includes(a.status)) notFound();
   const [{ data: itens }, { data: loja }] = await Promise.all([
     supabase.from("agendamento_item").select("servico_id, ordem").eq("agendamento_id", a.id).order("ordem"),
-    supabase.from("petshop").select("slot_minutos, fuso").eq("id", a.petshop_id).single(),
+    supabase.from("petshop").select("fuso").eq("id", a.petshop_id).single(),
   ]);
   const pedido: ItemPedido[] = [{ pet_id: a.pet_id, servicos: (itens ?? []).map((i) => i.servico_id) }];
   const hoje = new Intl.DateTimeFormat("en-CA", { timeZone: loja?.fuso ?? a.loja_fuso }).format(new Date());
@@ -45,7 +45,6 @@ async function Conteudo({ params }: { params: Promise<{ agendamentoId: string }>
         itens={pedido}
         profissional={{ id: a.profissional_id, nome: a.profissional_nome }}
         hoje={hoje}
-        slotMinutos={loja?.slot_minutos ?? 15}
       />
     </>
   );

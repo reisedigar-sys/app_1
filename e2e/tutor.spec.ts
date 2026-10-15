@@ -35,7 +35,7 @@ test("tutor novo agenda 2 pets pelo fluxo e vê os agendamentos gravados", async
   // Página pública da loja → login → volta para o agendamento
   await page.goto("/pet-feliz-centro");
   await expect(page.getByRole("heading", { name: "Pet Feliz Centro" })).toBeVisible();
-  await page.getByRole("link", { name: "Agendar agora" }).click();
+  await page.getByRole("link", { name: "Agendar banho e tosa" }).click();
   await expect(page).toHaveURL(/\/conta\/entrar\?voltar=/);
   await page.getByRole("link", { name: "Criar conta" }).click();
   await expect(page.getByRole("link", { name: "Criar conta" })).toHaveAttribute("aria-current", "page");
@@ -48,54 +48,43 @@ test("tutor novo agenda 2 pets pelo fluxo e vê os agendamentos gravados", async
   await campo(page, "Seu nome").fill("Teste Tutor");
   await campo(page, "Celular (WhatsApp)").fill(`119${sufixo}`);
   await botao(page, "Salvar e continuar").click();
-  await expect(texto(page, "Quais pets vão hoje?")).toBeVisible();
+  await expect(texto(page, "Quem vai tomar banho?")).toBeVisible();
   await expect(texto(page, "Você ainda não cadastrou nenhum pet.")).toBeVisible();
 
   await cadastrarPet(page, "Rex", "Grande", "Longa");
   await cadastrarPet(page, "Pipoca", "Pequeno", "Curta");
 
-  // Etapa 1: os dois pets
+  // Tela 1: os dois pets, o serviço de cada um (na ordem em que foram escolhidos, que é a ordem de atendimento) e a
+  // unidade (lista da rede, com o total para os dois pets).
   await page.goto("/pet-feliz-centro/agendar");
-  const avancar = botao(page, "Avançar ›");
-  await expect(avancar).toBeDisabled();
+  const verHorarios = botao(page, "Ver horários");
+  await expect(verHorarios).toBeDisabled();
   await page.locator("label").filter({ hasText: "Rex" }).click();
   await page.locator("label").filter({ hasText: "Pipoca" }).click();
-  await avancar.click();
-
-  // Etapa 2: serviço de cada pet, na ordem em que foram escolhidos (é a ordem de atendimento)
-  await expect(page.getByRole("heading", { name: "Serviço para Rex" })).toBeVisible();
-  await expect(avancar).toBeDisabled();
-  await page.locator("label").filter({ hasText: /^BanhoBanho com shampoo/ }).click();
-  await avancar.click();
-  await expect(page.getByRole("heading", { name: "Serviço para Pipoca" })).toBeVisible();
-  await page.locator("label").filter({ hasText: /^BanhoBanho com shampoo/ }).click();
-  await page.locator("label").filter({ hasText: "Hidratação" }).click();
-  await campo(page, "Observações").fill("Tem medo de secador");
-  await avancar.click();
-
-  // Etapa 3: unidade (lista da rede, com preço para os dois pets)
+  const paraRex = page.locator("section").filter({ has: page.getByRole("heading", { name: "Para Rex" }) });
+  const paraPipoca = page.locator("section").filter({ has: page.getByRole("heading", { name: "Para Pipoca" }) });
+  await paraRex.locator("label").filter({ hasText: /^Banho\d/ }).click();
+  await expect(verHorarios).toBeDisabled();
+  await paraPipoca.locator("label").filter({ hasText: /^Banho\d/ }).click();
+  await paraPipoca.locator("label").filter({ hasText: "Hidratação" }).click();
+  await campo(page, "Algo que a loja deve saber sobre Pipoca? (opcional)").fill("Tem medo de secador");
   await expect(page.getByRole("heading", { name: "Em qual unidade?" })).toBeVisible();
-  const centro = page.getByRole("radiogroup", { name: "Unidades" }).locator("label").filter({ hasText: "Pet Feliz Centro" });
-  await expect(page.getByRole("radiogroup", { name: "Unidades" }).locator("label").filter({ hasText: "Pet Feliz Zona Sul" })).toBeVisible();
-  await centro.click();
-  await avancar.click();
+  const unidades = page.getByRole("radiogroup", { name: "Unidades" });
+  await expect(unidades.locator("label").filter({ hasText: "Pet Feliz Zona Sul" })).toBeVisible();
+  await unidades.locator("label").filter({ hasText: "Pet Feliz Centro" }).click();
+  await verHorarios.click();
 
-  // Etapa 4: data e hora, depois o profissional
-  await page.locator("label").filter({ hasText: "Data e hora" }).click();
-  await avancar.click();
-  await escolherDia(page, TER);
-  await page.getByRole("group", { name: "Manhã" }).getByRole("button", { name: "10:00" }).click();
-  await avancar.click();
-  await expect(page.getByRole("heading", { name: "Escolha o profissional" })).toBeVisible();
-  await page.locator("label").filter({ hasText: "Sem profissional de preferência" }).click();
-  await avancar.click();
-
-  // Etapa 5: resumo e confirmação
-  await expect(page.getByRole("heading", { name: "Resumo" })).toBeVisible();
+  // Tela 2: dia na faixa de dias com vaga, horário (profissional fica em "Qualquer") e revisão
+  await expect(page.getByRole("heading", { name: "Quando fica bom?" })).toBeVisible();
   const [, mm, dd] = TER.split("-");
-  await expect(texto(page, `${dd}/${mm}/${TER.slice(0, 4)} às 10:00`)).toBeVisible();
-  await page.getByLabel(/Aceito receber lembretes/).check();
-  await botao(page, "Confirmar agendamento").click();
+  await page.getByRole("radiogroup", { name: "Dias com vaga" }).getByRole("radio", { name: `Terça ${dd}/${mm}` }).click();
+  await page.getByRole("group", { name: "Manhã" }).getByRole("button", { name: "10:00" }).click();
+  await botao(page, "Revisar").click();
+  const revisao = page.getByRole("dialog", { name: "Tudo certo?" });
+  await expect(revisao.getByText(`Terça ${dd}/${mm} às 10:00`)).toBeVisible();
+  await expect(revisao.getByText("Quem estiver livre")).toBeVisible();
+  await revisao.getByLabel(/Aceito receber lembretes/).check();
+  await revisao.getByRole("button", { name: /^Confirmar · R\$/ }).click();
   await expect(texto(page, "Agendamento confirmado!")).toBeVisible();
 
   // Meus agendamentos: um por pet, em sequência
@@ -129,15 +118,22 @@ test("tutor novo agenda 2 pets pelo fluxo e vê os agendamentos gravados", async
   await page.getByRole("link", { name: "+ Novo agendamento" }).click();
   await page.waitForURL(/\/(pet-feliz-centro\/agendar|conta\/lojas)$/);
   if (page.url().endsWith("/conta/lojas")) await page.goto("/pet-feliz-centro/agendar");
-  await expect(page.getByRole("progressbar", { name: "Etapas do agendamento" }).filter({ visible: true })).toHaveAttribute("aria-valuenow", "1");
+  await expect(page.getByRole("heading", { name: "Quem vai tomar banho?" }).filter({ visible: true })).toBeVisible();
   await expect(texto(page, "Agendamento confirmado!")).toHaveCount(0);
 
-  // Loja com uma unidade só: a etapa de unidade é pulada.
+  // Repetir o último pela página da loja: pets e serviços já vêm escolhidos (a rede tem 2 unidades, então a escolha
+  // da unidade continua na tela).
+  await page.goto("/pet-feliz-centro");
+  await page.getByRole("link", { name: /Repetir o banho/ }).click();
+  const repetirRex = page.locator("section").filter({ has: page.getByRole("heading", { name: "Para Rex" }) }).filter({ visible: true });
+  await expect(repetirRex.locator("label").filter({ hasText: /^Banho\d/ }).getByRole("radio")).toBeChecked();
+  await expect(page.getByRole("heading", { name: "Em qual unidade?" }).filter({ visible: true })).toBeVisible();
+
+  // Loja com uma unidade só: a lista de unidades nem aparece.
   await page.goto("/banho-e-cia-moema/agendar");
   await page.locator("label").filter({ hasText: "Rex" }).filter({ visible: true }).click();
-  await botao(page, "Avançar ›").click();
-  await page.locator("label").filter({ hasText: /^BanhoBanho com shampoo/ }).filter({ visible: true }).click();
-  await botao(page, "Avançar ›").click();
-  await expect(page.getByRole("heading", { name: "Como prefere seguir?" }).filter({ visible: true })).toBeVisible();
+  await page.locator("label").filter({ hasText: /^Banho\d/ }).filter({ visible: true }).click();
   await expect(page.getByRole("heading", { name: "Em qual unidade?" }).filter({ visible: true })).toHaveCount(0);
+  await botao(page, "Ver horários").click();
+  await expect(page.getByRole("heading", { name: "Quando fica bom?" }).filter({ visible: true })).toBeVisible();
 });
