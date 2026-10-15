@@ -1,9 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { reduzirFoto } from "@/lib/imagem";
 import { createClient } from "@/lib/supabase/client";
-
-const TAMANHO_MAXIMO = 2 * 1024 * 1024;
 
 /** Envia a foto direto para o Storage (o RLS do bucket só aceita a pasta da própria loja). */
 export function CampoFoto({ lojaId, inicial }: { lojaId: string; inicial?: string | null }) {
@@ -12,21 +11,16 @@ export function CampoFoto({ lojaId, inicial }: { lojaId: string; inicial?: strin
   const [erro, setErro] = useState("");
 
   async function enviar(arquivo: File) {
-    if (!["image/jpeg", "image/png", "image/webp"].includes(arquivo.type)) {
-      setEstado("erro");
-      setErro("Use uma imagem JPG, PNG ou WebP.");
-      return;
-    }
-    if (arquivo.size > TAMANHO_MAXIMO) {
-      setEstado("erro");
-      setErro("A foto deve ter no máximo 2 MB.");
-      return;
-    }
     setEstado("enviando");
+    const foto = await reduzirFoto(arquivo);
+    if (!foto) {
+      setEstado("erro");
+      setErro("Não foi possível ler essa imagem. Use uma foto JPG ou PNG.");
+      return;
+    }
     const supabase = createClient();
-    const extensao = arquivo.type.split("/")[1];
-    const caminho = `${lojaId}/profissionais/${crypto.randomUUID()}.${extensao}`;
-    const { error } = await supabase.storage.from("fotos").upload(caminho, arquivo, { contentType: arquivo.type });
+    const caminho = `${lojaId}/profissionais/${crypto.randomUUID()}.jpg`;
+    const { error } = await supabase.storage.from("fotos").upload(caminho, foto, { contentType: "image/jpeg" });
     if (error) {
       setEstado("erro");
       setErro("Não foi possível enviar a foto.");
@@ -44,11 +38,11 @@ export function CampoFoto({ lojaId, inicial }: { lojaId: string; inicial?: strin
         {url && <img src={url} alt="Foto do profissional" className="size-full object-cover" />}
       </div>
       <div className="flex flex-col gap-1 text-sm">
-        <label className="cursor-pointer font-medium text-teal-700 dark:text-teal-400">
+        <label className="cursor-pointer font-medium text-marca-700 dark:text-marca-400">
           {estado === "enviando" ? "Enviando…" : url ? "Trocar foto" : "Adicionar foto"}
           <input
             type="file"
-            accept="image/jpeg,image/png,image/webp"
+            accept="image/*"
             className="sr-only"
             disabled={estado === "enviando"}
             onChange={(e) => e.target.files?.[0] && enviar(e.target.files[0])}

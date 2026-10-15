@@ -1,5 +1,9 @@
 import type { Metadata, Viewport } from "next";
+import { Bricolage_Grotesque, Figtree } from "next/font/google";
 import "./globals.css";
+
+const texto = Figtree({ subsets: ["latin"], variable: "--font-texto", display: "swap" });
+const titulo = Bricolage_Grotesque({ subsets: ["latin"], variable: "--font-bricolage", display: "swap" });
 
 export const metadata: Metadata = {
   title: { default: "Hora do Pet", template: "%s · Hora do Pet" },
@@ -8,14 +12,14 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0f766e",
+  themeColor: "#1c2340",
   width: "device-width",
   initialScale: 1,
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="pt-BR" className="h-full antialiased">
+    <html lang="pt-BR" className={`h-full antialiased ${texto.variable} ${titulo.variable}`}>
       <body className="flex min-h-full flex-col">{children}</body>
     </html>
   );

@@ -6,10 +6,14 @@ const CENTRO = "20000000-0000-0000-0000-000000000001";
 const DIA = proximo(3, 15); // quarta com a agenda livre
 
 const coluna = (page: Page, nome: string) => page.getByRole("region", { name: `Agenda de ${nome}` }).filter({ visible: true });
+// No celular a agenda abre em lista (um atendimento por linha, com o profissional no texto).
+const linha = (page: Page, pet: string) =>
+  page.getByRole("list", { name: "Atendimentos do dia" }).filter({ visible: true }).getByRole("listitem").filter({ hasText: pet });
+const cartao = (page: Page, pet: string) => linha(page, pet).getByRole("link", { name: new RegExp(pet) });
 
 async function entrarNaAgenda(page: Page, email: string, data = DIA) {
   await entrar(page, email);
-  await expect(page.getByRole("heading", { name: "Configuração da loja" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Hoje", exact: true })).toBeVisible();
   await page.goto(`/painel/${CENTRO}/agenda?data=${data}`);
 }
 
@@ -41,14 +45,23 @@ test("balcão: cliente novo, pet novo, horário pelo motor e o atendimento segue
   await page.getByRole("button", { name: "10:00", exact: true }).click();
   await botao(page, "Agendar às 10:00").click();
 
-  // Volta para a agenda do dia, na coluna do Marcos, a confirmar.
+  // Volta para a agenda do dia (lista no celular), com o Marcos, a confirmar.
   await expect(page).toHaveURL(new RegExp(`/agenda\\?data=${DIA}`));
-  const cartao = coluna(page, "Marcos").getByRole("link", { name: /Paçoca/ });
-  await expect(cartao).toContainText("10:00–10:54");
-  await expect(cartao).toContainText("A confirmar");
+  await expect(cartao(page, "Paçoca")).toContainText("10:00–10:54");
+  await expect(cartao(page, "Paçoca")).toContainText("Marcos");
+  await expect(cartao(page, "Paçoca")).toContainText("A confirmar");
+
+  // WhatsApp com o pedido de confirmação já escrito, e confirmar a um toque (com desfazer).
+  await expect(linha(page, "Paçoca").getByRole("link", { name: "WhatsApp" })).toHaveAttribute("href", /^https:\/\/wa\.me\/5511.*Podemos%20confirmar/);
+  await expect(linha(page, "Paçoca").getByRole("link", { name: "Ligar" })).toHaveAttribute("href", /^tel:\+5511/);
+  await linha(page, "Paçoca").getByRole("button", { name: "Confirmar" }).click();
+  await expect(cartao(page, "Paçoca")).toContainText("Confirmado");
+  await linha(page, "Paçoca").getByRole("button", { name: "Desfazer" }).click();
+  await expect(cartao(page, "Paçoca")).toContainText("A confirmar");
+  await expect(linha(page, "Paçoca").getByRole("button", { name: "Desfazer" })).toHaveCount(0);
 
   // Ficha do atendimento: confirmar → iniciar → pronto → concluir.
-  await cartao.click();
+  await cartao(page, "Paçoca").click();
   await expect(page.getByRole("heading", { name: /Paçoca · 10:00–10:54/ })).toBeVisible();
   for (const [acao, status] of [
     ["Confirmar", "Confirmado"],
@@ -88,12 +101,12 @@ test("encaixe fora da grade, remarcar e cancelar", async ({ page }) => {
   await campo(page, "Hora do encaixe").fill("08:05");
   await botao(page, "Agendar encaixe").click();
 
-  const cartao = coluna(page, "Júlia").getByRole("link", { name: /Biscoito/ });
-  await expect(cartao).toContainText("08:05–09:05");
-  await expect(cartao).toContainText("encaixe");
+  await expect(cartao(page, "Biscoito")).toContainText("08:05–09:05");
+  await expect(cartao(page, "Biscoito")).toContainText("encaixe");
+  await expect(cartao(page, "Biscoito")).toContainText("Júlia");
 
   // Remarcar pelo motor (mantendo a Júlia).
-  await cartao.click();
+  await cartao(page, "Biscoito").click();
   await page.getByRole("link", { name: "Remarcar" }).click();
   await expect(page.getByRole("heading", { name: "Remarcar" })).toBeVisible();
   const [, m, d] = DIA.split("-").map(Number);
@@ -106,24 +119,31 @@ test("encaixe fora da grade, remarcar e cancelar", async ({ page }) => {
   await dia.click();
   await page.getByRole("button", { name: "15:00", exact: true }).click();
   await botao(page, /^Remarcar para/).click();
-  const remarcado = coluna(page, "Júlia").getByRole("link", { name: /Biscoito/ });
-  await expect(remarcado).toContainText("15:00–16:00");
+  await expect(cartao(page, "Biscoito")).toContainText("15:00–16:00");
+  await expect(cartao(page, "Biscoito")).toContainText("Júlia");
 
   // Cancelar: some da agenda (o filtro padrão esconde cancelados).
-  await remarcado.click();
+  await cartao(page, "Biscoito").click();
   await botao(page, "Cancelar atendimento").click();
   await botao(page, "Sim, cancelar").click();
   // Depois de cancelar não há mais ações: a ficha mostra só o status.
   await expect(texto(page, "Cancelado")).toBeVisible();
   await expect(botao(page, "Cancelar atendimento")).toHaveCount(0);
   await page.goto(`/painel/${CENTRO}/agenda?data=${DIA}`);
-  await expect(coluna(page, "Júlia").getByRole("link", { name: /Biscoito/ })).toHaveCount(0);
+  await expect(texto(page, /Biscoito/)).toHaveCount(0);
   await page.goto(`/painel/${CENTRO}/agenda?data=${DIA}&status=cancelado`);
+  await expect(cartao(page, "Biscoito")).toContainText("Cancelado");
+  // Na grade por profissional, o mesmo atendimento fica na coluna da Júlia.
+  await page.goto(`/painel/${CENTRO}/agenda?data=${DIA}&status=cancelado&visao=dia`);
   await expect(coluna(page, "Júlia").getByRole("link", { name: /Biscoito/ })).toContainText("Cancelado");
 });
 
 test("a profissional vê só a própria coluna; a agenda atualiza ao vivo", async ({ page, browser }) => {
-  await entrarNaAgenda(page, "paula@petfeliz.test");
+  await entrar(page, "paula@petfeliz.test");
+  await expect(page.getByRole("heading", { name: "Hoje", exact: true })).toBeVisible();
+  // Menu da profissional: sem lista de espera nem mensagens (são da recepção).
+  await expect(page.getByRole("navigation", { name: "Painel da loja" }).getByRole("link", { name: "Espera" })).toHaveCount(0);
+  await page.goto(`/painel/${CENTRO}/agenda?data=${DIA}&visao=dia`);
   await expect(coluna(page, "Paula")).toBeVisible();
   await expect(coluna(page, "Júlia")).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Novo atendimento" })).toHaveCount(0);
@@ -133,7 +153,7 @@ test("a profissional vê só a própria coluna; a agenda atualiza ao vivo", asyn
   const recepcao = await browser.newPage();
   const sufixo = Date.now().toString().slice(-7);
   await entrar(recepcao, "alice@petfeliz.test");
-  await expect(recepcao.getByRole("heading", { name: "Configuração da loja" })).toBeVisible();
+  await expect(recepcao.getByRole("heading", { name: "Hoje", exact: true })).toBeVisible();
   await recepcao.goto(`/painel/${CENTRO}/agenda/novo?data=${DIA}`);
   await campo(recepcao, "Telefone do tutor").fill(`(11) 95${sufixo}`);
   await botao(recepcao, "Buscar").click();

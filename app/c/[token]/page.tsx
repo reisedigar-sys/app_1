@@ -80,12 +80,13 @@ async function Conteudo({ params, searchParams }: { params: Promise<{ token: str
                 <span className="whitespace-nowrap rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-medium dark:bg-neutral-900">{STATUS[a.status]}</span>
               </div>
               {a.alteravel && (
-                <div className="flex flex-wrap items-start gap-4 pt-1">
+                <div className="flex flex-wrap items-start gap-2 pt-1">
                   <BotaoLink href={`/c/${token}/remarcar/${a.id}`} variante="secundario">
                     Remarcar
                   </BotaoLink>
                   <CancelarAgendamento
                     id={a.id}
+                    titulo={`Cancelar o horário de ${a.pet_nome}?`}
                     acaoCancelar={cancelar.bind(null, token)}
                     politica={
                       gratuito

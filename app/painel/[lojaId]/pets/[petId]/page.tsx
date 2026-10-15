@@ -79,7 +79,14 @@ async function Conteudo({ params }: { params: Promise<{ lojaId: string; petId: s
       </Cartao>
 
       <Cartao>
-        <h2 className="mb-2 font-medium">Tutor</h2>
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <h2 className="font-medium">Tutor</h2>
+          {editavel && (
+            <Link href={`/painel/${lojaId}/clientes/${pet.tutor.id}`} className="text-sm font-medium text-marca-700 dark:text-marca-400">
+              Ficha do cliente
+            </Link>
+          )}
+        </div>
         <p className="text-sm">
           <strong>{pet.tutor.nome}</strong> · {telefoneLegivel(pet.tutor.telefone_e164)}
         </p>
@@ -108,7 +115,7 @@ async function Conteudo({ params }: { params: Promise<{ lojaId: string; petId: s
               <li key={a.id}>
                 <Link
                   href={`/painel/${lojaId}/agenda/${a.id}`}
-                  className="flex flex-col gap-0.5 rounded-xl border border-neutral-200 bg-white px-4 py-2 text-sm hover:border-teal-600 dark:border-neutral-800 dark:bg-neutral-950"
+                  className="flex flex-col gap-0.5 rounded-xl border border-neutral-200 bg-white px-4 py-2 text-sm hover:border-marca-600 dark:border-neutral-800 dark:bg-neutral-950"
                 >
                   <span className="flex items-center justify-between gap-2">
                     <span className="font-medium">

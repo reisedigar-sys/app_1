@@ -9,6 +9,8 @@ import { NOME_PELAGEM, NOME_PORTE, formatarReais, telefoneLegivel } from "@/lib/
 import { COLUNAS_MENSAGEM, type LinhaMensagem } from "@/lib/painel/mensagens";
 import { exigirLoja, podeConfigurar, podeOperar } from "@/lib/painel/sessao";
 import { createClient } from "@/lib/supabase/server";
+import { textoWhatsApp } from "@/lib/painel/contato";
+import { ContatoTutor, quando } from "../../lista-atendimentos";
 import { ListaMensagens } from "../../mensagens/lista";
 import { dispensarSinal } from "../acoes";
 import { AcoesStatus, Cancelar, Observacoes } from "./acoes-atendimento";
@@ -54,7 +56,7 @@ async function Conteudo({ params }: { params: Promise<{ lojaId: string; agendame
 
   return (
     <div className="flex flex-col gap-4">
-      <Link href={`/painel/${lojaId}/agenda?data=${dia}`} className="text-sm text-teal-700 dark:text-teal-400">
+      <Link href={`/painel/${lojaId}/agenda?data=${dia}`} className="text-sm text-marca-700 dark:text-marca-400">
         ‹ Agenda do dia
       </Link>
       <div className="flex flex-wrap items-start justify-between gap-2">
@@ -69,7 +71,7 @@ async function Conteudo({ params }: { params: Promise<{ lojaId: string; agendame
         <span className={`rounded-full border px-3 py-1 text-sm font-medium ${COR_STATUS[a.status]}`}>{NOME_STATUS[a.status]}</span>
       </div>
       {a.status === "agendado" && a.sem_confirmacao_em && (
-        <Aviso tipo="alerta">O cliente não confirmou dentro do prazo da loja. Vale ligar para confirmar.</Aviso>
+        <Aviso tipo="alerta">O cliente não confirmou dentro do prazo da loja. Vale ligar ou mandar um WhatsApp (botões no cartão do tutor).</Aviso>
       )}
 
       {(acoes.length > 0 || (operacao && podeRemarcarOuCancelar(a.status))) && (
@@ -115,7 +117,7 @@ async function Conteudo({ params }: { params: Promise<{ lojaId: string; agendame
         <div className="mb-2 flex items-center justify-between gap-2">
           <h2 className="font-medium">Pet</h2>
           {a.pet && (
-            <Link href={`/painel/${lojaId}/pets/${a.pet.id}`} className="text-sm font-medium text-teal-700 dark:text-teal-400">
+            <Link href={`/painel/${lojaId}/pets/${a.pet.id}`} className="text-sm font-medium text-marca-700 dark:text-marca-400">
               Ficha do pet
             </Link>
           )}
@@ -132,10 +134,31 @@ async function Conteudo({ params }: { params: Promise<{ lojaId: string; agendame
       </Cartao>
 
       <Cartao>
-        <h2 className="mb-2 font-medium">Tutor</h2>
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <h2 className="font-medium">Tutor</h2>
+          {operacao && a.tutor && (
+            <Link href={`/painel/${lojaId}/clientes/${a.tutor.id}`} className="text-sm font-medium text-marca-700 dark:text-marca-400">
+              Ficha do cliente
+            </Link>
+          )}
+        </div>
         <p className="text-sm">
           <strong>{a.tutor?.nome}</strong> · {telefoneLegivel(a.tutor?.telefone_e164)}
         </p>
+        {operacao && !["concluido", "cancelado", "faltou"].includes(a.status) && (
+          <div className="mt-2 flex flex-wrap gap-2">
+            <ContatoTutor
+              telefone={a.tutor?.telefone_e164}
+              texto={textoWhatsApp({
+                status: a.status,
+                loja: loja.nome,
+                tutor: a.tutor?.nome ?? null,
+                pet: a.pet?.nome ?? null,
+                quando: quando(a.inicio, { fuso: loja.fuso, hoje: dataNoFuso(new Date(agora()), loja.fuso) }),
+              })}
+            />
+          </div>
+        )}
         {vinculo && vinculo.faltas > 0 && (
           <p className="text-sm text-red-700 dark:text-red-400">
             {vinculo.faltas} falta(s) nesta loja{vinculo.exige_sinal && " · exige sinal"}

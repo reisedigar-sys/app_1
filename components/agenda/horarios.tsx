@@ -53,13 +53,66 @@ export function Horarios({
                     aria-pressed={ativo}
                     className={`min-h-10 rounded-full border text-sm transition ${
                       ativo
-                        ? "border-teal-700 bg-teal-700 text-white"
+                        ? "border-marca-700 bg-marca-700 text-white"
                         : opcao
-                          ? "border-neutral-400 hover:border-teal-700 dark:border-neutral-600"
+                          ? "border-neutral-400 hover:border-marca-700 dark:border-neutral-600"
                           : "border-neutral-200 text-neutral-300 dark:border-neutral-800 dark:text-neutral-700"
                     }`}
                   >
                     {h}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ),
+      )}
+    </div>
+  );
+}
+
+/**
+ * Lado do tutor: só os horários livres, em botões grandes, agrupados por período. O horário ocupado não aparece
+ * (a grade com ocupados acinzentados fica para a equipe, que precisa ver os buracos da agenda).
+ */
+export function HorariosLivres({
+  disponiveis,
+  selecionado,
+  onEscolher,
+}: {
+  disponiveis: OpcaoHorario[];
+  selecionado?: string;
+  onEscolher: (h: OpcaoHorario) => void;
+}) {
+  if (disponiveis.length === 0) return null;
+  const grupos = [
+    ["Manhã", disponiveis.filter((d) => minutos(d.hora) < 12 * 60)],
+    ["Tarde", disponiveis.filter((d) => minutos(d.hora) >= 12 * 60 && minutos(d.hora) < 18 * 60)],
+    ["Noite", disponiveis.filter((d) => minutos(d.hora) >= 18 * 60)],
+  ] as const;
+
+  return (
+    <div className="flex flex-col gap-4">
+      {grupos.map(([nome, horas]) =>
+        horas.length === 0 ? null : (
+          <div key={nome} role="group" aria-label={nome}>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-neutral-500">{nome}</p>
+            <div className="grid grid-cols-4 gap-2 sm:grid-cols-6">
+              {horas.map((h) => {
+                const ativo = h.inicio === selecionado;
+                return (
+                  <button
+                    key={h.inicio}
+                    type="button"
+                    onClick={() => onEscolher(h)}
+                    aria-pressed={ativo}
+                    className={`min-h-11 rounded-xl border text-sm font-semibold tabular-nums transition ${
+                      ativo
+                        ? "border-marca-700 bg-marca-700 text-white"
+                        : "border-neutral-200 bg-white hover:border-marca-500 dark:border-neutral-800 dark:bg-neutral-950"
+                    }`}
+                  >
+                    {h.hora}
                   </button>
                 );
               })}

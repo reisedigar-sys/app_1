@@ -1,0 +1,39 @@
+{
+  "object": "whatsapp_business_account",
+  "entry": [
+    {
+      "id": "102290129340398",
+      "changes": [
+        {
+          "field": "messages",
+          "value": {
+            "messaging_product": "whatsapp",
+            "metadata": { "display_phone_number": "15550783881", "phone_number_id": "106540352242922" },
+            "contacts": [{ "profile": { "name": "Ana" }, "wa_id": "5511988880001" }],
+            "messages": [
+              { "from": "5511988880001", "id": "wamid.ENTRADA1", "timestamp": "1760468400", "type": "text", "text": { "body": "Parar" } },
+              { "from": "5511988880002", "id": "wamid.ENTRADA2", "timestamp": "1760468401", "type": "button", "button": { "text": "Quero agendar", "payload": "x" } }
+            ]
+          }
+        },
+        {
+          "field": "messages",
+          "value": {
+            "messaging_product": "whatsapp",
+            "metadata": { "display_phone_number": "15550783881", "phone_number_id": "106540352242922" },
+            "statuses": [
+              { "id": "wamid.SAIDA1", "status": "delivered", "timestamp": "1760468402", "recipient_id": "5511988880001" },
+              {
+                "id": "wamid.SAIDA2",
+                "status": "failed",
+                "timestamp": "1760468403",
+                "recipient_id": "5511988880003",
+                "errors": [{ "code": 131026, "title": "Message undeliverable", "error_data": { "details": "Receiver is incapable of receiving this message" } }]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

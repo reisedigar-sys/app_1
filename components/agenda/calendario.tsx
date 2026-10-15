@@ -42,7 +42,7 @@ export function Calendario({
           type="button"
           onClick={() => onMes(somarMes(mes, -1))}
           disabled={!podeVoltar}
-          className="flex size-11 items-center justify-center rounded-full text-xl text-teal-700 disabled:opacity-30 dark:text-teal-400"
+          className="flex size-11 items-center justify-center rounded-full text-xl text-marca-700 disabled:opacity-30 dark:text-marca-400"
           aria-label="Mês anterior"
         >
           ‹
@@ -53,7 +53,7 @@ export function Calendario({
         <button
           type="button"
           onClick={() => onMes(somarMes(mes, 1))}
-          className="flex size-11 items-center justify-center rounded-full text-xl text-teal-700 dark:text-teal-400"
+          className="flex size-11 items-center justify-center rounded-full text-xl text-marca-700 dark:text-marca-400"
           aria-label="Próximo mês"
         >
           ›
@@ -82,11 +82,11 @@ export function Calendario({
                 aria-label={`${i + 1} de ${MESES[m - 1]}${livre ? "" : ", sem horários"}`}
                 className={`flex size-10 items-center justify-center rounded-full text-sm font-medium transition ${
                   ativo
-                    ? "bg-teal-700 text-white"
+                    ? "bg-marca-700 text-white"
                     : livre
-                      ? "text-neutral-900 hover:bg-teal-50 dark:text-neutral-100 dark:hover:bg-teal-950"
+                      ? "text-neutral-900 hover:bg-marca-50 dark:text-neutral-100 dark:hover:bg-marca-950"
                       : "text-neutral-300 dark:text-neutral-700"
-                } ${dia === hoje && !ativo ? "ring-1 ring-teal-700" : ""}`}
+                } ${dia === hoje && !ativo ? "ring-1 ring-marca-700" : ""}`}
               >
                 {i + 1}
               </button>

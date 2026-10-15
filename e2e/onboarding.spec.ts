@@ -56,7 +56,7 @@ test("loja nova se configura sozinha até o checklist ficar completo", async ({ 
   await expect(page.locator("summary").filter({ hasText: "Hidratação" }).filter({ visible: true })).toBeVisible();
 
   // Checklist aponta o que falta nos serviços
-  await abrir(page, "Início");
+  await abrir(page, "Resumo");
   await expect(texto(page, "Serviços incompletos")).toBeVisible();
   await expect(page.getByRole("listitem").filter({ hasText: "Banho: falta preço e profissional habilitado" }).filter({ visible: true })).toBeVisible();
 
@@ -111,7 +111,7 @@ test("loja nova se configura sozinha até o checklist ficar completo", async ({ 
   await expect(texto(page, /se sobrepõe a outro já cadastrado/)).toBeVisible();
 
   // Checklist completo
-  await abrir(page, "Início");
+  await abrir(page, "Resumo");
   await expect(texto(page, "Tudo pronto!")).toBeVisible();
   await expect(texto(page, `/e2e-cao-limpo-${sufixo}`)).toBeVisible();
 });

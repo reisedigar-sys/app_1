@@ -76,16 +76,15 @@ describe("simulação de um dia de loja", () => {
       expect(encaixe.erro).toBeUndefined();
       expect((await agendar(db, { ...clientes[1], servico, inicio: as("10:20"), prof: PROFISSIONAL.paula, encaixe: true })).erro).toBe("AG001");
 
-      // 2 cancelamentos: o horário volta a aparecer no motor.
+      // 2 cancelamentos: o horário volta a ficar livre no motor (o dia já passou, então a consulta é por
+      // profissionais_disponiveis; a lista de horários oferecidos não mostra horário passado).
       await db.query("select public.cancelar_agendamento($1)", [ids[2]]);
       await db.query("select public.cancelar_agendamento($1)", [ids[6]]);
-      const horas = await db.rows<{ hora: string }>("select hora from public.horarios_do_dia($1, $2::jsonb, $3, $4)", [
-        LOJA.centro,
-        JSON.stringify([{ pet_id: clientes[0].pet, servicos: [servico] }]),
-        DIA,
-        PROFISSIONAL.paula,
-      ]);
-      expect(horas.map((h) => h.hora)).toContain("11:00");
+      const livres = await db.rows<{ profissional_id: string }>(
+        "select profissional_id from public.profissionais_disponiveis($1, $2::jsonb, $3::timestamptz)",
+        [LOJA.centro, JSON.stringify([{ pet_id: clientes[0].pet, servicos: [servico] }]), as("11:00")],
+      );
+      expect(livres.map((l) => l.profissional_id)).toContain(PROFISSIONAL.paula);
 
       // 1 falta: conta no cadastro do tutor nesta loja.
       await db.query("update public.agendamento set status = 'faltou' where id = $1", [ids[7]]);

@@ -37,5 +37,5 @@ export async function criarLoja(_: Estado, form: FormData): Promise<Estado> {
     if (error) return { ok: false, mensagem: mensagemDeErro(error, contexto), erros: error.code === "23505" ? { slug: contexto.duplicado } : undefined };
     lojaId = data;
   }
-  redirect(`/painel/${lojaId}`);
+  redirect(`/painel/${lojaId}/configurar`);
 }

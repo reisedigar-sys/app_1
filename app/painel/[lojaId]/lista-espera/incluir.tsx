@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useTransition } from "react";
 import { FormAcao } from "@/components/form-acao";
 import { Aviso, Botao, Campo, Selecao } from "@/components/ui";
@@ -20,7 +21,6 @@ export function IncluirNaFila({ lojaId, servicos, hoje }: { lojaId: string; serv
       const r = await buscarTutor(lojaId, telefone);
       if (!r.ok) return setErro(r.erro);
       setTutores(r.dados.tutores);
-      if (r.dados.tutores.length === 0) setErro("Nenhum cliente da loja com esse telefone. Cadastre pelo novo atendimento.");
     });
   }
 
@@ -33,6 +33,15 @@ export function IncluirNaFila({ lojaId, servicos, hoje }: { lojaId: string; serv
         </Botao>
       </div>
       {erro && <Aviso tipo="erro">{erro}</Aviso>}
+      {tutores?.length === 0 && (
+        <Aviso tipo="alerta">
+          Nenhum cliente da loja com esse telefone. A lista de espera é para quem já é cliente:{" "}
+          <Link className="font-medium underline" href={`/painel/${lojaId}/agenda/novo`}>
+            cadastre o cliente e o pet no novo atendimento
+          </Link>
+          .
+        </Aviso>
+      )}
       {pets.length > 0 && (
         <FormAcao acao={incluirNaFila} rotuloEnviar="Incluir na lista de espera">
           <input type="hidden" name="loja_id" value={lojaId} />

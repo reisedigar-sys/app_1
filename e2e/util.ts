@@ -8,7 +8,16 @@ export const botao = (page: Page, nome: string | RegExp) => page.getByRole("butt
 
 export const texto = (page: Page, t: string | RegExp) => page.getByText(t).filter({ visible: true });
 
+/** Item do menu do dia a dia (barra de baixo no celular). */
+export async function menu(page: Page, rotulo: string) {
+  const nav = page.getByRole("navigation", { name: "Painel da loja" });
+  await nav.getByRole("link", { name: rotulo, exact: true }).click();
+  await expect(nav.getByRole("link", { name: rotulo, exact: true })).toHaveAttribute("aria-current", "page");
+}
+
+/** Tela de configuração; fora de "Configurar", entra nele primeiro. */
 export async function abrir(page: Page, rotulo: string) {
+  if (!(await page.getByRole("navigation", { name: "Configuração da loja" }).isVisible())) await menu(page, "Configurar");
   await page.getByRole("navigation", { name: "Configuração da loja" }).getByRole("link", { name: rotulo, exact: true }).click();
   await expect(page.getByRole("navigation", { name: "Configuração da loja" }).getByRole("link", { name: rotulo, exact: true })).toHaveAttribute(
     "aria-current",

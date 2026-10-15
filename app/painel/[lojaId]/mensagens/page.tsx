@@ -29,13 +29,17 @@ async function Conteudo({ params, searchParams }: { params: Promise<{ lojaId: st
     supabase.rpc("horario_da_loja", { p_petshop_id: lojaId, p_local: `${data} 00:00` }),
     supabase.rpc("horario_da_loja", { p_petshop_id: lojaId, p_local: `${somarDias(data, 1)} 00:00` }),
   ]);
-  const { data: mensagens } = await supabase
-    .from("notificacao_agendada")
-    .select(COLUNAS_MENSAGEM)
-    .eq("petshop_id", lojaId)
-    .gte("enviar_em", de ?? "")
-    .lt("enviar_em", ate ?? "")
-    .order("enviar_em");
+  const [{ data: mensagens }, { data: mes }] = await Promise.all([
+    supabase
+      .from("notificacao_agendada")
+      .select(COLUNAS_MENSAGEM)
+      .eq("petshop_id", lojaId)
+      .gte("enviar_em", de ?? "")
+      .lt("enviar_em", ate ?? "")
+      .order("enviar_em"),
+    supabase.rpc("mensagens_do_mes", { p_petshop_id: lojaId, p_mes: data }),
+  ]);
+  const total = mes?.[0];
   const link = (d: string) => `/painel/${lojaId}/mensagens?data=${d}`;
 
   return (
@@ -49,9 +53,12 @@ async function Conteudo({ params, searchParams }: { params: Promise<{ lojaId: st
         <Link href={link(hoje)} className="rounded-full border border-neutral-300 px-3 py-2 dark:border-neutral-700">Hoje</Link>
         <Link href={link(somarDias(data, 1))} className="rounded-full border border-neutral-300 px-3 py-2 dark:border-neutral-700">Próximo ›</Link>
       </nav>
-      <Aviso tipo="alerta">
-        Envio pelo WhatsApp em preparação: por enquanto as mensagens são registradas aqui, com o texto exato, mas ainda não chegam ao celular do cliente.
-      </Aviso>
+      {total && (
+        <p className="text-sm text-neutral-600 dark:text-neutral-300" data-total-mes>
+          No mês: <strong>{total.whatsapp}</strong> pelo WhatsApp e <strong>{total.push}</strong> por push (grátis).
+          {total.simuladas > 0 && ` ${total.simuladas} ficaram só registradas aqui, sem envio (WhatsApp ainda não ligado).`}
+        </p>
+      )}
       <ListaMensagens mensagens={(mensagens ?? []) as LinhaMensagem[]} fuso={loja.fuso} />
     </div>
   );

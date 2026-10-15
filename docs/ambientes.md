@@ -91,12 +91,45 @@ destes passos; até lá, as mensagens ficam na fila (nada é perdido, e as atras
    ```
 4. Confira em *Edge Functions → notificacoes → Logs* que há uma chamada por minuto com resposta 200.
 
-Enquanto o WhatsApp oficial não está ligado (semana 7), o worker usa o provedor de teste: a mensagem é registrada
-(painel → Mensagens) e não chega ao celular do cliente.
+Enquanto o WhatsApp oficial não está ligado (segredos abaixo), o worker usa o provedor de teste: a mensagem é
+registrada (painel → Mensagens) e não chega ao celular do cliente.
+
+### Push no celular (semana 7, uma vez em cada ambiente)
+1. Gere as chaves: `pnpm vapid:gerar` (um par para o staging e outro para a produção). Não salve a chave privada em
+   arquivo nem mostre em print.
+2. Supabase, *Edge Functions → Secrets*: `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` e `VAPID_SUBJECT`
+   (`mailto:` + e-mail de contato do Hora do Pet).
+3. Vercel, *Settings → Environment Variables*: `NEXT_PUBLIC_VAPID_PUBLIC_KEY` = a chave pública (Production com a da
+   produção; Preview com a do staging). Publique de novo para valer.
+
+### WhatsApp (semana 7, depois da verificação da empresa na Meta)
+Um número central do Hora do Pet envia os avisos de todas as lojas. Antes da verificação, dá para testar com o número
+de teste da Meta, que só envia para os telefones cadastrados no app da Meta.
+
+1. https://developers.facebook.com → *Meus apps → Criar app* (tipo Empresa, ligado ao portfólio do Hora do Pet) →
+   adicionar o produto **WhatsApp**. Anote o **Phone number ID** do número (de teste ou o central).
+2. *Configurações do negócio → Usuários do sistema*: criar um usuário do sistema (Admin), dar acesso ao app e à conta
+   do WhatsApp e gerar um token **sem expiração** com `whatsapp_business_messaging` e `whatsapp_business_management`.
+3. *Configurações do app → Básico*: copie a **Chave secreta do app** (App secret).
+4. Supabase, *Edge Functions → Secrets*: `WHATSAPP_TOKEN` (passo 2), `WHATSAPP_PHONE_NUMBER_ID` (passo 1),
+   `WHATSAPP_APP_SECRET` (passo 3) e `WHATSAPP_VERIFY_TOKEN` (um texto aleatório criado por você, ex.:
+   `openssl rand -hex 16`). No staging, também `WHATSAPP_SOMENTE_PARA` = telefones de teste separados por vírgula
+   (os outros ficam só registrados no painel).
+5. No app da Meta, *WhatsApp → Configuração → Webhook*: URL de retorno `https://REF.supabase.co/functions/v1/whatsapp`
+   e o mesmo `WHATSAPP_VERIFY_TOKEN`; depois, em *Campos do webhook*, assine **messages**.
+6. Cadastre os modelos de `docs/modelos-whatsapp.md` e espere a aprovação. Mensagem com modelo ainda não aprovado
+   falha e é tentada de novo (o painel mostra o erro da Meta).
 
 ### Supabase Auth (cada projeto)
-*Authentication → URL Configuration*: **Site URL** = endereço do app daquele ambiente (por enquanto o da Vercel) e o
-mesmo endereço em **Redirect URLs**. Trocar pelo domínio quando ele existir.
+*Authentication → URL Configuration*: **Site URL** = endereço do app daquele ambiente (por enquanto o da Vercel) e, em
+**Redirect URLs**, o mesmo endereço terminado em `/**` (ex.: `https://hora-do-pet.vercel.app/**`), para o link de
+"Esqueci a senha" voltar para `/auth/confirmar`. No staging, inclua também `https://hora-do-pet-*-edigar-reis.vercel.app/**`
+(prévias dos PRs). Trocar pelo domínio quando ele existir.
+
+*Authentication → Emails → Templates → Reset password*: assunto `Hora do Pet: crie sua nova senha` e, no corpo, o
+conteúdo de `supabase/templates/recuperar-senha.html`. Com esse modelo o link funciona em qualquer navegador; com o
+modelo padrão, só no mesmo navegador em que a pessoa pediu o link. Sem SMTP próprio (abaixo), o e-mail só chega para
+os membros da organização no Supabase.
 
 ### Domínio
 1. Registre o domínio (ex.: `agendapet.com.br` em https://registro.br — exige CPF/CNPJ).
@@ -115,7 +148,7 @@ O e-mail embutido do Supabase envia pouquíssimas mensagens por hora e serve só
    nome da marca.
 
 ### Contas que demoram (iniciar já, em paralelo)
-- **Meta / WhatsApp Business (semanas 6–7):** https://business.facebook.com → criar o portfólio empresarial com o CNPJ
+- **Meta / WhatsApp Business (semana 7):** https://business.facebook.com → criar o portfólio empresarial com o CNPJ
   e o domínio, fazer a **verificação da empresa** e depois cadastrar o app no https://developers.facebook.com com o
   produto WhatsApp. A verificação e a aprovação dos modelos de mensagem podem levar dias.
 - **Asaas (semana 8):** https://www.asaas.com → conta com o CNPJ da plataforma; solicitar acesso ao **sandbox** e à API de

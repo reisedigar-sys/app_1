@@ -56,7 +56,7 @@ Cuidados:
   `tests/rls/cobertura.test.ts` a descobre sozinho e falha se faltar.
 - Regra de disponibilidade e criação de agendamento ficam em funções SQL chamadas por RPC; o front-end só consome.
 - Imports usam o alias `@/` (raiz do repositório).
-- Documentação de apoio: `README.md` (setup e banco), `PLANO-MVP.md` (plano semana a semana),
+- Documentação de apoio: `README.md` (setup e banco), `PLANO-MVP.md` (plano semana a semana), `PLANO-CRESCIMENTO.md` (Meta 1),
   `PROMPTS-CLAUDE-CODE.md` (prompts por semana). Ao fim de cada semana, atualize a seção "Estado atual" abaixo.
 
 ## Regras de negócio
@@ -88,8 +88,9 @@ Cuidados:
 6. Lembretes WhatsApp + notificação "pet pronto"
 7. Pix com sinal
 **Fase 2 — Diferenciais (após o piloto, ver PLANO-MVP.md)**: painel de resultados ("faltas evitadas" sempre como estimativa), retorno automático, financeiro leve, fotos antes/depois, pacotes e recorrência, desconto em horários ociosos. Estoque, nota fiscal e taxi dog só se as lojas pedirem. Mensagens de retorno e promoção são de marketing: exigem consentimento próprio, opt-out e controle de custo.
-**Fase 3 — Escala (meses 4–6)**: onboarding self-service, cobrança de mensalidade, 15–30 lojas.
-**Fase 4 — Marketplace (6–12+ meses)**: busca por região, avaliações, comissão, app nativo se necessário.
+**Fase 3 — Escala (meses 4–6)**: onboarding self-service, cobrança de mensalidade, importação de clientes, página de vendas e indicação, 15–30 lojas.
+**Meta 1 — 240 lojas pagando (até ~18 meses após o piloto)**: primeira meta do projeto (decidida em 14/10/2026), com três frentes: recursos que vendem, qualidade e consistência, campanha regional e depois nacional. Detalhe em `PLANO-CRESCIMENTO.md`.
+**Fase 4 — Marketplace**: depende de densidade regional de lojas (consequência da Meta 1); busca por região, avaliações, comissão, app nativo se necessário.
 
 ## Requisitos adicionais (migração 002)
 - Uma visita tem UM profissional e pode ter vários serviços; só pode ser escolhido quem estiver habilitado em todos eles (`profissional_servico`). O overbooking é travado em `agendamento`.
@@ -124,6 +125,15 @@ Cuidados:
   testes E2E, use os helpers de `e2e/util.ts`, que miram só elementos visíveis.
 - IDs: valide com `z.guid()` (os IDs do seed não são UUID v4).
 - Horário informado pela loja é local: a conversão para UTC é feita no banco com `petshop.fuso` (ex.: `criar_bloqueio`).
+- Painel: menu do dia a dia (Hoje, Agenda, Clientes, Espera, Mensagens, Configurar) fica embaixo no celular; as telas de
+  configuração ficam em "Configurar" (`/painel/{loja}/configurar` + menu "Configuração da loja"). Sem `visao` na URL,
+  a agenda abre em lista no celular (pelo user-agent) e em colunas no computador; os testes E2E rodam como celular.
+- Clientes (migração 014): `clientes_da_loja` busca por nome do tutor ou do pet (sem acento, `app.sem_acento`) ou
+  por 4+ dígitos do telefone; só dono, gerente e atendente. "Agendar de novo" abre `/agenda/novo?cliente=&pet=` com os
+  serviços do último atendimento do pet.
+- Resultados (migração 015): `resultados_do_mes` (só dono e gerência) e `petshop_indicador.faltas_antes_pct`
+  (referência informada pela loja, fora de `petshop` porque a loja é pública). "Faltas evitadas" é sempre estimativa:
+  taxa de antes × atendimentos realizados − faltas reais (`lib/painel/resultados.ts`).
 
 ## Estado atual
 - Semana 1 (fundação) concluída.
@@ -146,11 +156,14 @@ Cuidados:
 - Semana 5 (painel da loja) concluída e em produção (14/10/2026): migração 008 (`agenda_loja`, transições de status por trigger, balcão com
   `buscar_tutor_balcao`/`cadastrar_tutor_balcao`/`cadastrar_pet_balcao`, `horario_da_loja`, `agendamento` no Realtime),
   `/painel/{loja}/agenda` (dia/semana, filtros, ao vivo), novo atendimento com encaixe, remarcar, ficha do pet.
-- Semana 6 (anti no-show) em revisão: migrações 009–010 (fila programada por trigger em `agendamento`, worker
-  `worker_reservar`/`worker_concluir` com SKIP LOCKED, link `/c/{token}`, prazo de confirmação, lista de espera,
-  `dispensar_sinal`, pg_cron → Edge Function `notificacoes`), telas Mensagens e Lista de espera no painel, lista de
-  espera no fluxo do tutor. Envio pelo provedor de teste até a semana 7 (WhatsApp).
-- Próximo: semana 7 (WhatsApp), seguindo o prompt da semana 7 em `PROMPTS-CLAUDE-CODE.md`.
+- Semana 6 (anti no-show) concluída e em produção (14/10/2026): migrações 009–010 (fila programada por trigger em
+  `agendamento`, worker `worker_reservar`/`worker_concluir` com SKIP LOCKED, link `/c/{token}`, prazo de confirmação,
+  lista de espera, `dispensar_sinal`, pg_cron → Edge Function `notificacoes`), telas Mensagens e Lista de espera.
+- Semana 7a (mensagens de verdade e app da loja) em revisão: migrações 011–012 (`modelo_mensagem`, `push_inscricao`,
+  `whatsapp_status`/`whatsapp_receber`, `minhas_lojas`, `mensagens_do_mes`, `petshop.logo_url`), worker com WhatsApp
+  (Meta Cloud API) e Web Push, Edge Function `whatsapp` (webhook), `/{slug}/manifest.webmanifest` e ícone por loja,
+  `/conta/lojas`, avisos no celular (tutor e equipe). Sem os segredos da Meta, o worker continua no provedor de teste.
+- Próximo: 7b (bot de agendamento no número da loja), depois de a 7a estar no ar e da aprovação como *Tech Provider*.
 
 ## Pendências fora do código (decisão ou ação do dono do produto)
 - **Repositório público**: `reisedigar-sys/app_1` está público. Recomendado torná-lo privado
@@ -174,6 +187,21 @@ Cuidados:
 - Se o Docker Hub responder 429 (limite de downloads), puxe as imagens pelo espelho do Google e renomeie:
   `docker pull mirror.gcr.io/supabase/postgres:<versão> && docker tag mirror.gcr.io/supabase/postgres:<versão> supabase/postgres:<versão>`.
 - Rode `pnpm db:types` só com o banco local no ar (o script não apaga mais os tipos se ele estiver fora).
+
+## Decisões da semana 7
+- **Número central só envia** (avisos de todas as lojas, nome da loja no texto). Quem escreve para ele recebe, no
+  máximo a cada 12 h, o link das lojas onde é cliente. Agendar pelo WhatsApp só no número da própria loja (7b).
+- **"PARAR" no número central** apaga a autorização de contato em todas as lojas (não dá para saber de qual loja a
+  pessoa fala); no número da loja, só nela. Voltar: Minha conta → Minhas lojas, por loja.
+- **Modelos**: o corpo em `modelo_mensagem` é o mesmo submetido à Meta (pt_BR, Utilidade); nunca começa nem termina
+  com variável. Mudar o texto = novo modelo aprovado na Meta + migração.
+- **Push é aviso a mais**: sai só na primeira tentativa; quem decide "enviada" é o WhatsApp (ou o push, quando é o
+  único canal). A inscrição de push é a autorização do canal (não depende de `consentimento_contato_em`).
+- **Avisos da equipe** (`equipe_novo_pedido`, `equipe_cancelamento`) só entram na fila se alguém da loja ligou o push;
+  balcão não gera aviso. Profissional só recebe dos próprios atendimentos.
+- **App da loja**: manifesto em `/{slug}/manifest.webmanifest` (`id` por loja, escopo `/`); ícone gerado com o logo
+  (só PNG/JPG do bucket `fotos` do próprio projeto) ou as iniciais.
+- **Staging**: `WHATSAPP_SOMENTE_PARA` limita o envio real aos telefones do número de teste da Meta.
 
 ## Decisões da semana 6
 - **Mensagens são programadas no banco** (trigger `agendamento_notificacoes`), por qualquer caminho de criação,

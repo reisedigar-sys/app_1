@@ -135,17 +135,17 @@ select s.petshop_id, '30000000-0000-0000-0000-000000000101', s.id, d, '09:00', '
 -- Almoço de Marcos todo dia útil da próxima semana, folga de Pedro e feriado na Zona Sul.
 insert into public.bloqueio (petshop_id, profissional_id, tipo, periodo, motivo)
 select '20000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000102', 'almoco',
-       tstzrange(((current_date + d) + time '12:00') at time zone 'America/Sao_Paulo',
-                 ((current_date + d) + time '13:00') at time zone 'America/Sao_Paulo'), 'Almoço'
+       tstzrange((((now() at time zone 'America/Sao_Paulo')::date + d) + time '12:00') at time zone 'America/Sao_Paulo',
+                 (((now() at time zone 'America/Sao_Paulo')::date + d) + time '13:00') at time zone 'America/Sao_Paulo'), 'Almoço'
   from generate_series(1, 7) as d;
 
 insert into public.bloqueio (petshop_id, profissional_id, tipo, periodo, motivo) values
   ('20000000-0000-0000-0000-000000000003', '30000000-0000-0000-0000-000000000302', 'folga',
-   tstzrange((current_date + 3)::timestamp at time zone 'America/Sao_Paulo',
-             (current_date + 4)::timestamp at time zone 'America/Sao_Paulo'), 'Folga'),
+   tstzrange(((now() at time zone 'America/Sao_Paulo')::date + 3)::timestamp at time zone 'America/Sao_Paulo',
+             ((now() at time zone 'America/Sao_Paulo')::date + 4)::timestamp at time zone 'America/Sao_Paulo'), 'Folga'),
   ('20000000-0000-0000-0000-000000000002', null, 'feriado',
-   tstzrange((current_date + 10)::timestamp at time zone 'America/Sao_Paulo',
-             (current_date + 11)::timestamp at time zone 'America/Sao_Paulo'), 'Feriado municipal');
+   tstzrange(((now() at time zone 'America/Sao_Paulo')::date + 10)::timestamp at time zone 'America/Sao_Paulo',
+             ((now() at time zone 'America/Sao_Paulo')::date + 11)::timestamp at time zone 'America/Sao_Paulo'), 'Feriado municipal');
 
 -- ---------------------------------------------------------------------------
 -- Tutores e pets
@@ -191,7 +191,7 @@ with dados (id, pedido_id, pet_id, profissional_id, dias, hora, servico, status)
     ('70000000-0000-0000-0000-000000000005', '60000000-0000-0000-0000-000000000005', '50000000-0000-0000-0000-000000000002', '30000000-0000-0000-0000-000000000101', -14, time '15:00', 'Banho', 'concluido')
 ), calc as (
   select d.*, pe.tutor_id, pd.petshop_id, pd.canal, sp.preco_centavos, sp.duracao_minutos, s.id as servico_id, ps.buffer_minutos,
-         ((current_date + d.dias) + d.hora) at time zone ps.fuso as inicio
+         (((now() at time zone 'America/Sao_Paulo')::date + d.dias) + d.hora) at time zone ps.fuso as inicio
     from dados d
     join public.pet pe on pe.id = d.pet_id
     join public.pedido pd on pd.id = d.pedido_id
@@ -223,7 +223,7 @@ insert into public.mensagem_log (petshop_id, tutor_id, direcao, destino, conteud
   ('20000000-0000-0000-0000-000000000002', '40000000-0000-0000-0000-000000000002', 'saida', '+5511988880002', '{"template":"confirmacao"}', 'entregue');
 
 insert into public.lista_espera (petshop_id, tutor_id, pet_id, servico_id, data, periodo)
-select s.petshop_id, t.tutor_id, t.pet_id, s.id, current_date + 2, 'manha'
+select s.petshop_id, t.tutor_id, t.pet_id, s.id, (now() at time zone 'America/Sao_Paulo')::date + 2, 'manha'
   from public.servico s
   join (values
     ('20000000-0000-0000-0000-000000000001'::uuid, '40000000-0000-0000-0000-000000000001'::uuid, '50000000-0000-0000-0000-000000000002'::uuid),
@@ -247,3 +247,8 @@ insert into public.whatsapp_sessao (petshop_id, telefone_e164, tutor_id, estado,
 insert into public.avaliacao (petshop_id, agendamento_id, profissional_id, tutor_id, nota, comentario)
 select petshop_id, id, profissional_id, tutor_id, 5, 'Ótimo atendimento!'
   from public.agendamento where status = 'concluido';
+
+-- Faltas antes do Hora do Pet (referência da estimativa de faltas evitadas), informada pela gestão de cada loja.
+insert into public.petshop_indicador (petshop_id, faltas_antes_pct) values
+  ('20000000-0000-0000-0000-000000000001', 15),
+  ('20000000-0000-0000-0000-000000000003', 12);

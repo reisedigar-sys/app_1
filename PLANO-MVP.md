@@ -15,8 +15,10 @@ atendente registrando o pedido pelo painel e enviando o link de agendamento no c
 | Semanas 1 a 4 (fundação, onboarding, motor de disponibilidade, lado do tutor) | ✅ concluídas |
 | Ambientes de teste e produção | ✅ no ar: staging (prévia da `main`) e produção (`hora-do-pet.vercel.app`), com deploy automático (ver `docs/ambientes.md`) |
 | Semana 5 — Painel da loja | ✅ concluída (em produção desde 14/10/2026) |
-| **Semana 6 — Anti no-show** | **em revisão** (PR da semana 6). Mensagens com provedor de teste até o WhatsApp (semana 7) |
-| Semanas 7 a 9 | a fazer |
+| Semana 6 — Anti no-show | ✅ concluída (em produção desde 14/10/2026) |
+| **Semana 7a — Mensagens de verdade e app da loja** | **em revisão** (PR da 7a): WhatsApp pelo número central, push, "PARAR", app com nome e ícone da loja, Minhas lojas. O envio real depende da verificação da Meta |
+| Semana 7b — Agendar pelo WhatsApp da loja | a fazer (depois da 7a e da aprovação como *Tech Provider* na Meta) |
+| Semanas 8 e 9 | a fazer |
 
 Como cada entrega chega aos clientes: PR da semana → merge na `main` (o staging se atualiza sozinho) → PR `main` →
 `producao` → aprovação do dono em *Actions → Deploy produção*.
@@ -96,12 +98,27 @@ Como cada entrega chega aos clientes: PR da semana → merge na `main` (o stagin
 - Contador de faltas por tutor e sinal obrigatório após faltas
 - Entrega: o fluxo que mais reduz falta, funcionando
 
-## Semana 7 — WhatsApp como canal de entrada (bot guiado)
+## Semana 7 — WhatsApp, push e app da loja (dividida em 7a e 7b; decisões do dono em 14/10/2026)
+O agendamento pelo WhatsApp é sempre pelo número da própria loja. As notificações saem pelo número central do Hora do
+Pet até a loja ligar o dela, com reforço por push. App: só o PWA, com nome e ícone de cada loja; app único nas lojas
+de apps só se os tutores pedirem.
+
+### 7a — Mensagens de verdade e app da loja
+- Modelos (templates) da Meta para cada mensagem da semana 6 (`modelo_mensagem`, lista em `docs/modelos-whatsapp.md`)
+- Worker envia pelo WhatsApp (Meta Cloud API, número central) e por push (Web Push, tutor e equipe)
+- Webhook: status de entrega (entregue, lida, falhou), "PARAR" e resposta automática do número central com o link das lojas
+- App com nome e ícone da loja (manifesto por loja, logo enviado no painel), "Minhas lojas" em Minha conta
+- Mensagens no painel com canal, entrega e total do mês
+- Entrega: lembretes chegam ao celular do tutor
+
+### 7b — Agendar pelo WhatsApp da loja (bot guiado)
 - Webhook da API do WhatsApp, idempotente pelo id da mensagem e roteado pelo número de cada loja
 - Identifica o tutor pelo telefone; se não existir, cria o cadastro mínimo (nome e pet) na própria conversa
 - Conversa guiada com botões e listas, sem texto livre: pet → serviço → profissional/horário → confirmar
 - Usa a mesma `criar_agendamento`, com canal `whatsapp`; atalhos para remarcar, cancelar e "falar com atendente"
 - Texto livre com IA fica para depois do MVP
+- Número próprio da loja pelo cadastro guiado da Meta (*Embedded Signup*); as notificações da loja passam a sair dele
+- Verificação do telefone por código no WhatsApp (une o cadastro do balcão ao da conta)
 - Entrega: o tutor agenda sem sair do WhatsApp
 
 ## Semana 8 — Pagamento
@@ -160,6 +177,11 @@ e pule o que as lojas não pedirem. Cada item é uma fatia que funciona sozinha.
 - Regras de desconto por dia, faixa de horário e serviço; sugestão automática dos horários com baixa ocupação
 - Divulgação por mensagem de marketing só para tutores com consentimento, mostrando o custo estimado antes de enviar
 - Medir receita incremental e preenchimento
+
+## Meta 1 — 240 lojas pagando
+Primeira meta do projeto (14/10/2026): cerca de 240 petshops pagando até uns 18 meses depois do piloto. Fase 2,
+Fase 3 e tudo o que vem depois são priorizados por quanto aproximam essa meta. Marcos, indicadores e as três frentes
+(recursos que vendem, qualidade, divulgação) em `PLANO-CRESCIMENTO.md`.
 
 ## Depois (conforme a demanda)
 Onboarding self-service, cobrança de mensalidade, taxi dog, estoque (só se as lojas pedirem, ou por integração

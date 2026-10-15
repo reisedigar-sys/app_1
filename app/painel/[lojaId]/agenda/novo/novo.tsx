@@ -15,7 +15,9 @@ type Servico = {
   tipo: "principal" | "adicional";
   precos: { porte: string; pelagem: string; preco_centavos: number; duracao_minutos: number }[];
 };
-type Escolha = { principal: string; adicionais: string[] };
+export type Escolha = { principal: string; adicionais: string[] };
+/** Começo já preenchido ("Agendar de novo" na ficha do cliente): tutor, pets e serviços da última vez. */
+export type Inicial = { tutor: TutorBalcao; pets: string[]; escolhas: Record<string, Escolha> };
 
 const precoDe = (s: Servico, pet: PetBalcao) => s.precos.find((p) => p.porte === pet.porte && p.pelagem === pet.pelagem);
 
@@ -29,12 +31,14 @@ export function NovoAtendimento({
   profissionais,
   dataInicial,
   slotMinutos,
+  inicial,
 }: {
   lojaId: string;
   catalogo: Servico[];
   profissionais: { id: string; nome: string }[];
   dataInicial: string;
   slotMinutos: number;
+  inicial?: Inicial;
 }) {
   const router = useRouter();
   const [ocupado, iniciar] = useTransition();
@@ -43,15 +47,17 @@ export function NovoAtendimento({
   const [chave] = useState(() => crypto.randomUUID());
 
   const [canal, setCanal] = useState<"balcao" | "whatsapp">("balcao");
-  const [telefone, setTelefone] = useState("");
-  const [busca, setBusca] = useState<{ telefone: string; tutores: TutorBalcao[] } | null>(null);
-  const [tutor, setTutor] = useState<TutorBalcao | null>(null);
+  const [telefone, setTelefone] = useState(inicial ? (telefoneLegivel(inicial.tutor.telefone) ?? "") : "");
+  const [busca, setBusca] = useState<{ telefone: string; tutores: TutorBalcao[] } | null>(
+    inicial ? { telefone: inicial.tutor.telefone, tutores: [inicial.tutor] } : null,
+  );
+  const [tutor, setTutor] = useState<TutorBalcao | null>(inicial?.tutor ?? null);
   const [novoNome, setNovoNome] = useState("");
   const [consentimento, setConsentimento] = useState(false);
 
-  const [pets, setPets] = useState<string[]>([]);
+  const [pets, setPets] = useState<string[]>(inicial?.pets ?? []);
   const [novoPet, setNovoPet] = useState<{ nome: string; porte: string; pelagem: string; especie: string; raca: string } | null>(null);
-  const [escolhas, setEscolhas] = useState<Record<string, Escolha>>({});
+  const [escolhas, setEscolhas] = useState<Record<string, Escolha>>(inicial?.escolhas ?? {});
 
   const [encaixe, setEncaixe] = useState(false);
   const [profissional, setProfissional] = useState("");
@@ -166,7 +172,7 @@ export function NovoAtendimento({
             ] as const
           ).map(([v, rotulo]) => (
             <label key={v} className="flex min-h-11 items-center gap-2 text-sm">
-              <input type="radio" name="canal" className="size-5 accent-teal-700" checked={canal === v} onChange={() => setCanal(v)} />
+              <input type="radio" name="canal" className="size-5 accent-marca-700" checked={canal === v} onChange={() => setCanal(v)} />
               {rotulo}
             </label>
           ))}
@@ -198,7 +204,7 @@ export function NovoAtendimento({
             <legend className="mb-1 text-sm font-medium">Clientes com este telefone</legend>
             {busca.tutores.map((t) => (
               <label key={t.id} className="flex min-h-11 items-center gap-2 text-sm">
-                <input type="radio" name="tutor" className="size-5 accent-teal-700" checked={tutor?.id === t.id} onChange={() => setTutor(t)} />
+                <input type="radio" name="tutor" className="size-5 accent-marca-700" checked={tutor?.id === t.id} onChange={() => setTutor(t)} />
                 {t.nome} {t.temConta ? "(tem conta no app)" : "(cadastrado pela loja)"}
               </label>
             ))}
@@ -278,7 +284,7 @@ export function NovoAtendimento({
           ) : (
             <button
               type="button"
-              className="mt-2 min-h-11 text-sm font-medium text-teal-700 dark:text-teal-400"
+              className="mt-2 min-h-11 text-sm font-medium text-marca-700 dark:text-marca-400"
               onClick={() => setNovoPet({ nome: "", porte: "medio", pelagem: "curta", especie: "cao", raca: "" })}
             >
               + Novo pet
