@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { acoesDeStatus, dataNoFuso, faixaDoDia, inicioDaSemana, minutosNoFuso, passaNoFiltro } from "./agenda";
+import { acaoRapida, acoesDeStatus, dataNoFuso, desfazer, faixaDoDia, inicioDaSemana, minutosNoFuso, passaNoFiltro } from "./agenda";
 
 describe("ações de status", () => {
   const status = (s: Parameters<typeof acoesDeStatus>[0], operacao = true, jaComecou = false) =>
@@ -50,5 +50,32 @@ describe("datas no fuso da loja", () => {
   it("faixa do dia em horas cheias", () => {
     expect(faixaDoDia([])).toEqual({ inicio: 480, fim: 1140 });
     expect(faixaDoDia([{ inicio: 9 * 60 + 10, fim: 17 * 60 + 5 }, { inicio: 10 * 60, fim: 18 * 60 }])).toEqual({ inicio: 540, fim: 1080 });
+  });
+});
+
+describe("ação rápida da lista", () => {
+  const rapida = (s: Parameters<typeof acaoRapida>[0], operacao = true, ehHoje = true) => acaoRapida(s, { operacao, ehHoje })?.status ?? null;
+
+  it("põe o próximo passo a um toque; iniciar e entregar só no dia", () => {
+    expect(rapida("agendado")).toBe("confirmado");
+    expect(rapida("confirmado")).toBe("em_atendimento");
+    expect(rapida("confirmado", true, false)).toBeNull();
+    expect(rapida("em_atendimento")).toBe("pronto");
+    expect(rapida("pronto")).toBe("concluido");
+    expect(rapida("concluido")).toBeNull();
+    expect(rapida("cancelado")).toBeNull();
+  });
+
+  it("a profissional não confirma: no dia, inicia direto", () => {
+    expect(rapida("agendado", false)).toBe("em_atendimento");
+    expect(rapida("agendado", false, false)).toBeNull();
+  });
+
+  it("desfazer só volta um passo que o banco aceita", () => {
+    expect(desfazer("agendado", "confirmado", { operacao: true })).toBe("agendado");
+    expect(desfazer("confirmado", "em_atendimento", { operacao: true })).toBe("confirmado");
+    expect(desfazer("agendado", "em_atendimento", { operacao: true })).toBeNull();
+    expect(desfazer("pronto", "concluido", { operacao: false })).toBe("pronto");
+    expect(desfazer("confirmado", "em_atendimento", { operacao: false })).toBeNull();
   });
 });

@@ -73,7 +73,7 @@ test("pelo link, o tutor confirma, remarca e cancela sem login; a loja vê as me
 
   // A loja vê as mensagens do pedido na ficha do atendimento.
   await entrar(page, "gabriel@petfeliz.test");
-  await expect(page.getByRole("heading", { name: "Configuração da loja" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Hoje", exact: true })).toBeVisible();
   await page.goto(`/painel/${CENTRO}/agenda/${agendamento}`);
   await expect(page.getByRole("heading", { name: "Mensagens ao cliente" })).toBeVisible();
   await expect(texto(page, "Confirmação do agendamento").first()).toBeVisible();

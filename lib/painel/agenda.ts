@@ -139,3 +139,34 @@ export function faixaDoDia(minutos: { inicio: number; fim: number }[]) {
   const fim = Math.max(...minutos.map((m) => m.fim));
   return { inicio: Math.max(0, Math.floor(inicio / 60) * 60), fim: Math.min(24 * 60, Math.ceil(fim / 60) * 60) };
 }
+
+/**
+ * O próximo passo que o painel põe a um toque, na lista do dia (os outros ficam na ficha do atendimento).
+ * Iniciar, "pet pronto" e entregar só no próprio dia; confirmar vale para qualquer dia.
+ */
+export function acaoRapida(status: Status, opts: { operacao: boolean; ehHoje: boolean }): Acao | null {
+  switch (status) {
+    case "agendado":
+      if (opts.operacao) return { status: "confirmado", rotulo: "Confirmar" };
+      return opts.ehHoje ? { status: "em_atendimento", rotulo: "Iniciar" } : null;
+    case "confirmado":
+      return opts.ehHoje ? { status: "em_atendimento", rotulo: "Iniciar" } : null;
+    case "em_atendimento":
+      return opts.ehHoje ? { status: "pronto", rotulo: "Pet pronto" } : null;
+    case "pronto":
+      return opts.ehHoje ? { status: "concluido", rotulo: "Entregue" } : null;
+    default:
+      return null;
+  }
+}
+
+// Volta de um passo que o banco aceita (agendamento_valida_status, migração 008).
+const VOLTA: Partial<Record<Status, Status>> = { confirmado: "agendado", em_atendimento: "confirmado", pronto: "em_atendimento", concluido: "pronto" };
+
+/** Status para "desfazer" depois de passar de `de` para `para`; null quando a volta não é permitida. */
+export function desfazer(de: Status, para: Status, opts: { operacao: boolean }): Status | null {
+  if (VOLTA[para] !== de) return null;
+  // A profissional só conduz o atendimento: não volta para "confirmado" nem "agendado".
+  if (!opts.operacao && !["em_atendimento", "pronto", "concluido"].includes(de)) return null;
+  return de;
+}

@@ -125,6 +125,9 @@ Cuidados:
   testes E2E, use os helpers de `e2e/util.ts`, que miram só elementos visíveis.
 - IDs: valide com `z.guid()` (os IDs do seed não são UUID v4).
 - Horário informado pela loja é local: a conversão para UTC é feita no banco com `petshop.fuso` (ex.: `criar_bloqueio`).
+- Painel: menu do dia a dia (Hoje, Agenda, Espera, Mensagens, Configurar) fica embaixo no celular; as telas de
+  configuração ficam em "Configurar" (`/painel/{loja}/configurar` + menu "Configuração da loja"). Sem `visao` na URL,
+  a agenda abre em lista no celular (pelo user-agent) e em colunas no computador; os testes E2E rodam como celular.
 
 ## Estado atual
 - Semana 1 (fundação) concluída.

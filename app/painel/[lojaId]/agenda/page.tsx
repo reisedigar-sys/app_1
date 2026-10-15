@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import Link from "next/link";
 import { Suspense } from "react";
 import { Aviso, BotaoLink, Carregando, Vazio } from "@/components/ui";
@@ -21,6 +22,7 @@ import {
 import { lerPeriodo } from "@/lib/painel/periodo";
 import { exigirLoja, exigirUsuario, podeOperar } from "@/lib/painel/sessao";
 import { createClient } from "@/lib/supabase/server";
+import { ListaAtendimentos } from "../lista-atendimentos";
 import { AoVivo } from "./ao-vivo";
 import { Filtros } from "./filtros";
 
@@ -37,6 +39,9 @@ export default function AgendaPage({ params, searchParams }: PageProps<"/painel/
 }
 
 const PIXELS_POR_MINUTO = 1.4;
+const VISOES = ["lista", "dia", "semana"] as const;
+type Visao = (typeof VISOES)[number];
+const NOME_VISAO: Record<Visao, string> = { lista: "Lista", dia: "Colunas", semana: "Semana" };
 
 async function Conteudo({ params, searchParams }: { params: Promise<{ lojaId: string }>; searchParams: Promise<Busca> }) {
   const { lojaId } = await params;
@@ -47,7 +52,9 @@ async function Conteudo({ params, searchParams }: { params: Promise<{ lojaId: st
 
   const hoje = dataNoFuso(new Date(), loja.fuso);
   const data = ehData(busca.data) ? busca.data : hoje;
-  const visao = busca.visao === "semana" ? "semana" : "dia";
+  // Sem escolha na URL: lista no celular (cabe na tela) e colunas por profissional no computador.
+  const celular = /Mobi|Android/i.test((await headers()).get("user-agent") ?? "");
+  const visao = VISOES.includes(busca.visao as Visao) ? (busca.visao as Visao) : celular ? "lista" : "dia";
   const filtroStatus: FiltroStatus = FILTROS_STATUS.includes(busca.status as FiltroStatus) ? (busca.status as FiltroStatus) : "ativos";
   const de = visao === "semana" ? inicioDaSemana(data) : data;
   const ate = visao === "semana" ? somarDias(de, 6) : data;
@@ -87,7 +94,7 @@ async function Conteudo({ params, searchParams }: { params: Promise<{ lojaId: st
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-semibold first-letter:uppercase">
-            {visao === "dia" ? diaPorExtenso(data) : `Semana de ${diaCurto(de)} a ${diaCurto(ate)}`}
+            {visao !== "semana" ? diaPorExtenso(data) : `Semana de ${diaCurto(de)} a ${diaCurto(ate)}`}
           </h1>
           <p className="flex items-center gap-3 text-sm text-neutral-500">
             <span>
@@ -124,14 +131,14 @@ async function Conteudo({ params, searchParams }: { params: Promise<{ lojaId: st
           </Link>
         </nav>
         <div className="flex rounded-lg border border-neutral-300 p-0.5 dark:border-neutral-700" role="group" aria-label="Visão">
-          {(["dia", "semana"] as const).map((v) => (
+          {VISOES.map((v) => (
             <Link
               key={v}
               href={link({ visao: v })}
               aria-current={visao === v ? "page" : undefined}
               className="flex min-h-9 items-center rounded-md px-3 text-sm aria-[current=page]:bg-marca-700 aria-[current=page]:text-white"
             >
-              {v === "dia" ? "Dia" : "Semana"}
+              {NOME_VISAO[v]}
             </Link>
           ))}
         </div>
@@ -140,6 +147,17 @@ async function Conteudo({ params, searchParams }: { params: Promise<{ lojaId: st
 
       {colunas.length === 0 ? (
         <Vazio>Nenhum profissional ativo para mostrar.</Vazio>
+      ) : visao === "lista" ? (
+        itens.length === 0 ? (
+          <Vazio>Nenhum atendimento neste dia.</Vazio>
+        ) : (
+          <ListaAtendimentos
+            rotulo="Atendimentos do dia"
+            grupos={[{ itens: [...itens].sort((x, y) => x.inicio.localeCompare(y.inicio)) }]}
+            c={{ lojaId, lojaNome: loja.nome, fuso: loja.fuso, hoje, operacao }}
+            mostrarProfissional={!proprio}
+          />
+        )
       ) : visao === "dia" ? (
         <AgendaDia
           lojaId={lojaId}
@@ -152,7 +170,7 @@ async function Conteudo({ params, searchParams }: { params: Promise<{ lojaId: st
           bloqueios={(bloqueios.data ?? []).map((b) => ({ ...b, ...lerPeriodo(b.periodo as string) }))}
         />
       ) : (
-        <AgendaSemana lojaId={lojaId} fuso={loja.fuso} de={de} hoje={hoje} colunas={colunas} itens={itens} linkDia={(d) => link({ data: d, visao: "dia" })} />
+        <AgendaSemana lojaId={lojaId} fuso={loja.fuso} de={de} hoje={hoje} colunas={colunas} itens={itens} linkDia={(d) => link({ data: d, visao: celular ? "lista" : "dia" })} />
       )}
     </div>
   );
