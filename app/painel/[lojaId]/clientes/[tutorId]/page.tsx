@@ -115,7 +115,7 @@ async function Conteudo({ params }: { params: Promise<{ lojaId: string; tutorId:
                 <Link href={`${base}/pets/${p.id}`} className="flex flex-col text-sm">
                   <span className="font-medium text-marca-700 dark:text-marca-400">{p.nome}</span>
                   <span className="text-neutral-500">
-                    {p.especie === "gato" ? "Gato" : "Cão"}
+                    {p.especie === "gato" ? "Gato" : "Cachorro"}
                     {p.raca && ` · ${p.raca}`} · {NOME_PORTE[p.porte]} · pelagem {NOME_PELAGEM[p.pelagem].toLowerCase()}
                   </span>
                   {p.alergias && <span className="text-red-700 dark:text-red-400">Alergias: {p.alergias}</span>}
