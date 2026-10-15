@@ -6,6 +6,13 @@ describe("formatos", () => {
     expect(reaisParaCentavos("50")).toBe(5000);
     expect(reaisParaCentavos("50,5")).toBe(5050);
     expect(reaisParaCentavos("R$ 1.234,56")).toBe(123456);
+    // Teclado numérico só com ponto: "45.90" é R$ 45,90, não R$ 4.590,00.
+    expect(reaisParaCentavos("45.90")).toBe(4590);
+    expect(reaisParaCentavos("45.9")).toBe(4590);
+    expect(reaisParaCentavos("1.234")).toBe(123400);
+    expect(reaisParaCentavos("1.234.567")).toBe(123456700);
+    expect(reaisParaCentavos("45,999")).toBeNull();
+    expect(reaisParaCentavos("4,5,6")).toBeNull();
     expect(reaisParaCentavos("")).toBeNull();
     expect(reaisParaCentavos("abc")).toBeNull();
     expect(reaisParaCentavos("-1")).toBeNull();

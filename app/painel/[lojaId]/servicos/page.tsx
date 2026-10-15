@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Suspense } from "react";
 import { Aviso, Cartao, Carregando, Titulo, Vazio } from "@/components/ui";
 import { exigirLoja, minhasLojas, podeConfigurar } from "@/lib/painel/sessao";
@@ -68,8 +69,13 @@ async function Conteudo({ params }: { params: Promise<{ lojaId: string }> }) {
                     </span>
                     <span aria-hidden className="text-neutral-400 group-open:rotate-90">›</span>
                   </summary>
+                  <div className="border-t border-neutral-100 px-4 pt-3 dark:border-neutral-900">
+                    <Link href={`/painel/${lojaId}/precos?servico=${s.id}`} className="text-sm font-medium text-marca-700 underline dark:text-marca-400">
+                      Preços e tempos de {s.nome} ›
+                    </Link>
+                  </div>
                   {editavel && (
-                    <div className="border-t border-neutral-100 p-4 dark:border-neutral-900">
+                    <div className="p-4">
                       <EditarServico lojaId={lojaId} categorias={categorias} s={s} />
                     </div>
                   )}
