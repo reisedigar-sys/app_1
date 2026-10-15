@@ -91,8 +91,18 @@ test("tutor novo agenda 2 pets pelo fluxo e vê os agendamentos gravados", async
   await botao(page, "Pôr na agenda").click();
   expect((await convite).suggestedFilename()).toBe("hora-do-pet.ics");
 
+  // Quem já entrou e abre a página inicial vai direto para os agendamentos.
+  await page.goto("/");
+  await expect(page).toHaveURL(/\/conta\/agendamentos$/);
+
+  // No celular, a navegação da conta fica numa barra embaixo.
+  const barra = page.getByRole("navigation", { name: "Minha conta" });
+  await barra.getByRole("link", { name: "Pets" }).click();
+  await expect(page.getByRole("heading", { name: "Meus pets" })).toBeVisible();
+  expect((await barra.boundingBox())!.y).toBeGreaterThan(page.viewportSize()!.height / 2);
+  await barra.getByRole("link", { name: "Agenda" }).click();
+
   // Meus agendamentos: um por pet, em sequência
-  await page.getByRole("link", { name: "Ver meus agendamentos" }).click();
   const proximos = page.locator("section").filter({ has: page.getByRole("heading", { name: "Próximos" }) });
   // Só os cartões (o primeiro também tem a lista com o andamento do atendimento).
   const cartoes = proximos.locator(":scope > ul > li");
