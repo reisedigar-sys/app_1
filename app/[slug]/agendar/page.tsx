@@ -22,7 +22,9 @@ export default function AgendarPage({ params, searchParams }: PageProps<"/[slug]
 
 async function Conteudo({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const { slug } = await params;
-  const repetir = z.guid().safeParse((await searchParams).repetir);
+  const busca = await searchParams;
+  const repetir = z.guid().safeParse(busca.repetir);
+  const petInicial = z.guid().safeParse(busca.pet);
   const loja = await lojaPorSlug(slug);
   if (!loja) notFound();
   const tutor = await exigirTutor(`/${slug}/agendar`);
@@ -73,6 +75,7 @@ async function Conteudo({ params, searchParams }: { params: Promise<{ slug: stri
         catalogo={catalogo}
         consentimentoAnterior={Boolean(vinculo.data?.consentimento_contato_em)}
         inicial={pedidoParaRepetir(anterior.data, (pets.data ?? []) as PetTutor[], catalogo)}
+        petInicial={petInicial.success ? petInicial.data : undefined}
       />
     </>
   );

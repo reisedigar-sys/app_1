@@ -114,7 +114,15 @@ function duracaoLegivel(min: number) {
   return h === 0 ? `${m} min` : m === 0 ? `${h}h` : `${h}h${String(m).padStart(2, "0")}`;
 }
 
-type PropsFluxo = { loja: LojaFluxo; pets: PetTutor[]; catalogo: ServicoCatalogo[]; consentimentoAnterior: boolean; inicial?: PedidoInicial };
+type PropsFluxo = {
+  loja: LojaFluxo;
+  pets: PetTutor[];
+  catalogo: ServicoCatalogo[];
+  consentimentoAnterior: boolean;
+  inicial?: PedidoInicial;
+  /** "Agendar para Mel" em Meus pets: já começa com esse pet marcado. */
+  petInicial?: string;
+};
 
 /**
  * O roteador guarda a tela visitada (com o estado) para voltar instantaneamente. Depois de um agendamento
@@ -123,19 +131,20 @@ type PropsFluxo = { loja: LojaFluxo; pets: PetTutor[]; catalogo: ServicoCatalogo
 export function FluxoAgendamento(props: PropsFluxo) {
   const [versao, setVersao] = useState(0);
   // Um "repetir" só vale na primeira montagem; o próximo agendamento começa em branco.
-  return <Fluxo key={versao} {...props} inicial={versao === 0 ? props.inicial : undefined} reiniciar={() => setVersao(versao + 1)} />;
+  return <Fluxo key={versao} {...props} inicial={versao === 0 ? props.inicial : undefined} petInicial={versao === 0 ? props.petInicial : undefined} reiniciar={() => setVersao(versao + 1)} />;
 }
 
 /**
  * Agendamento em duas telas: "pedido" (pets, serviços e unidade) e "quando" (dia, profissional e horário), com a
  * revisão numa folha por cima. Toda regra de disponibilidade continua no banco; esta tela só chama as funções.
  */
-function Fluxo({ loja, pets, catalogo, consentimentoAnterior, inicial, reiniciar }: PropsFluxo & { reiniciar: () => void }) {
+function Fluxo({ loja, pets, catalogo, consentimentoAnterior, inicial, petInicial, reiniciar }: PropsFluxo & { reiniciar: () => void }) {
+  const petsIniciais = inicial?.pets ?? (pets.length === 1 ? [pets[0].id] : pets.some((p) => p.id === petInicial) ? [petInicial!] : []);
   const [etapa, setEtapa] = useState<Etapa>("pedido");
-  const [selecionados, setSelecionados] = useState<string[]>(() => inicial?.pets ?? (pets.length === 1 ? [pets[0].id] : []));
+  const [selecionados, setSelecionados] = useState<string[]>(petsIniciais);
   const [escolhas, setEscolhas] = useState<Record<string, Escolha>>(() =>
     Object.fromEntries(
-      (inicial?.pets ?? (pets.length === 1 ? [pets[0].id] : [])).map((id) => [
+      petsIniciais.map((id) => [
         id,
         { principal: inicial?.escolhas[id]?.principal, adicionais: inicial?.escolhas[id]?.adicionais ?? [], observacoes: "" },
       ]),
