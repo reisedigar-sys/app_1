@@ -125,9 +125,12 @@ Cuidados:
   testes E2E, use os helpers de `e2e/util.ts`, que miram só elementos visíveis.
 - IDs: valide com `z.guid()` (os IDs do seed não são UUID v4).
 - Horário informado pela loja é local: a conversão para UTC é feita no banco com `petshop.fuso` (ex.: `criar_bloqueio`).
-- Painel: menu do dia a dia (Hoje, Agenda, Espera, Mensagens, Configurar) fica embaixo no celular; as telas de
+- Painel: menu do dia a dia (Hoje, Agenda, Clientes, Espera, Mensagens, Configurar) fica embaixo no celular; as telas de
   configuração ficam em "Configurar" (`/painel/{loja}/configurar` + menu "Configuração da loja"). Sem `visao` na URL,
   a agenda abre em lista no celular (pelo user-agent) e em colunas no computador; os testes E2E rodam como celular.
+- Clientes (migração 014): `clientes_da_loja` busca por nome do tutor ou do pet (sem acento, `app.sem_acento`) ou
+  por 4+ dígitos do telefone; só dono, gerente e atendente. "Agendar de novo" abre `/agenda/novo?cliente=&pet=` com os
+  serviços do último atendimento do pet.
 
 ## Estado atual
 - Semana 1 (fundação) concluída.

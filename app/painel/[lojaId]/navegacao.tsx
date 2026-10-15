@@ -27,6 +27,7 @@ const icone = (d: ReactNode) => (
 const OPERACAO = [
   ["", "Hoje", false, icone(<><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></>)],
   ["/agenda", "Agenda", false, icone(<><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" /></>)],
+  ["/clientes", "Clientes", true, icone(<><circle cx="9" cy="8" r="3.5" /><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6.5 6.5 0 0 1 3.5 6" /></>)],
   ["/lista-espera", "Espera", true, icone(<><path d="M8 6h13M8 12h13M8 18h13" /><circle cx="4" cy="6" r="1" /><circle cx="4" cy="12" r="1" /><circle cx="4" cy="18" r="1" /></>)],
   ["/mensagens", "Mensagens", true, icone(<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z" />)],
   ["/configurar", "Configurar", false, icone(<><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z" /></>)],
@@ -36,7 +37,7 @@ const ehConfiguracao = (caminho: string, base: string) => CONFIGURACAO.some(([s]
 
 /**
  * Menu do dia a dia: barra fixa embaixo no celular (ao alcance do polegar) e abas no computador.
- * A ficha do pet e do atendimento contam como Agenda.
+ * A ficha do atendimento conta como Agenda; a do pet, como Clientes.
  */
 export function NavegacaoOperacao({ lojaId, operacao }: { lojaId: string; operacao: boolean }) {
   const atual = usePathname();
@@ -44,7 +45,8 @@ export function NavegacaoOperacao({ lojaId, operacao }: { lojaId: string; operac
   const ativo = (sufixo: string) => {
     if (sufixo === "") return atual === base;
     if (sufixo === "/configurar") return ehConfiguracao(atual, base);
-    if (sufixo === "/agenda") return atual.startsWith(`${base}/agenda`) || atual.startsWith(`${base}/pets`);
+    if (sufixo === "/agenda") return atual.startsWith(`${base}/agenda`);
+    if (sufixo === "/clientes") return atual.startsWith(`${base}/clientes`) || atual.startsWith(`${base}/pets`);
     return atual.startsWith(base + sufixo);
   };
   return (

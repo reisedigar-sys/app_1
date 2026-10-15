@@ -134,7 +134,14 @@ async function Conteudo({ params }: { params: Promise<{ lojaId: string; agendame
       </Cartao>
 
       <Cartao>
-        <h2 className="mb-2 font-medium">Tutor</h2>
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <h2 className="font-medium">Tutor</h2>
+          {operacao && a.tutor && (
+            <Link href={`/painel/${lojaId}/clientes/${a.tutor.id}`} className="text-sm font-medium text-marca-700 dark:text-marca-400">
+              Ficha do cliente
+            </Link>
+          )}
+        </div>
         <p className="text-sm">
           <strong>{a.tutor?.nome}</strong> · {telefoneLegivel(a.tutor?.telefone_e164)}
         </p>
