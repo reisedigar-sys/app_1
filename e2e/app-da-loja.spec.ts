@@ -19,7 +19,7 @@ test("tutor vê as lojas em que é cliente e liga ou desliga os avisos pelo What
   await campo(page, "Senha").fill("senha123");
   await botao(page, "Entrar").click();
   await expect(page.getByRole("heading", { name: "Minhas lojas" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Avisos no celular" }).filter({ visible: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Avisos no celular" })).toHaveCount(0);
 
   const centro = page.getByRole("listitem").filter({ hasText: "Pet Feliz Centro" }).filter({ visible: true });
   await expect(page.getByRole("listitem").filter({ hasText: "Banho & Cia Moema" }).filter({ visible: true })).toBeVisible();
@@ -28,4 +28,8 @@ test("tutor vê as lojas em que é cliente e liga ou desliga os avisos pelo What
   await expect(centro).toContainText("Sem avisos pelo WhatsApp");
   await centro.getByRole("button", { name: "Receber avisos" }).click();
   await expect(centro).toContainText("Recebe avisos pelo WhatsApp");
+
+  // Os avisos no celular valem para o aparelho, então ficam na conta.
+  await page.getByRole("link", { name: "Conta" }).filter({ visible: true }).click();
+  await expect(page.getByRole("heading", { name: "Avisos no celular" }).filter({ visible: true })).toBeVisible();
 });

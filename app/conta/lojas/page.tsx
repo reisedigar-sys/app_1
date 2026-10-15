@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-import { AvisosPush } from "@/components/avisos-push";
 import { BotaoEnviar, FormAcao } from "@/components/form-acao";
 import { BotaoLink, Cartao, Carregando, Titulo, Vazio } from "@/components/ui";
 import { exigirTutor } from "@/lib/conta/sessao";
@@ -43,11 +42,6 @@ async function Conteudo() {
 
   return (
     <>
-      <Cartao>
-        <h2 className="mb-2 font-medium">Avisos no celular</h2>
-        <AvisosPush escopo="tutor" texto="Receba aqui as confirmações, os lembretes e o aviso de pet pronto de todas as suas lojas, de graça." />
-      </Cartao>
-
       {lojas.length === 0 ? (
         <Vazio>Você ainda não agendou em nenhuma loja. Use o link que o seu petshop passou.</Vazio>
       ) : (

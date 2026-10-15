@@ -154,7 +154,8 @@ async function Lista({ searchParams }: { searchParams: Promise<Record<string, st
     if (["concluido", "cancelado"].includes(a.status)) repetir.add(a.id);
   }
 
-  const cartao = (a: (typeof data)[number], futuro: boolean, destaque = false) => {
+  const cartao = (a: (typeof data)[number], futuro: boolean) => {
+    const destaque = futuro; // todo horário que vem tem contagem e andamento, não só o primeiro
     const [rotulo, cor] = STATUS[a.status];
     const alteravel = futuro && ["agendado", "confirmado"].includes(a.status);
     const gratuito = new Date(a.cancelamento_gratuito_ate).getTime() > agora;
@@ -213,7 +214,7 @@ async function Lista({ searchParams }: { searchParams: Promise<Record<string, st
       {filaDeEspera}
       <section aria-labelledby="t-proximos">
         <h2 id="t-proximos" className="mb-2 font-semibold">Próximos</h2>
-        {proximos.length ? <ul className="flex flex-col gap-2">{proximos.map((a, i) => cartao(a, true, i === 0))}</ul> : <Vazio>Nenhum agendamento futuro.</Vazio>}
+        {proximos.length ? <ul className="flex flex-col gap-2">{proximos.map((a) => cartao(a, true))}</ul> : <Vazio>Nenhum agendamento futuro.</Vazio>}
       </section>
       {anteriores.length > 0 && (
         <section aria-labelledby="t-anteriores">

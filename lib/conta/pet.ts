@@ -26,35 +26,69 @@ export type Pet = {
   foto_url: string | null;
 };
 
+export const ESPECIES_PET = [
+  ["cao", "Cachorro"],
+  ["gato", "Gato"],
+] as const;
+
+export const nomeEspecie = (especie: string) => (especie === "gato" ? "Gato" : "Cachorro");
+
+type Sugestao = readonly [Pet["porte"], Pet["pelagem"]];
+
 /**
- * Raças comuns com o porte e a pelagem mais frequentes, só para sugerir no cadastro (o tutor confirma).
- * Ordem: o que mais aparece nos petshops primeiro.
+ * Raças comuns por espécie, com o porte e a pelagem mais frequentes, só para sugerir no cadastro (o tutor confirma).
+ * Na tela: SRD primeiro, depois em ordem alfabética (`racasEmOrdem`). Quem não acha a raça escolhe "Outra" e digita.
  */
-export const RACAS_SUGERIDAS: Record<string, readonly [Pet["porte"], Pet["pelagem"]]> = {
-  SRD: ["medio", "curta"],
-  "Shih Tzu": ["pequeno", "longa"],
-  "Yorkshire Terrier": ["mini", "longa"],
-  "Lhasa Apso": ["pequeno", "longa"],
-  Poodle: ["pequeno", "media"],
-  "Spitz Alemão (Lulu da Pomerânia)": ["mini", "longa"],
-  Maltês: ["mini", "longa"],
-  Pinscher: ["mini", "curta"],
-  Chihuahua: ["mini", "curta"],
-  "Bulldog Francês": ["pequeno", "curta"],
-  Pug: ["pequeno", "curta"],
-  Dachshund: ["pequeno", "curta"],
-  Beagle: ["medio", "curta"],
-  Schnauzer: ["pequeno", "media"],
-  "Cocker Spaniel": ["medio", "longa"],
-  "Border Collie": ["medio", "media"],
-  "Golden Retriever": ["grande", "longa"],
-  Labrador: ["grande", "curta"],
-  "Pastor Alemão": ["grande", "media"],
-  "Husky Siberiano": ["grande", "media"],
-  Rottweiler: ["grande", "curta"],
-  "Chow Chow": ["grande", "longa"],
-  "São Bernardo": ["gigante", "longa"],
-  "Gato SRD": ["pequeno", "curta"],
-  Persa: ["pequeno", "longa"],
-  "Maine Coon": ["medio", "longa"],
+export const RACAS: Record<"cao" | "gato", Record<string, Sugestao>> = {
+  cao: {
+    SRD: ["medio", "curta"],
+    "Shih Tzu": ["pequeno", "longa"],
+    "Yorkshire Terrier": ["mini", "longa"],
+    "Lhasa Apso": ["pequeno", "longa"],
+    Poodle: ["pequeno", "media"],
+    "Spitz Alemão (Lulu da Pomerânia)": ["mini", "longa"],
+    Maltês: ["mini", "longa"],
+    Pinscher: ["mini", "curta"],
+    Chihuahua: ["mini", "curta"],
+    "Bulldog Francês": ["pequeno", "curta"],
+    "Bulldog Inglês": ["medio", "curta"],
+    Pug: ["pequeno", "curta"],
+    Dachshund: ["pequeno", "curta"],
+    Beagle: ["medio", "curta"],
+    Schnauzer: ["pequeno", "media"],
+    "Bichon Frisé": ["pequeno", "longa"],
+    "Cavalier King Charles": ["pequeno", "longa"],
+    "West Highland Terrier": ["pequeno", "media"],
+    "Jack Russell Terrier": ["pequeno", "curta"],
+    "Cocker Spaniel": ["medio", "longa"],
+    "Border Collie": ["medio", "media"],
+    "Pit Bull": ["medio", "curta"],
+    Boxer: ["grande", "curta"],
+    "Golden Retriever": ["grande", "longa"],
+    Labrador: ["grande", "curta"],
+    "Pastor Alemão": ["grande", "media"],
+    "Husky Siberiano": ["grande", "media"],
+    Akita: ["grande", "media"],
+    Rottweiler: ["grande", "curta"],
+    "Chow Chow": ["grande", "longa"],
+    Dálmata: ["grande", "curta"],
+    "São Bernardo": ["gigante", "longa"],
+    "Dogue Alemão": ["gigante", "curta"],
+  },
+  gato: {
+    SRD: ["pequeno", "curta"],
+    Persa: ["pequeno", "longa"],
+    Siamês: ["pequeno", "curta"],
+    "Maine Coon": ["medio", "longa"],
+    Angorá: ["pequeno", "longa"],
+    Ragdoll: ["medio", "longa"],
+    "British Shorthair": ["pequeno", "curta"],
+    Bengal: ["pequeno", "curta"],
+    Sphynx: ["pequeno", "curta"],
+    Himalaio: ["pequeno", "longa"],
+  },
 };
+
+/** SRD no topo (o mais comum) e o resto de A a Z. */
+export const racasEmOrdem = (especie: "cao" | "gato") =>
+  Object.keys(RACAS[especie]).sort((a, b) => (a === "SRD" ? -1 : b === "SRD" ? 1 : a.localeCompare(b, "pt-BR")));

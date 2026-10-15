@@ -6,9 +6,6 @@ import { mensagemDeErro } from "@/lib/painel/erros";
 import type { Estado } from "@/lib/painel/estado";
 import { NOME_PELAGEM, NOME_PORTE, PELAGENS, PORTES, reaisParaCentavos } from "@/lib/painel/formatos";
 
-export type Celula = { preco: string; duracao: string };
-export type Grade = Record<string, Celula>; // chave: "porte.pelagem"
-
 export async function salvarPrecos(_: Estado, form: FormData): Promise<Estado> {
   const { supabase, lojaId } = await iniciarAcao(form);
   const servicoId = z.guid().parse(form.get("servico_id"));

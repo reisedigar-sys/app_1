@@ -251,7 +251,7 @@ export function NovoAtendimento({
               <Campo rotulo="Nome do pet" nome="pet_nome" value={novoPet.nome} onChange={(e) => setNovoPet({ ...novoPet, nome: e.target.value })} maxLength={60} />
               <div className="grid grid-cols-2 gap-3">
                 <Selecao rotulo="Espécie" nome="pet_especie" value={novoPet.especie} onChange={(e) => setNovoPet({ ...novoPet, especie: e.target.value })}>
-                  <option value="cao">Cão</option>
+                  <option value="cao">Cachorro</option>
                   <option value="gato">Gato</option>
                 </Selecao>
                 <Campo rotulo="Raça (opcional)" nome="pet_raca" value={novoPet.raca} onChange={(e) => setNovoPet({ ...novoPet, raca: e.target.value })} maxLength={60} />

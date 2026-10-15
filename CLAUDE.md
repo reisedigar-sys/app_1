@@ -134,6 +134,9 @@ Cuidados:
 - Resultados (migração 015): `resultados_do_mes` (só dono e gerência) e `petshop_indicador.faltas_antes_pct`
   (referência informada pela loja, fora de `petshop` porque a loja é pública). "Faltas evitadas" é sempre estimativa:
   taxa de antes × atendimentos realizados − faltas reais (`lib/painel/resultados.ts`).
+- Preços (`/precos`): "Preço para todas", "Mesmo preço e tempo para todos" (abre assim em adicional sem tabela),
+  copiar a tabela de outro serviço e aviso antes de trocar de serviço sem salvar (`lib/painel/precos.ts`). Valores
+  aceitam vírgula ou ponto como decimal ("45.90" = R$ 45,90; `reaisParaCentavos`).
 
 ## Estado atual
 - Semana 1 (fundação) concluída.

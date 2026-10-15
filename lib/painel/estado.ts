@@ -7,6 +7,8 @@ export type Estado = {
   erros?: Record<string, string>;
   /** Carga completa da página (não navegação do roteador); usado depois de login/cadastro. */
   destino?: string;
+  /** Próximo passo sugerido junto da mensagem (ex.: cadastrar os preços do serviço recém-criado). */
+  proximo?: { href: string; rotulo: string };
 };
 
 export const estadoInicial: Estado = {};

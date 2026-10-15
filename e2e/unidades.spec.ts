@@ -24,6 +24,13 @@ test("dona da rede abre uma unidade nova e copia o catálogo da outra", async ({
   await abrir(page, "Preços");
   await page.getByRole("navigation", { name: "Serviço" }).getByRole("link", { name: "Tosa completa" }).click();
   await expect(campo(page, "Duração em minutos Pequeno, pelagem curta")).toHaveValue("90");
+
+  // A tabela de outro serviço serve de ponto de partida
+  await campo(page, "Copiar a tabela de").selectOption({ label: "Banho" });
+  await botao(page, /^Copiar$/).click();
+  await expect(campo(page, "Preço Pequeno, pelagem curta")).toHaveValue("50,00");
+  await expect(campo(page, "Duração em minutos Pequeno, pelagem curta")).toHaveValue("45");
+  await expect(texto(page, "Alterações ainda não salvas.")).toBeVisible();
 });
 
 test("gerente de uma unidade só não vê a opção de copiar", async ({ page }) => {

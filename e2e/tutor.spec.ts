@@ -164,6 +164,8 @@ test("tutor com histórico vê a contagem do próximo, desiste de cancelar e age
   const proximos = page.locator("section").filter({ has: page.getByRole("heading", { name: "Próximos" }) });
   const primeiro = proximos.locator(":scope > ul > li").first();
   await expect(primeiro.getByText(/^(Hoje|Amanhã|Daqui a \d+ dias)$/)).toBeVisible();
+  for (const cartao of await proximos.locator(":scope > ul > li").all())
+    await expect(cartao.getByRole("list", { name: "Andamento do atendimento" })).toBeVisible();
 
   // Cancelar abre a folha com o prazo; "Manter horário" fecha sem cancelar.
   await primeiro.getByRole("button", { name: "Cancelar" }).click();
@@ -202,10 +204,19 @@ test("no cadastro, a raça sugere porte e pelagem e o resto fica recolhido", asy
   await expect(page.getByRole("heading", { name: "Cadastrar pet" })).toBeVisible();
 
   await expect(campo(page, "Alergias")).toBeHidden();
-  await campo(page, "Raça").fill("Shih Tzu");
+  await expect(page.getByRole("option", { name: "Cachorro" })).toBeAttached();
+  const racas = await campo(page, "Raça").locator("option").allTextContents();
+  expect(racas.slice(0, 4)).toEqual(["Escolha", "SRD (sem raça definida)", "Akita", "Beagle"]);
+  expect(racas.at(-1)).toBe("Outra raça");
+  await campo(page, "Raça").selectOption("Shih Tzu");
   await expect(texto(page, /Marcamos Pequeno e pelagem longa/)).toBeVisible();
   await expect(page.getByRole("radio", { name: /^Pequeno / })).toBeChecked();
   await expect(page.getByRole("radio", { name: "Longa", exact: true })).toBeChecked();
+  await campo(page, "Raça").selectOption("Outra raça");
+  await expect(campo(page, "Qual raça?")).toBeVisible();
+  await campo(page, "Espécie").selectOption("Gato");
+  await expect(page.getByRole("option", { name: "Persa" })).toBeAttached();
+  await expect(campo(page, "Qual raça?")).toBeHidden();
   await page.getByText("Saúde e jeito do pet").filter({ visible: true }).click();
   await expect(campo(page, "Alergias")).toBeVisible();
 });

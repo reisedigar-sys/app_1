@@ -28,10 +28,14 @@ export async function criarServico(_: Estado, form: FormData): Promise<Estado> {
   const { supabase, lojaId } = await iniciarAcao(form);
   const dados = servico.safeParse(dadosDoForm(form));
   if (!dados.success) return errosDeValidacao(dados.error);
-  const { error } = await supabase.from("servico").insert({ ...dados.data, petshop_id: lojaId });
+  const { data, error } = await supabase.from("servico").insert({ ...dados.data, petshop_id: lojaId }).select("id").single();
   if (error) return { ok: false, mensagem: mensagemDeErro(error) };
   revalidarLoja(lojaId);
-  return { ok: true, mensagem: `Serviço criado. Agora cadastre os preços e quem faz ${dados.data.nome}.` };
+  return {
+    ok: true,
+    mensagem: `Serviço criado. Agora cadastre os preços e quem faz ${dados.data.nome}.`,
+    proximo: { href: `/painel/${lojaId}/precos?servico=${data.id}`, rotulo: `Cadastrar preços de ${dados.data.nome} ›` },
+  };
 }
 
 export async function salvarServico(_: Estado, form: FormData): Promise<Estado> {
