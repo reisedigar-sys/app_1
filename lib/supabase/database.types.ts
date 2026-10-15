@@ -853,6 +853,33 @@ export type Database = {
           },
         ];
       };
+      petshop_indicador: {
+        Row: {
+          atualizado_em: string;
+          faltas_antes_pct: number | null;
+          petshop_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          atualizado_em?: string;
+          faltas_antes_pct?: number | null;
+          petshop_id: string;
+        };
+        Update: {
+          atualizado_em?: string;
+          faltas_antes_pct?: number | null;
+          petshop_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "petshop_indicador_petshop_id_fkey";
+            columns: ["petshop_id"];
+            isOneToOne: true;
+            referencedRelation: "petshop";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       petshop_membro: {
         Row: {
           criado_em: string;
@@ -1596,6 +1623,7 @@ export type Database = {
         Returns: Json;
       };
       remover_push: { Args: { p_endpoint: string; p_escopo: string }; Returns: undefined };
+      resultados_do_mes: { Args: { p_mes?: string; p_petshop_id: string }; Returns: Json };
       salvar_perfil_tutor: { Args: { p_nome: string; p_telefone: string }; Returns: string };
       timemultirange: { Args: Record<PropertyKey, never>; Returns: unknown };
       unidades_para_pedido: {

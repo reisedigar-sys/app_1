@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { Aviso, BotaoLink, Cartao, Carregando, Vazio } from "@/components/ui";
 import { dataNoFuso, diaPorExtenso } from "@/lib/painel/agenda";
-import { exigirLoja, podeOperar } from "@/lib/painel/sessao";
+import { exigirLoja, podeConfigurar, podeOperar } from "@/lib/painel/sessao";
 import { createClient } from "@/lib/supabase/server";
 import { AoVivo } from "./agenda/ao-vivo";
 import { LinkDaLoja } from "./link-da-loja";
@@ -106,9 +106,16 @@ async function Conteudo({ params }: { params: Promise<{ lojaId: string }> }) {
         />
       )}
 
-      <Link href={`${base}/agenda`} className="text-sm font-medium text-marca-700 dark:text-marca-400">
-        Ver a agenda completa ›
-      </Link>
+      <div className="flex flex-wrap gap-x-6 gap-y-2">
+        <Link href={`${base}/agenda`} className="text-sm font-medium text-marca-700 dark:text-marca-400">
+          Ver a agenda completa ›
+        </Link>
+        {podeConfigurar(papel) && (
+          <Link href={`${base}/resultados`} className="text-sm font-medium text-marca-700 dark:text-marca-400">
+            Resultados do mês ›
+          </Link>
+        )}
+      </div>
 
       {operacao && completo && (
         <Cartao>

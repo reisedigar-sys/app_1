@@ -131,6 +131,9 @@ Cuidados:
 - Clientes (migração 014): `clientes_da_loja` busca por nome do tutor ou do pet (sem acento, `app.sem_acento`) ou
   por 4+ dígitos do telefone; só dono, gerente e atendente. "Agendar de novo" abre `/agenda/novo?cliente=&pet=` com os
   serviços do último atendimento do pet.
+- Resultados (migração 015): `resultados_do_mes` (só dono e gerência) e `petshop_indicador.faltas_antes_pct`
+  (referência informada pela loja, fora de `petshop` porque a loja é pública). "Faltas evitadas" é sempre estimativa:
+  taxa de antes × atendimentos realizados − faltas reais (`lib/painel/resultados.ts`).
 
 ## Estado atual
 - Semana 1 (fundação) concluída.
