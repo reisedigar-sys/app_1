@@ -37,7 +37,7 @@ type Sugestao = readonly [Pet["porte"], Pet["pelagem"]];
 
 /**
  * Raças comuns por espécie, com o porte e a pelagem mais frequentes, só para sugerir no cadastro (o tutor confirma).
- * Ordem: SRD primeiro, depois o que mais aparece nos petshops. Quem não acha a raça escolhe "Outra" e digita.
+ * Na tela: SRD primeiro, depois em ordem alfabética (`racasEmOrdem`). Quem não acha a raça escolhe "Outra" e digita.
  */
 export const RACAS: Record<"cao" | "gato", Record<string, Sugestao>> = {
   cao: {
@@ -88,3 +88,7 @@ export const RACAS: Record<"cao" | "gato", Record<string, Sugestao>> = {
     Himalaio: ["pequeno", "longa"],
   },
 };
+
+/** SRD no topo (o mais comum) e o resto de A a Z. */
+export const racasEmOrdem = (especie: "cao" | "gato") =>
+  Object.keys(RACAS[especie]).sort((a, b) => (a === "SRD" ? -1 : b === "SRD" ? 1 : a.localeCompare(b, "pt-BR")));
