@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
+import { PassosAtendimento } from "@/components/agenda/passos-atendimento";
 import { Aviso, BotaoLink, Carregando, Titulo, Vazio } from "@/components/ui";
 import { exigirTutor } from "@/lib/conta/sessao";
 import { formatarReais } from "@/lib/painel/formatos";
@@ -47,6 +48,10 @@ function quando(iso: string, fuso: string) {
   return new Intl.DateTimeFormat("pt-BR", { timeZone: fuso, weekday: "short", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" })
     .format(new Date(iso))
     .replace(",", "");
+}
+
+function hora(iso: string, fuso: string) {
+  return new Intl.DateTimeFormat("pt-BR", { timeZone: fuso, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(iso));
 }
 
 async function Lista({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
@@ -112,7 +117,7 @@ async function Lista({ searchParams }: { searchParams: Promise<Record<string, st
       </Vazio>
     );
 
-  const cartao = (a: (typeof data)[number], futuro: boolean) => {
+  const cartao = (a: (typeof data)[number], futuro: boolean, destaque = false) => {
     const [rotulo, cor] = STATUS[a.status];
     const alteravel = futuro && ["agendado", "confirmado"].includes(a.status);
     const gratuito = new Date(a.cancelamento_gratuito_ate).getTime() > agora;
@@ -133,6 +138,11 @@ async function Lista({ searchParams }: { searchParams: Promise<Record<string, st
           </Link>{" "}
           · {a.profissional_nome} · {formatarReais(a.preco_total_centavos)}
         </p>
+        {destaque && (
+          <div className="rounded-xl bg-neutral-50 p-3 dark:bg-neutral-900">
+            <PassosAtendimento status={a.status} inicio={hora(a.inicio, a.loja_fuso)} pronto={hora(a.fim, a.loja_fuso)} />
+          </div>
+        )}
         {alteravel && (
           <div className="flex flex-wrap items-start gap-4 pt-1">
             <BotaoLink href={`/conta/agendamentos/${a.id}/remarcar`} variante="secundario">
@@ -159,7 +169,7 @@ async function Lista({ searchParams }: { searchParams: Promise<Record<string, st
       {filaDeEspera}
       <section aria-labelledby="t-proximos">
         <h2 id="t-proximos" className="mb-2 font-semibold">Próximos</h2>
-        {proximos.length ? <ul className="flex flex-col gap-2">{proximos.map((a) => cartao(a, true))}</ul> : <Vazio>Nenhum agendamento futuro.</Vazio>}
+        {proximos.length ? <ul className="flex flex-col gap-2">{proximos.map((a, i) => cartao(a, true, i === 0))}</ul> : <Vazio>Nenhum agendamento futuro.</Vazio>}
       </section>
       {anteriores.length > 0 && (
         <section aria-labelledby="t-anteriores">

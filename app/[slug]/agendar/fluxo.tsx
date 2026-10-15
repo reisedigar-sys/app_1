@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { Calendario, somarMes } from "@/components/agenda/calendario";
 import { HorariosLivres } from "@/components/agenda/horarios";
+import { PassosAtendimento } from "@/components/agenda/passos-atendimento";
 import { Avatar } from "@/components/agenda/profissional";
 import { Aviso, Botao, Caixa, classeInput } from "@/components/ui";
 import type { Horario, ItemPedido, Profissional, ResumoPedido, Unidade } from "@/lib/disponibilidade";
@@ -73,6 +74,32 @@ function dataHoraLegivel(iso: string, fuso: string) {
   return new Intl.DateTimeFormat("pt-BR", { timeZone: fuso, day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" })
     .format(new Date(iso))
     .replace(",", " às");
+}
+
+/** Arquivo de calendário (.ics) com o atendimento, para o tutor guardar no celular. */
+function baixarConvite(e: { id: string; titulo: string; local: string; inicio: string; fim: string }) {
+  const utc = (iso: string) => new Date(iso).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+  const texto = (t: string) => t.replace(/[\\;,]/g, (c) => `\\${c}`);
+  const ics = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//Hora do Pet//PT-BR",
+    "BEGIN:VEVENT",
+    `UID:${e.id}@horadopet`,
+    `DTSTAMP:${utc(new Date().toISOString())}`,
+    `DTSTART:${utc(e.inicio)}`,
+    `DTEND:${utc(e.fim)}`,
+    `SUMMARY:${texto(e.titulo)}`,
+    `LOCATION:${texto(e.local)}`,
+    "END:VEVENT",
+    "END:VCALENDAR",
+  ].join("\r\n");
+  const url = URL.createObjectURL(new Blob([ics], { type: "text/calendar;charset=utf-8" }));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "hora-do-pet.ics";
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 /** "até 14/10 às 12:00", ou o aviso de que o prazo gratuito já passou (cancelar continua possível; a loja é avisada). */
@@ -306,23 +333,55 @@ function Fluxo({ loja, pets, catalogo, consentimentoAnterior, inicial, reiniciar
   }
 
   // ---- telas ---------------------------------------------------------------
-  if (etapa === "pronto" && resumo && horario && dia) {
+  if (etapa === "pronto" && resumo && horario && dia && unidade) {
+    const nomes = selecionados.map((id) => petPorId.get(id)!.nome);
+    const quem = nomes.length > 1 ? `${nomes.slice(0, -1).join(", ")} e ${nomes.at(-1)}` : nomes[0];
+    const pronto = horaLegivel(resumo.retirada_estimada, loja.fuso);
+    const mapa = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([unidade.nome, unidade.endereco].filter(Boolean).join(", "))}`;
     return (
-      <div className="flex flex-col gap-4">
-        <Aviso tipo="ok">
-          <strong>Agendamento confirmado!</strong> {resumo.agendamentos.length > 1 ? `${resumo.agendamentos.length} pets` : "Seu pet"} em{" "}
-          {diaLongo(dia, loja.hoje).toLowerCase()} às {horario.hora}, na {unidade?.nome}.
-        </Aviso>
-        <div className="rounded-2xl border border-neutral-200 bg-white p-4 text-sm dark:border-neutral-800 dark:bg-neutral-950">
-          <p>Pronto para buscar por volta das <strong>{horaLegivel(resumo.retirada_estimada, loja.fuso)}</strong></p>
-          <p>Total: <strong>{formatarReais(resumo.total_centavos)}</strong>, pago na loja.</p>
+      <div className="flex flex-col gap-5">
+        <div className="flex flex-col items-center gap-2 pt-2 text-center" role="status">
+          <span aria-hidden className="flex size-16 items-center justify-center rounded-full bg-emerald-50 text-3xl font-extrabold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
+            ✓
+          </span>
+          <h2 className="text-2xl font-bold">Horário {nomes.length > 1 ? "dos pets" : `de ${quem}`} garantido</h2>
+          <p className="text-sm text-neutral-500">
+            {diaLongo(dia, loja.hoje)} às {horario.hora} · {unidade.nome}
+          </p>
         </div>
-        <Botao variante="secundario" onClick={reiniciar}>
-          Fazer outro agendamento
-        </Botao>
-        <Link href="/conta/agendamentos" className="text-center font-medium text-marca-700 underline dark:text-marca-400">
-          Ver meus agendamentos
-        </Link>
+        <section aria-labelledby="t-como-vai-ser" className="rounded-2xl bg-neutral-50 p-4 dark:bg-neutral-900">
+          <h3 id="t-como-vai-ser" className="mb-3 font-titulo font-bold">Como vai ser</h3>
+          <PassosAtendimento status="agendado" inicio={horario.hora} pronto={pronto} />
+          <p className="mt-3 border-t border-neutral-200 pt-3 text-sm dark:border-neutral-800">
+            Total: <strong>{formatarReais(resumo.total_centavos)}</strong>, pago na loja.
+          </p>
+        </section>
+        <div className="grid grid-cols-2 gap-2">
+          <Botao
+            type="button"
+            variante="secundario"
+            onClick={() =>
+              baixarConvite({
+                id: resumo.pedido_id,
+                titulo: `Banho e tosa: ${quem} (${unidade.nome})`,
+                local: [unidade.nome, unidade.endereco].filter(Boolean).join(", "),
+                inicio: resumo.agendamentos[0]?.inicio ?? horario.inicio,
+                fim: resumo.retirada_estimada,
+              })
+            }
+          >
+            Pôr na agenda
+          </Botao>
+          <a href={mapa} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center justify-center rounded-lg border border-neutral-300 bg-white px-4 text-sm font-medium dark:border-neutral-700 dark:bg-neutral-900">
+            Como chegar
+          </a>
+          <Botao variante="secundario" onClick={reiniciar}>
+            Agendar outro pet
+          </Botao>
+          <Link href="/conta/agendamentos" className="inline-flex min-h-11 items-center justify-center rounded-lg px-4 text-sm font-medium text-marca-700 underline dark:text-marca-400">
+            Ver meus agendamentos
+          </Link>
+        </div>
       </div>
     );
   }

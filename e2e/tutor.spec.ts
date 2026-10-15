@@ -85,14 +85,20 @@ test("tutor novo agenda 2 pets pelo fluxo e vê os agendamentos gravados", async
   await expect(revisao.getByText("Quem estiver livre")).toBeVisible();
   await revisao.getByLabel(/Aceito receber lembretes/).check();
   await revisao.getByRole("button", { name: /^Confirmar · R\$/ }).click();
-  await expect(texto(page, "Agendamento confirmado!")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Horário dos pets garantido" })).toBeVisible();
+  await expect(page.getByRole("list", { name: "Andamento do atendimento" }).filter({ visible: true })).toContainText("Pronto para buscar");
+  const convite = page.waitForEvent("download");
+  await botao(page, "Pôr na agenda").click();
+  expect((await convite).suggestedFilename()).toBe("hora-do-pet.ics");
 
   // Meus agendamentos: um por pet, em sequência
   await page.getByRole("link", { name: "Ver meus agendamentos" }).click();
   const proximos = page.locator("section").filter({ has: page.getByRole("heading", { name: "Próximos" }) });
-  await expect(proximos.getByRole("listitem")).toHaveCount(2);
-  const rex = proximos.getByRole("listitem").filter({ hasText: "Rex" });
-  const pipoca = proximos.getByRole("listitem").filter({ hasText: "Pipoca" });
+  // Só os cartões (o primeiro também tem a lista com o andamento do atendimento).
+  const cartoes = proximos.locator(":scope > ul > li");
+  await expect(cartoes).toHaveCount(2);
+  const rex = cartoes.filter({ hasText: "Rex" });
+  const pipoca = cartoes.filter({ hasText: "Pipoca" });
   // Rex primeiro, às 10:00; Pipoca em seguida, depois do banho do Rex e da limpeza (o horário exato depende do
   // profissional que a loja escolheu, porque cada um tem o seu tempo).
   await expect(rex).toContainText("10:00");
@@ -103,7 +109,7 @@ test("tutor novo agenda 2 pets pelo fluxo e vê os agendamentos gravados", async
   await pipoca.getByText("Cancelar", { exact: true }).click();
   await pipoca.getByRole("button", { name: "Confirmar cancelamento" }).click();
   await expect(texto(page, "Agendamento cancelado.")).toBeVisible();
-  await expect(proximos.getByRole("listitem")).toHaveCount(1);
+  await expect(cartoes).toHaveCount(1);
 
   // Remarcar o Rex para as 15:00 do mesmo dia
   await rex.getByRole("link", { name: "Remarcar" }).click();
@@ -112,14 +118,14 @@ test("tutor novo agenda 2 pets pelo fluxo e vê os agendamentos gravados", async
   await page.getByRole("group", { name: "Tarde" }).getByRole("button", { name: "15:00" }).click();
   await page.getByRole("button", { name: /Remarcar para .* às 15:00/ }).click();
   await expect(texto(page, "Agendamento remarcado.")).toBeVisible();
-  await expect(proximos.getByRole("listitem").filter({ hasText: "Rex" })).toContainText("15:00");
+  await expect(cartoes.filter({ hasText: "Rex" })).toContainText("15:00");
 
   // Novo agendamento: o fluxo recomeça do início, não reabre a confirmação anterior.
   await page.getByRole("link", { name: "+ Novo agendamento" }).click();
   await page.waitForURL(/\/(pet-feliz-centro\/agendar|conta\/lojas)$/);
   if (page.url().endsWith("/conta/lojas")) await page.goto("/pet-feliz-centro/agendar");
   await expect(page.getByRole("heading", { name: "Quem vai tomar banho?" }).filter({ visible: true })).toBeVisible();
-  await expect(texto(page, "Agendamento confirmado!")).toHaveCount(0);
+  await expect(texto(page, /garantido$/)).toHaveCount(0);
 
   // Repetir o último pela página da loja: pets e serviços já vêm escolhidos (a rede tem 2 unidades, então a escolha
   // da unidade continua na tela).
