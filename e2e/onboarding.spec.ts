@@ -50,6 +50,7 @@ test("loja nova se configura sozinha até o checklist ficar completo", async ({ 
   await campo(page, "Categoria").selectOption({ label: "Banho" });
   await botao(page, "Adicionar serviço").click();
   await expect(texto(page, /^Serviço criado/)).toBeVisible();
+  await expect(page.getByRole("link", { name: "Cadastrar preços de Banho ›" }).filter({ visible: true })).toBeVisible();
   await campo(page, "Nome").fill("Hidratação");
   await campo(page, "Tipo").selectOption("adicional");
   await botao(page, "Adicionar serviço").click();
@@ -64,6 +65,12 @@ test("loja nova se configura sozinha até o checklist ficar completo", async ({ 
   await abrir(page, "Preços");
   await page.getByRole("navigation", { name: "Serviço" }).getByRole("link", { name: "Banho" }).click();
   await expect(page.getByRole("navigation", { name: "Serviço" }).getByRole("link", { name: "Banho" })).toHaveAttribute("aria-current", "page");
+  // Valor base para a tabela inteira e depois as exceções do porte pequeno; "50.5" (teclado só com ponto) é R$ 50,50
+  await campo(page, "Preço para todas").fill("50.5");
+  await campo(page, "Duração para todas").fill("40");
+  await botao(page, "Aplicar a todas").click();
+  await expect(campo(page, "Preço Mini, pelagem longa")).toHaveValue("50,50");
+  await expect(campo(page, "Duração em minutos Gigante, pelagem curta")).toHaveValue("40");
   for (const [pelagem, preco, min] of [["curta", "50", "45"], ["média", "55", "50"], ["longa", "60", "60"]] as const) {
     await campo(page, `Preço Pequeno, pelagem ${pelagem}`).fill(preco);
     await campo(page, `Duração em minutos Pequeno, pelagem ${pelagem}`).fill(min);
@@ -72,7 +79,7 @@ test("loja nova se configura sozinha até o checklist ficar completo", async ({ 
   const copiar = page.getByRole("group", { name: "Copiar Pequeno para" });
   for (const porte of ["Mini", "Médio", "Grande", "Gigante"]) await copiar.getByLabel(porte).check();
   await copiar.getByRole("button", { name: "Aplicar" }).click();
-  await expect(campo(page, "Preço Gigante, pelagem longa")).toHaveValue("60");
+  await expect(campo(page, "Preço Gigante, pelagem longa")).toHaveValue("60,00");
   await campo(page, "Preço Gigante, pelagem longa").fill("120");
   await botao(page, "Salvar preços").click();
   await expect(texto(page, "Preços salvos (15 de 15 combinações).")).toBeVisible();
@@ -83,14 +90,22 @@ test("loja nova se configura sozinha até o checklist ficar completo", async ({ 
   await expect(texto(page, "Mini / pelagem curta: duração entre 5 e 600 minutos.")).toBeVisible();
   await campo(page, "Duração em minutos Mini, pelagem curta").fill("35");
 
-  // Preço só para pequeno/curta na hidratação
-  await page.getByRole("navigation", { name: "Serviço" }).getByRole("link", { name: "Hidratação" }).click();
-  await expect(page.getByRole("navigation", { name: "Serviço" }).getByRole("link", { name: "Hidratação" })).toHaveAttribute("aria-current", "page");
-  await expect(campo(page, "Preço Pequeno, pelagem curta")).toHaveValue("");
-  await campo(page, "Preço Pequeno, pelagem curta").fill("25,50");
-  await campo(page, "Duração em minutos Pequeno, pelagem curta").fill("15");
+  // Trocar de serviço com alteração pendente avisa antes de descartar
+  const servico = page.getByRole("navigation", { name: "Serviço" });
+  await servico.getByRole("link", { name: "Hidratação" }).click();
+  await expect(texto(page, "Os preços de Banho ainda não foram salvos.")).toBeVisible();
+  await botao(page, "Continuar editando").click();
   await botao(page, "Salvar preços").click();
-  await expect(texto(page, "Preços salvos (1 de 15 combinações).")).toBeVisible();
+  await expect(texto(page, "Preços salvos (15 de 15 combinações).")).toBeVisible();
+
+  // Adicional sem tabela abre com um preço só para todos os portes
+  await servico.getByRole("link", { name: "Hidratação" }).click();
+  await expect(servico.getByRole("link", { name: "Hidratação" })).toHaveAttribute("aria-current", "page");
+  await expect(campo(page, "Mesmo preço e tempo para todos os portes e pelagens")).toBeChecked();
+  await campo(page, "Preço (R$)").fill("25,50");
+  await campo(page, "Duração (min)").fill("15");
+  await botao(page, "Salvar preços").click();
+  await expect(texto(page, "Preços salvos (15 de 15 combinações).")).toBeVisible();
 
   // Quem faz o quê
   await abrir(page, "Quem faz o quê");

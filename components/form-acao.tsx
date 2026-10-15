@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useEffect, type ReactNode } from "react";
 import { useFormStatus } from "react-dom";
 import type { Estado } from "@/lib/painel/estado";
@@ -34,7 +35,19 @@ export function FormAcao({
   return (
     <form action={formAction} className={className} noValidate>
       {typeof children === "function" ? children(erros) : children}
-      {estado.mensagem && <Aviso tipo={estado.ok ? "ok" : "erro"}>{estado.mensagem}</Aviso>}
+      {estado.mensagem && (
+        <Aviso tipo={estado.ok ? "ok" : "erro"}>
+          {estado.mensagem}
+          {estado.proximo && (
+            <>
+              {" "}
+              <Link href={estado.proximo.href} className="font-medium underline">
+                {estado.proximo.rotulo}
+              </Link>
+            </>
+          )}
+        </Aviso>
+      )}
       {!semBotao && <BotaoEnviar>{rotuloEnviar}</BotaoEnviar>}
     </form>
   );

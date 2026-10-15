@@ -1,10 +1,15 @@
-/** "50", "50,5", "R$ 1.234,56" → centavos. Vazio ou inválido → null. */
+/**
+ * "50", "50,5", "45.90", "R$ 1.234,56" → centavos. Vazio ou inválido → null.
+ * Aceita vírgula ou ponto como decimal: muitos teclados numéricos de celular só têm o ponto.
+ * Com vírgula, os pontos são milhar ("1.234,56"); sem vírgula, um ponto seguido de 1 ou 2 dígitos no fim é decimal
+ * ("45.90") e os demais são milhar ("1.234").
+ */
 export function reaisParaCentavos(texto: string): number | null {
-  const limpo = texto.replace(/[R$\s.]/g, "").replace(",", ".");
-  if (limpo === "") return null;
-  const valor = Number(limpo);
-  if (!Number.isFinite(valor) || valor < 0) return null;
-  return Math.round(valor * 100);
+  let limpo = texto.replace(/[R$\s]/g, "");
+  if (limpo.includes(",")) limpo = limpo.replace(/\./g, "").replace(",", ".");
+  else if (!/^\d+\.\d{1,2}$/.test(limpo)) limpo = limpo.replace(/\./g, "");
+  if (!/^\d+(\.\d{1,2})?$/.test(limpo)) return null;
+  return Math.round(Number(limpo) * 100);
 }
 
 export function centavosParaReais(centavos: number | null | undefined): string {
