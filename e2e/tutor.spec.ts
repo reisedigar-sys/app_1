@@ -205,6 +205,9 @@ test("no cadastro, a raça sugere porte e pelagem e o resto fica recolhido", asy
 
   await expect(campo(page, "Alergias")).toBeHidden();
   await expect(page.getByRole("option", { name: "Cachorro" })).toBeAttached();
+  const racas = await campo(page, "Raça").locator("option").allTextContents();
+  expect(racas.slice(0, 4)).toEqual(["Escolha", "SRD (sem raça definida)", "Akita", "Beagle"]);
+  expect(racas.at(-1)).toBe("Outra raça");
   await campo(page, "Raça").selectOption("Shih Tzu");
   await expect(texto(page, /Marcamos Pequeno e pelagem longa/)).toBeVisible();
   await expect(page.getByRole("radio", { name: /^Pequeno / })).toBeChecked();

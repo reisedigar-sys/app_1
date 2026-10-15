@@ -6,7 +6,7 @@ import { FormAcao } from "@/components/form-acao";
 import { AreaTexto, Campo, Selecao } from "@/components/ui";
 import { mascaraData, nascimentoDeIso } from "@/lib/conta/data-nascimento";
 import { reduzirFoto } from "@/lib/imagem";
-import { ESPECIES_PET, PELAGENS_PET, PORTES_PET, RACAS, type Pet } from "@/lib/conta/pet";
+import { ESPECIES_PET, PELAGENS_PET, PORTES_PET, RACAS, racasEmOrdem, type Pet } from "@/lib/conta/pet";
 import { createClient } from "@/lib/supabase/client";
 import { salvarPet } from "./acoes";
 
@@ -110,7 +110,7 @@ export function FormularioPet({ tutorId, pet, voltar }: { tutorId: string; pet?:
             </Selecao>
             <Selecao rotulo="Raça" nome={raca === OUTRA ? "raca_lista" : "raca"} value={raca} onChange={(e) => escolherRaca(e.currentTarget.value)} erro={raca === OUTRA ? undefined : erros.raca}>
               <option value="">Escolha</option>
-              {Object.keys(RACAS[especie]).map((r) => (
+              {racasEmOrdem(especie).map((r) => (
                 <option key={r} value={r}>
                   {r === "SRD" ? "SRD (sem raça definida)" : r}
                 </option>
