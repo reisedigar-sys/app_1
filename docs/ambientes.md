@@ -121,8 +121,15 @@ de teste da Meta, que só envia para os telefones cadastrados no app da Meta.
    falha e é tentada de novo (o painel mostra o erro da Meta).
 
 ### Supabase Auth (cada projeto)
-*Authentication → URL Configuration*: **Site URL** = endereço do app daquele ambiente (por enquanto o da Vercel) e o
-mesmo endereço em **Redirect URLs**. Trocar pelo domínio quando ele existir.
+*Authentication → URL Configuration*: **Site URL** = endereço do app daquele ambiente (por enquanto o da Vercel) e, em
+**Redirect URLs**, o mesmo endereço terminado em `/**` (ex.: `https://hora-do-pet.vercel.app/**`), para o link de
+"Esqueci a senha" voltar para `/auth/confirmar`. No staging, inclua também `https://hora-do-pet-*-edigar-reis.vercel.app/**`
+(prévias dos PRs). Trocar pelo domínio quando ele existir.
+
+*Authentication → Emails → Templates → Reset password*: assunto `Hora do Pet: crie sua nova senha` e, no corpo, o
+conteúdo de `supabase/templates/recuperar-senha.html`. Com esse modelo o link funciona em qualquer navegador; com o
+modelo padrão, só no mesmo navegador em que a pessoa pediu o link. Sem SMTP próprio (abaixo), o e-mail só chega para
+os membros da organização no Supabase.
 
 ### Domínio
 1. Registre o domínio (ex.: `agendapet.com.br` em https://registro.br — exige CPF/CNPJ).

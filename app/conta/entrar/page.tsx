@@ -38,7 +38,16 @@ async function Conteudo({ searchParams }: { searchParams: Promise<Record<string,
           Criar conta
         </Link>
       </nav>
-      {cadastro ? <FormularioCadastroTutor voltar={voltar} /> : <FormularioEntrarTutor voltar={voltar} />}
+      {cadastro ? (
+        <FormularioCadastroTutor voltar={voltar} />
+      ) : (
+        <>
+          <FormularioEntrarTutor voltar={voltar} />
+          <Link href="/senha/esqueci" className="-mt-2 text-center text-sm text-marca-700 underline dark:text-marca-400">
+            Esqueci a senha
+          </Link>
+        </>
+      )}
     </div>
   );
 }

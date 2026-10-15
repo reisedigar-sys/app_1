@@ -33,7 +33,16 @@ async function Formularios({ searchParams }: { searchParams: Promise<Record<stri
           Criar conta
         </Link>
       </nav>
-      {cadastro ? <FormularioCadastro /> : <FormularioEntrar />}
+      {cadastro ? (
+        <FormularioCadastro />
+      ) : (
+        <>
+          <FormularioEntrar />
+          <Link href="/senha/esqueci?para=equipe" className="-mt-2 text-center text-sm text-marca-700 underline dark:text-marca-400">
+            Esqueci a senha
+          </Link>
+        </>
+      )}
     </div>
   );
 }
