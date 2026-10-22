@@ -56,6 +56,9 @@ Cuidados:
   `tests/rls/cobertura.test.ts` a descobre sozinho e falha se faltar.
 - Regra de disponibilidade e criação de agendamento ficam em funções SQL chamadas por RPC; o front-end só consome.
 - Imports usam o alias `@/` (raiz do repositório).
+- Skills do repositório em `.claude/skills/` (`nova-migracao`, `nova-tela`, `abrir-pr`, `subir-ambiente`,
+  `levar-para-producao`) e revisores em `.claude/agents/` (`revisor-seguranca`, `revisor-disponibilidade`,
+  `revisor-celular`): use-os em vez de refazer os passos de memória.
 - Documentação de apoio: `README.md` (setup e banco), `PLANO-MVP.md` (plano semana a semana), `PLANO-CRESCIMENTO.md` (Meta 1),
   `PROMPTS-CLAUDE-CODE.md` (prompts por semana). Ao fim de cada semana, atualize a seção "Estado atual" abaixo.
 
