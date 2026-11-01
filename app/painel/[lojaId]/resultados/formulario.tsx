@@ -11,7 +11,7 @@ export function FaltasAntes({ lojaId, valor }: { lojaId: string; valor: number |
         <>
           <input type="hidden" name="loja_id" value={lojaId} />
           <Campo
-            rotulo="Antes do Hora do Pet, quantos clientes faltavam a cada 100 agendamentos?"
+            rotulo="Antes do Salão do Pet, quantos clientes faltavam a cada 100 agendamentos?"
             nome="faltas_antes_pct"
             inputMode="decimal"
             defaultValue={valor ?? ""}

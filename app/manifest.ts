@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Hora do Pet",
-    short_name: "Hora do Pet",
+    name: "Salão do Pet",
+    short_name: "Salão do Pet",
     description: "Agende banho e tosa no seu petshop em poucos toques.",
     lang: "pt-BR",
     start_url: "/",

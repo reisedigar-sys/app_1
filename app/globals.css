@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /*
- * Identidade Hora do Pet: tinta (azul-escuro) para texto e base, coral para a marca e a seleção.
+ * Identidade Salão do Pet: tinta (azul-escuro) para texto e base, coral para a marca e a seleção.
  * - `marca-*` é o coral. `marca-700` é o tom para botões e links sobre fundo claro (contraste AA com branco);
  *   `marca-400` é o tom de links e destaques sobre fundo escuro.
  * - A escala `neutral-*` do Tailwind é trocada por cinzas puxados para a tinta: todas as telas usam

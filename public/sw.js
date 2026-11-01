@@ -1,4 +1,4 @@
-// Service worker do Hora do Pet: avisos por push (semana 7). Não guarda páginas em cache.
+// Service worker do Salão do Pet: avisos por push (semana 7). Não guarda páginas em cache.
 self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", (event) => event.waitUntil(self.clients.claim()));
 
@@ -10,7 +10,7 @@ self.addEventListener("push", (event) => {
     dados = { corpo: event.data ? event.data.text() : "" };
   }
   event.waitUntil(
-    self.registration.showNotification(dados.titulo || "Hora do Pet", {
+    self.registration.showNotification(dados.titulo || "Salão do Pet", {
       body: dados.corpo || "",
       icon: dados.icone || "/icons/icon-192.png",
       badge: "/icons/icon-192.png",

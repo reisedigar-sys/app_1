@@ -4,7 +4,7 @@ Decidido pelo dono do produto em 14/10/2026. Os números financeiros (preços, c
 documento interno do projeto, fora deste repositório público.
 
 ## A meta
-**Cerca de 240 petshops pagando**, por volta de 18 meses depois do fim do piloto. É o número que torna o Hora do Pet
+**Cerca de 240 petshops pagando**, por volta de 18 meses depois do fim do piloto. É o número que torna o Salão do Pet
 sustentável. Toda prioridade de produto, qualidade e divulgação é decidida por quanto ela aproxima a meta.
 
 | Marco | Lojas pagando | Quando (a partir do fim do piloto) |
@@ -44,7 +44,7 @@ Loja que perde agendamento por erro cancela e fala mal. A meta exige que o produ
 
 - **Monitoramento e alertas** (Sentry, worker de notificações, falhas de envio) e backup diário (semana 9).
 - **Meta de disponibilidade** de 99,5% no horário comercial, com página de status simples.
-- **Suporte com prazo**: resposta no mesmo dia útil pelo WhatsApp do Hora do Pet; base de respostas para as dúvidas
+- **Suporte com prazo**: resposta no mesmo dia útil pelo WhatsApp do Salão do Pet; base de respostas para as dúvidas
   repetidas.
 - **Ritmo de entrega**: tudo por PR com `pnpm check` verde, staging antes de produção, sem pular testes.
 - **Desempenho**: manter as consultas de agenda abaixo de 25 ms (p95) conforme o número de lojas cresce.
@@ -55,8 +55,8 @@ Loja que perde agendamento por erro cancela e fala mal. A meta exige que o produ
 1. **Regional primeiro**: concentrar na cidade dos pilotos. Lojas próximas geram indicação e, mais tarde, a
    densidade que o marketplace (Fase 4) precisa.
 2. **Casos com números**: cada piloto vira um caso ("faltas caíram de X para Y"), com autorização da loja.
-3. **Página de vendas do Hora do Pet** para petshops, com planos e preços, demonstração e teste (Fase 3).
-4. **Indicação**: loja que indica outra ganha desconto; rodapé "Agendamento pelo Hora do Pet" na página de cada
+3. **Página de vendas do Salão do Pet** para petshops, com planos e preços, demonstração e teste (Fase 3).
+4. **Indicação**: loja que indica outra ganha desconto; rodapé "Agendamento pelo Salão do Pet" na página de cada
    loja, levando à página de vendas.
 5. **Canais pagos e conteúdo**: anúncios para donos de petshop na região (Meta e Google), conteúdo sobre como
    reduzir faltas no banho e tosa, e parcerias com distribuidores, associações e feiras do setor.
