@@ -60,6 +60,7 @@ test("pelo link, o tutor confirma, remarca e cancela sem login; a loja vê as me
   await page.getByRole("link", { name: "Remarcar" }).click();
   await expect(page.getByRole("heading", { name: "Remarcar" })).toBeVisible();
   const [ano, m, d] = DIA.split("-").map(Number);
+  await expect(page.getByRole("grid", { name: /^Dias de / })).toBeVisible();
   for (let i = 0; i < 2 && !(await page.getByText(`${MESES[m - 1]} de ${ano}`, { exact: true }).isVisible()); i++) {
     await page.getByRole("button", { name: "Próximo mês" }).click();
   }

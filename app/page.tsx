@@ -17,7 +17,7 @@ export default function Home() {
       <Suspense fallback={null}>
         <IrParaOQueUsa />
       </Suspense>
-      <h1 className="text-3xl font-semibold text-marca-700 dark:text-marca-400">Hora do Pet</h1>
+      <h1 className="text-3xl font-semibold text-marca-700 dark:text-marca-400">Salão do Pet</h1>
       <p className="text-lg">Banho e tosa agendados em poucos toques.</p>
       <ul className="flex flex-col gap-3">
         {VANTAGENS.map(([titulo, texto]) => (

@@ -158,7 +158,8 @@ Cuidados:
   dono. Nunca fazer push direto na `producao`. Andamento das semanas em `PLANO-MVP.md` ("Andamento").
 - Hospedado ≠ local: no Supabase online a confirmação de e-mail está ligada e, sem SMTP próprio (Resend), só chegam
   e-mails para os membros da organização. Trate `signUp` sem sessão (as telas já mostram "confirme o e-mail").
-- Marca: **Hora do Pet** (provisória) nos títulos, manifesto do PWA e README; o nome do pacote continua `agenda-pet`.
+- Marca: **Salão do Pet** (domínio `salaodopet.com.br`, comprado em 01/11/2026 na Hostgator) nos títulos, manifesto do PWA,
+  e-mails e mensagens; o nome do pacote continua `agenda-pet` e os projetos da Vercel/Supabase continuam `hora-do-pet*`.
 - Semana 5 (painel da loja) concluída e em produção (14/10/2026): migração 008 (`agenda_loja`, transições de status por trigger, balcão com
   `buscar_tutor_balcao`/`cadastrar_tutor_balcao`/`cadastrar_pet_balcao`, `horario_da_loja`, `agendamento` no Realtime),
   `/painel/{loja}/agenda` (dia/semana, filtros, ao vivo), novo atendimento com encaixe, remarcar, ficha do pet.

@@ -6,9 +6,9 @@ const texto = Figtree({ subsets: ["latin"], variable: "--font-texto", display: "
 const titulo = Bricolage_Grotesque({ subsets: ["latin"], variable: "--font-bricolage", display: "swap" });
 
 export const metadata: Metadata = {
-  title: { default: "Hora do Pet", template: "%s · Hora do Pet" },
+  title: { default: "Salão do Pet", template: "%s · Salão do Pet" },
   description: "Agende banho e tosa no seu petshop em poucos toques.",
-  appleWebApp: { capable: true, title: "Hora do Pet", statusBarStyle: "default" },
+  appleWebApp: { capable: true, title: "Salão do Pet", statusBarStyle: "default" },
 };
 
 export const viewport: Viewport = {

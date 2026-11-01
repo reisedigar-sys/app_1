@@ -27,4 +27,4 @@ description: Use antes de abrir ou atualizar um pull request no app_1. Roda as v
 6. **Nunca** faça merge: quem decide é o Edigar. Nunca faça push na `producao`.
 
 Repositório público: nada de segredos, dados reais de pilotos, preços praticados de
-verdade (planos do Hora do Pet ou de pilotos) ou prints de terceiros no diff.
+verdade (planos do Salão do Pet ou de pilotos) ou prints de terceiros no diff.

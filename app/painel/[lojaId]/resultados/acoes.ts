@@ -5,7 +5,7 @@ import { SEM_PERMISSAO, iniciarAcao, revalidarLoja } from "@/lib/painel/acao";
 import { mensagemDeErro } from "@/lib/painel/erros";
 import type { Estado } from "@/lib/painel/estado";
 
-/** Faltas a cada 100 atendimentos antes do Hora do Pet (referência da estimativa). O RLS só deixa dono e gerência. */
+/** Faltas a cada 100 atendimentos antes do Salão do Pet (referência da estimativa). O RLS só deixa dono e gerência. */
 export async function salvarFaltasAntes(_: Estado, form: FormData): Promise<Estado> {
   const { supabase, lojaId } = await iniciarAcao(form);
   const r = z.coerce

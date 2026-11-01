@@ -248,7 +248,7 @@ otp_expiry = 3600
 # Recuperação de senha: o link vai para /auth/confirmar com token_hash (funciona em qualquer navegador).
 # Nos projetos hospedados, o mesmo modelo é colado no painel (docs/ambientes.md).
 [auth.email.template.recovery]
-subject = "Hora do Pet: crie sua nova senha"
+subject = "Salão do Pet: crie sua nova senha"
 content_path = "./supabase/templates/recuperar-senha.html"
 
 # [auth.email.template.invite]

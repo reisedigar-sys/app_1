@@ -1,4 +1,4 @@
-# Hora do Pet
+# Salão do Pet
 
 SaaS multi-tenant para petshops agendarem banho e tosa. Visão, regras de negócio e decisões de arquitetura estão em
 [`CLAUDE.md`](CLAUDE.md); o plano do MVP, em [`PLANO-MVP.md`](PLANO-MVP.md).
@@ -43,7 +43,7 @@ espera** (incluir pelo telefone e remover) e, em *Loja*, hora do lembrete da vé
 para confirmar e o que fazer sem confirmação (avisar a loja ou liberar o horário). A fila é processada a cada minuto
 pelo pg_cron, que chama a Edge Function `supabase/functions/notificacoes` (segredos em `docs/ambientes.md`).
 
-Mensagens de verdade (semana 7a): o worker envia pelo WhatsApp (modelos da Meta, número central do Hora do Pet) e por
+Mensagens de verdade (semana 7a): o worker envia pelo WhatsApp (modelos da Meta, número central do Salão do Pet) e por
 push (Web Push). Sem os segredos da Meta, usa o provedor de teste (registra, não envia). A Edge Function
 `supabase/functions/whatsapp` recebe o webhook da Meta: status de entrega, "PARAR" e mensagens enviadas ao número
 central. Em *Loja*, o logo; na tela inicial do painel, "Avisos no celular" para a equipe.

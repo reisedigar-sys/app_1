@@ -13,7 +13,7 @@ exige um modelo novo aprovado na Meta e uma migração; `tests/db/mensagens.test
 Aviso à loja: o tutor não confirmou.
 
 ```text
-Hora do Pet: {{1}} ({{2}}) não confirmou {{3}}, {{4}}. Veja a agenda no painel.
+Salão do Pet: {{1}} ({{2}}) não confirmou {{3}}, {{4}}. Veja a agenda no painel.
 ```
 
 Exemplos: `{{1}}` = Ana Souza; `{{2}}` = +5511988880001; `{{3}}` = Thor e Mel; `{{4}}` = qui, 16/10 às 10:00
