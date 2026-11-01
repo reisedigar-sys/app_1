@@ -20,7 +20,7 @@ export function FormAcao({
   semBotao = false,
 }: {
   acao: Acao;
-  children: ReactNode | ((erros: Record<string, string>) => ReactNode);
+  children: ReactNode | ((erros: Record<string, string>, valores: Record<string, string>) => ReactNode);
   rotuloEnviar?: string;
   className?: string;
   semBotao?: boolean;
@@ -34,7 +34,7 @@ export function FormAcao({
   }, [estado.destino]);
   return (
     <form action={formAction} className={className} noValidate>
-      {typeof children === "function" ? children(erros) : children}
+      {typeof children === "function" ? children(erros, estado.valores ?? {}) : children}
       {estado.mensagem && (
         <Aviso tipo={estado.ok ? "ok" : "erro"}>
           {estado.mensagem}

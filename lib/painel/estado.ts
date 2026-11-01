@@ -9,6 +9,8 @@ export type Estado = {
   destino?: string;
   /** Próximo passo sugerido junto da mensagem (ex.: cadastrar os preços do serviço recém-criado). */
   proximo?: { href: string; rotulo: string };
+  /** Valores enviados, para o formulário não voltar vazio depois de um erro (o React limpa o form após a ação). */
+  valores?: Record<string, string>;
 };
 
 export const estadoInicial: Estado = {};

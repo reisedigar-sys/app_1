@@ -81,6 +81,11 @@ async function Lista({ searchParams }: { searchParams: Promise<Record<string, st
     supabase.rpc("minhas_lojas"),
   ]);
   if (error) return <Vazio>Não foi possível carregar seus agendamentos.</Vazio>;
+  // Sinal por Pix de cada pedido (RLS: só os do próprio tutor).
+  const { data: pagamentos } = data.length
+    ? await supabase.from("pagamento").select("id, pedido_id, status, valor_centavos, expira_em").in("pedido_id", [...new Set(data.map((a) => a.pedido_id))])
+    : { data: [] };
+  const sinalDo = new Map((pagamentos ?? []).map((p) => [p.pedido_id, p]));
   // Uma loja: direto para o agendamento dela; várias: escolher em Minhas lojas.
   const novo = lojas?.length === 1 ? `/${lojas[0].slug}/agendar` : lojas?.length ? "/conta/lojas" : null;
   const botaoNovo = novo && (
@@ -159,6 +164,8 @@ async function Lista({ searchParams }: { searchParams: Promise<Record<string, st
     const [rotulo, cor] = STATUS[a.status];
     const alteravel = futuro && ["agendado", "confirmado"].includes(a.status);
     const gratuito = new Date(a.cancelamento_gratuito_ate).getTime() > agora;
+    const sinal = sinalDo.get(a.pedido_id);
+    const aguardandoPix = alteravel && sinal?.status === "aguardando" && new Date(sinal.expira_em).getTime() > agora;
     return (
       <li key={a.id} className="flex flex-col gap-2 rounded-xl border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-950">
         <div className="flex items-start justify-between gap-2">
@@ -177,6 +184,17 @@ async function Lista({ searchParams }: { searchParams: Promise<Record<string, st
           </Link>{" "}
           · {a.profissional_nome} · {formatarReais(a.preco_total_centavos)}
         </p>
+        {sinal?.status === "pago" && <p className="text-sm text-emerald-800 dark:text-emerald-300">Sinal de {formatarReais(sinal.valor_centavos)} pago por Pix.</p>}
+        {aguardandoPix && (
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border-2 border-amber-300 bg-amber-50 p-3 text-sm dark:border-amber-700 dark:bg-amber-950">
+            <span>
+              Falta pagar o sinal de <strong>{formatarReais(sinal.valor_centavos)}</strong> até {hora(sinal.expira_em, a.loja_fuso)}.
+            </span>
+            <BotaoLink href={`/conta/pix/${sinal.id}`} prefetch={false}>
+              Pagar agora
+            </BotaoLink>
+          </div>
+        )}
         {destaque && (
           <div className="rounded-xl bg-neutral-50 p-3 dark:bg-neutral-900">
             <PassosAtendimento status={a.status} inicio={hora(a.inicio, a.loja_fuso)} pronto={hora(a.fim, a.loja_fuso)} />

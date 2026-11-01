@@ -170,7 +170,11 @@ Cuidados:
   `whatsapp_status`/`whatsapp_receber`, `minhas_lojas`, `mensagens_do_mes`, `petshop.logo_url`), worker com WhatsApp
   (Meta Cloud API) e Web Push, Edge Function `whatsapp` (webhook), `/{slug}/manifest.webmanifest` e ícone por loja,
   `/conta/lojas`, avisos no celular (tutor e equipe). Sem os segredos da Meta, o worker continua no provedor de teste.
-- Próximo: 7b (bot de agendamento no número da loja), depois de a 7a estar no ar e da aprovação como *Tech Provider*.
+- Semana 8a (Pix com sinal) em revisão: migração 017 (`petshop_pagamento`, `pagamento`, `pagamento_evento`,
+  `sinal_previsto`, `pagamento_webhook`, Pix vencido liberado pelo worker), `lib/pagamentos/` (Asaas e Pix simulado),
+  Edge Function `asaas` (webhook), Configurar → Pagamentos, tela do Pix do tutor e `/conta/pix/{id}`. A 8b (devolver
+  ou reter o sinal) vem antes de a 8a ir para a produção.
+- Próximo: 8b; 7b (bot de agendamento no número da loja) depois de a 7a estar no ar e da aprovação como *Tech Provider*.
 
 ## Pendências fora do código (decisão ou ação do dono do produto)
 - **Repositório público**: `reisedigar-sys/app_1` está público. Recomendado torná-lo privado
@@ -194,6 +198,21 @@ Cuidados:
 - Se o Docker Hub responder 429 (limite de downloads), puxe as imagens pelo espelho do Google e renomeie:
   `docker pull mirror.gcr.io/supabase/postgres:<versão> && docker tag mirror.gcr.io/supabase/postgres:<versão> supabase/postgres:<versão>`.
 - Rode `pnpm db:types` só com o banco local no ar (o script não apaga mais os tipos se ele estiver fora).
+
+## Decisões da semana 8
+- **Subconta por loja no Asaas**: a cobrança é emitida na subconta (dinheiro e tarifa do Pix ficam com a loja); a chave
+  de API da subconta fica no Vault (`pagamento_conta_<petshop_id>`), lida só pela chave de serviço. Comissão zero
+  fora do marketplace.
+- **Sinal só no app** (canal `app_proprio`, pedido feito pelo tutor): `modo_sinal` nunca / faltas (`exige_sinal`) /
+  todos; percentual do pedido (padrão 30%) ou valor fixo por pet. Um Pix por pedido.
+- **QR Code estático do Asaas** (valor fixo, um pagamento, validade = prazo): não exige CPF do tutor. O webhook
+  (`PAYMENT_RECEIVED`/`CONFIRMED`) chega pela Edge Function `asaas` com o token `asaas-access-token`.
+- **15 minutos para pagar** (+2 de folga): o worker libera o horário (`app.expirar_pagamentos`), sem falta e sem aviso.
+  Enquanto aguarda, os avisos do pedido esperam (`proxima_tentativa_em`). Pix pago confirma o pedido inteiro.
+  Pix que cai depois de liberado fica `devolver` (estorno na 8b).
+- **Chamadas ao Asaas no servidor do app** (`lib/pagamentos/servico.ts`, `server-only`), sempre partindo do estado no
+  banco; a autorização é das funções SQL chamadas antes pelo usuário. Pix simulado só no ambiente local ou com
+  `PAGAMENTOS_TESTE=1`.
 
 ## Decisões da semana 7
 - **Número central só envia** (avisos de todas as lojas, nome da loja no texto). Quem escreve para ele recebe, no

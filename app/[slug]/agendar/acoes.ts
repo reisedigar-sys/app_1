@@ -13,6 +13,7 @@ import {
   unidadesParaPedido,
 } from "@/lib/disponibilidade";
 import { tutorAtual } from "@/lib/conta/sessao";
+import { ErroPagamento, type Pix, qrDoPagamento } from "@/lib/pagamentos/servico";
 import { createClient } from "@/lib/supabase/server";
 
 // Cada ação devolve { ok, dados } ou { ok: false, erro } para a tela mostrar a mensagem sem quebrar o fluxo.
@@ -112,7 +113,33 @@ export async function confirmarPedido(p: {
     });
     // Só registra quando o tutor marca a opção: desmarcar aqui não apaga uma autorização dada antes.
     if (p.consentimentoContato) await supabase.rpc("registrar_consentimento", { p_petshop_id: lojaId, p_contato: true, p_marketing: false });
-    return resumo;
+    // Loja que cobra sinal: o banco criou o pagamento junto com o pedido; aqui só se gera o QR Code.
+    const { data: pagamento } = await supabase.from("pagamento").select("id").eq("pedido_id", resumo.pedido_id).maybeSingle();
+    let pix: Pix | null = null;
+    let erroPix: string | null = null;
+    if (pagamento) {
+      try {
+        pix = await qrDoPagamento(pagamento.id);
+      } catch (e) {
+        if (!(e instanceof ErroPagamento)) console.error(e);
+        erroPix = e instanceof ErroPagamento ? e.message : "Não foi possível gerar o Pix agora.";
+      }
+    }
+    return { ...resumo, pagamentoId: pagamento?.id ?? null, pix, erroPix };
+  });
+}
+
+/** Sinal que o tutor logado vai pagar neste pedido (0 = sem sinal), para mostrar antes de confirmar. */
+export async function previsaoSinal(lojaId: string, totalCentavos: number, pets: number) {
+  return executar(async () => {
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc("sinal_previsto", {
+      p_petshop_id: id.parse(lojaId),
+      p_total_centavos: z.number().int().min(0).parse(totalCentavos),
+      p_pets: z.number().int().min(1).max(10).parse(pets),
+    });
+    if (error) throw error;
+    return data ?? 0;
   });
 }
 

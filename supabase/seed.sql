@@ -212,6 +212,16 @@ select petshop_id, id, servico_id, 0, preco_centavos, duracao_minutos from calc;
 update public.pedido p
    set total_centavos = (select sum(a.preco_total_centavos) from public.agendamento a where a.pedido_id = p.id);
 
+-- Sinal por Pix (migração 017): a Moema tem conta de recebimento de teste, sem cobrar sinal; o pedido antigo do
+-- Bruno ficou com o sinal pago.
+insert into public.petshop_pagamento (petshop_id, provedor, situacao, conta_id, wallet_id, pix_chave, dados_conta) values
+  ('20000000-0000-0000-0000-000000000003', 'teste', 'aprovada', 'teste-conta-moema', 'teste-carteira-moema', 'teste-chave-moema',
+   '{"nome": "Banho e Cia Moema Ltda", "cpf_cnpj": "11222333000181", "email": "financeiro@banhoecia.test"}');
+select vault.create_secret('teste-chave-moema', 'pagamento_conta_20000000-0000-0000-0000-000000000003', 'Chave de API da subconta da loja');
+insert into public.pagamento (petshop_id, pedido_id, tutor_id, valor_centavos, status, provedor, qr_id, expira_em, pago_em)
+select petshop_id, id, tutor_id, 2000, 'pago', 'teste', 'teste-qr-seed-4', criado_em + interval '15 minutes', criado_em + interval '2 minutes'
+  from public.pedido where id = '60000000-0000-0000-0000-000000000004';
+
 -- ---------------------------------------------------------------------------
 -- Anti no-show, lista de espera, WhatsApp e avaliações
 -- ---------------------------------------------------------------------------

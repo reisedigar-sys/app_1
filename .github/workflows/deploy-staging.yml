@@ -45,4 +45,4 @@ jobs:
       # Worker da fila de notificações (semana 6) e webhook do WhatsApp (semana 7). Os segredos deles são configurados
       # uma vez (docs/ambientes.md).
       - name: Publicar o worker de notificações e o webhook do WhatsApp
-        run: pnpm exec supabase functions deploy notificacoes whatsapp --project-ref "$SUPABASE_PROJECT_REF" --use-api
+        run: pnpm exec supabase functions deploy notificacoes whatsapp asaas --project-ref "$SUPABASE_PROJECT_REF" --use-api
