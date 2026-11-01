@@ -105,7 +105,9 @@ function baixarConvite(e: { id: string; titulo: string; local: string; inicio: s
 /** "até 14/10 às 12:00", ou o aviso de que o prazo gratuito já passou (cancelar continua possível; a loja é avisada). */
 function prazoCancelamento(inicio: string, horas: number, fuso: string) {
   const limite = new Date(new Date(inicio).getTime() - horas * 3600_000);
-  return limite.getTime() > Date.now() ? `até ${dataHoraLegivel(limite.toISOString(), fuso)}` : "prazo já passou";
+  if (limite.getTime() > Date.now()) return `até ${dataHoraLegivel(limite.toISOString(), fuso)}`;
+  // Horário em cima da hora: o prazo gratuito nem chega a existir; dizer o porquê em vez de "já passou".
+  return horas > 0 ? `não, faltam menos de ${horas} h` : "não";
 }
 
 function duracaoLegivel(min: number) {
@@ -167,6 +169,7 @@ function Fluxo({ loja, pets, catalogo, consentimentoAnterior, inicial, petInicia
   const [erro, setErro] = useState<string | null>(null);
   const [carregando, iniciar] = useTransition();
   const [chave] = useState(() => crypto.randomUUID());
+  const abrirQuandoPendente = useRef(false);
 
   // Ao sair da tela de confirmação (inclusive quando o roteador só a esconde), o próximo acesso começa do zero.
   useEffect(() => {
@@ -197,7 +200,9 @@ function Fluxo({ loja, pets, catalogo, consentimentoAnterior, inicial, petInicia
     }, 0);
   const total = unidade?.totalCentavos ?? somaOrigem("preco");
   const duracao = somaOrigem("duracao");
-  const profissional = profissionais.find((p) => p.id === profissionalId);
+  // Com um só profissional apto para o pedido não há o que escolher (o filtro some), mas o nome dele aparece.
+  const unicoProfissional = profissionais.length === 1 ? profissionais[0] : undefined;
+  const profissional = profissionais.find((p) => p.id === profissionalId) ?? unicoProfissional;
 
   function mostrarErro(r: { ok: false; erro: string }) {
     setErro(r.erro);
@@ -235,7 +240,7 @@ function Fluxo({ loja, pets, catalogo, consentimentoAnterior, inicial, petInicia
       if (r.dados.length === 1) {
         setUnidade(r.dados[0]);
         // "Repetir o último": com tudo escolhido e uma unidade só, vai direto para os horários.
-        if (inicial) setEtapa("quando");
+        if (inicial) abrirQuandoPendente.current = true;
       }
     });
     return () => {
@@ -288,6 +293,14 @@ function Fluxo({ loja, pets, catalogo, consentimentoAnterior, inicial, petInicia
       await carregarDias(null);
     });
   }
+
+  // "Repetir o último" abre os horários assim que a unidade está escolhida (carregando dias e profissionais).
+  useEffect(() => {
+    if (!abrirQuandoPendente.current || !unidade) return;
+    abrirQuandoPendente.current = false;
+    abrirQuando();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- dispara uma vez, quando a unidade chega
+  }, [unidade]);
 
   function escolherProfissional(id: string | null) {
     if (id === profissionalId) return;
@@ -578,6 +591,15 @@ function Fluxo({ loja, pets, catalogo, consentimentoAnterior, inicial, petInicia
                   </button>
                 );
               })}
+            </div>
+          )}
+
+          {unicoProfissional && (
+            <div className="flex items-center gap-3 text-sm">
+              <Avatar foto={unicoProfissional.fotoUrl} nome={unicoProfissional.nome} tamanho="size-9" />
+              <span>
+                Atendimento com <strong>{unicoProfissional.nome}</strong>
+              </span>
             </div>
           )}
 

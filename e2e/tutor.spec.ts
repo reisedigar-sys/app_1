@@ -222,3 +222,26 @@ test("no cadastro, a raça sugere porte e pelagem e o resto fica recolhido", asy
   await page.getByText("Saúde e jeito do pet").filter({ visible: true }).click();
   await expect(campo(page, "Alergias")).toBeVisible();
 });
+
+test("com um só profissional apto, o fluxo mostra quem atende em vez do filtro", async ({ page }) => {
+  await page.goto("/conta/entrar?voltar=/banho-e-cia-moema/agendar");
+  await campo(page, "E-mail").fill("ana@tutor.test");
+  await campo(page, "Senha").fill("senha123");
+  await botao(page, "Entrar").click();
+  await expect(texto(page, "Quem vai tomar banho?")).toBeVisible();
+
+  // Na Moema, só a Carla faz tosa completa.
+  await page.locator("label").filter({ hasText: "Mel" }).click();
+  const paraMel = page.locator("section").filter({ has: page.getByRole("heading", { name: "Para Mel" }) }).filter({ visible: true });
+  await paraMel.locator("label").filter({ hasText: /^Tosa completa/ }).click();
+  await botao(page, "Ver horários").click();
+
+  await expect(page.getByRole("heading", { name: "Quando fica bom?" })).toBeVisible();
+  await expect(texto(page, "Atendimento com Carla")).toBeVisible();
+  await expect(page.getByRole("radiogroup", { name: "Profissional" })).toHaveCount(0);
+  await page.getByRole("group", { name: /^(Manhã|Tarde|Noite)$/ }).filter({ visible: true }).first().getByRole("button").first().click();
+  await botao(page, "Revisar").click();
+  const revisao = page.getByRole("dialog", { name: "Tudo certo?" });
+  await expect(revisao.getByText("Carla", { exact: true })).toBeVisible();
+  await expect(revisao.getByText("Quem estiver livre")).toHaveCount(0);
+});
