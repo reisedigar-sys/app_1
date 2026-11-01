@@ -19,6 +19,8 @@ async function cadastrarPet(page: Page, nome: string, porte: string, pelagem: st
 async function escolherDia(page: Page, dia: string) {
   const [ano, m, d] = dia.split("-").map(Number);
   const mesAlvo = `${MESES[m - 1]} de ${ano}`;
+  // isVisible() não espera: sem o calendário na tela, o laço avançaria meses demais.
+  await expect(page.getByRole("grid", { name: /^Dias de / })).toBeVisible();
   for (let i = 0; i < 2 && !(await page.getByText(mesAlvo, { exact: true }).isVisible()); i++) {
     await page.getByRole("button", { name: "Próximo mês" }).click();
   }

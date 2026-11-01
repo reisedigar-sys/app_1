@@ -111,6 +111,8 @@ test("encaixe fora da grade, remarcar e cancelar", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Remarcar" })).toBeVisible();
   const [, m, d] = DIA.split("-").map(Number);
   const MESES = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
+  // isVisible() não espera: sem o calendário na tela, o laço avançaria meses demais quando DIA cai no mês atual.
+  await expect(page.getByRole("grid", { name: /^Dias de / })).toBeVisible();
   for (let i = 0; i < 2 && !(await page.getByText(new RegExp(`^${MESES[m - 1]} de`)).isVisible()); i++) {
     await page.getByRole("button", { name: "Próximo mês" }).click();
   }
