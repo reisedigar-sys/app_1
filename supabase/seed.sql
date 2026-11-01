@@ -248,7 +248,7 @@ insert into public.avaliacao (petshop_id, agendamento_id, profissional_id, tutor
 select petshop_id, id, profissional_id, tutor_id, 5, 'Ótimo atendimento!'
   from public.agendamento where status = 'concluido';
 
--- Faltas antes do Hora do Pet (referência da estimativa de faltas evitadas), informada pela gestão de cada loja.
+-- Faltas antes do Salão do Pet (referência da estimativa de faltas evitadas), informada pela gestão de cada loja.
 insert into public.petshop_indicador (petshop_id, faltas_antes_pct) values
   ('20000000-0000-0000-0000-000000000001', 15),
   ('20000000-0000-0000-0000-000000000003', 12);

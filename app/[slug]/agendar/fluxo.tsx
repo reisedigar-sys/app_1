@@ -83,9 +83,9 @@ function baixarConvite(e: { id: string; titulo: string; local: string; inicio: s
   const ics = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//Hora do Pet//PT-BR",
+    "PRODID:-//Salão do Pet//PT-BR",
     "BEGIN:VEVENT",
-    `UID:${e.id}@horadopet`,
+    `UID:${e.id}@salaodopet`,
     `DTSTAMP:${utc(new Date().toISOString())}`,
     `DTSTART:${utc(e.inicio)}`,
     `DTEND:${utc(e.fim)}`,
@@ -97,7 +97,7 @@ function baixarConvite(e: { id: string; titulo: string; local: string; inicio: s
   const url = URL.createObjectURL(new Blob([ics], { type: "text/calendar;charset=utf-8" }));
   const link = document.createElement("a");
   link.href = url;
-  link.download = "hora-do-pet.ics";
+  link.download = "salao-do-pet.ics";
   link.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }

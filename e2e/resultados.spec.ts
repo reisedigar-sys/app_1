@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import { botao, campo, entrar, texto } from "./util";
 
 const CENTRO = "20000000-0000-0000-0000-000000000001";
-const REFERENCIA = "Antes do Hora do Pet, quantos clientes faltavam a cada 100 agendamentos?";
+const REFERENCIA = "Antes do Salão do Pet, quantos clientes faltavam a cada 100 agendamentos?";
 
 test("gerente vê os resultados do mês e ajusta a referência de faltas", async ({ page }) => {
   await entrar(page, "gabriel@petfeliz.test");

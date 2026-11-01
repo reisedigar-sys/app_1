@@ -1,5 +1,5 @@
 // Web Push sem dependências (só Web Crypto): roda na Edge Function (Deno) e nos testes (Node 22).
-//   * Autenticação VAPID (RFC 8292): JWT ES256 assinado com a chave privada do Hora do Pet.
+//   * Autenticação VAPID (RFC 8292): JWT ES256 assinado com a chave privada do Salão do Pet.
 //   * Conteúdo cifrado com aes128gcm (RFC 8188 e RFC 8291), com as chaves que o navegador gerou na inscrição.
 
 export type InscricaoPush = { id?: string; endpoint: string; p256dh: string; auth: string };

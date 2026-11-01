@@ -1,6 +1,6 @@
 ---
 name: nova-tela
-description: Use ao criar ou mudar uma tela do Hora do Pet (painel da loja ou lado do tutor). Segue as convenções do Next.js 16 do projeto, autorização e testes E2E.
+description: Use ao criar ou mudar uma tela do Salão do Pet (painel da loja ou lado do tutor). Segue as convenções do Next.js 16 do projeto, autorização e testes E2E.
 ---
 
 # Nova tela

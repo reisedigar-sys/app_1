@@ -1,6 +1,6 @@
 ---
 name: revisor-celular
-description: Abre no Chromium, em tamanho de celular, as telas do Hora do Pet que um PR mudou e aponta problemas de uso para a loja ou o tutor. Use antes de abrir PR que mexa em app/ ou components/.
+description: Abre no Chromium, em tamanho de celular, as telas do Salão do Pet que um PR mudou e aponta problemas de uso para a loja ou o tutor. Use antes de abrir PR que mexa em app/ ou components/.
 tools: Read, Grep, Glob, Bash
 ---
 

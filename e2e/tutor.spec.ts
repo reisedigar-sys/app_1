@@ -89,7 +89,7 @@ test("tutor novo agenda 2 pets pelo fluxo e vê os agendamentos gravados", async
   await expect(page.getByRole("list", { name: "Andamento do atendimento" }).filter({ visible: true })).toContainText("Pronto para buscar");
   const convite = page.waitForEvent("download");
   await botao(page, "Pôr na agenda").click();
-  expect((await convite).suggestedFilename()).toBe("hora-do-pet.ics");
+  expect((await convite).suggestedFilename()).toBe("salao-do-pet.ics");
 
   // Quem já entrou e abre a página inicial vai direto para os agendamentos.
   await page.goto("/");

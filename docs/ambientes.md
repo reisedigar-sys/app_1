@@ -5,7 +5,7 @@
 | Para quê | Ver as entregas antes dos clientes; demonstração para os pilotos | Clientes reais |
 | Banco | Supabase `hora-do-pet-staging` (`cwnwrpvjebtzheqbhzhj`, plano Free) | Supabase `hora-do-pet-prod` (`xddxurtmevhgxwffknyb`) |
 | App | Vercel, deploy de Preview da branch `main` | Vercel, deploy de Production |
-| Endereço | `staging.SEU-DOMINIO` (até lá, o endereço de Preview da `main`) | `app.SEU-DOMINIO` (até lá, `hora-do-pet.vercel.app`) |
+| Endereço | `staging.salaodopet.com.br` (até lá, o endereço de Preview da `main`) | `app.salaodopet.com.br` (até lá, `hora-do-pet.vercel.app`) |
 | Origem do código | Branch `main` | Branch `producao` (atualizada por PR `main` → `producao`) |
 | Migrações | `deploy-staging.yml`, a cada merge na `main` | `deploy-producao.yml`, depois da sua aprovação |
 | App publicado por | Vercel, sozinha | `deploy-producao.yml`, **depois** das migrações (`vercel.json` desliga o deploy automático da `producao`) |
@@ -98,15 +98,15 @@ registrada (painel → Mensagens) e não chega ao celular do cliente.
 1. Gere as chaves: `pnpm vapid:gerar` (um par para o staging e outro para a produção). Não salve a chave privada em
    arquivo nem mostre em print.
 2. Supabase, *Edge Functions → Secrets*: `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` e `VAPID_SUBJECT`
-   (`mailto:` + e-mail de contato do Hora do Pet).
+   (`mailto:` + e-mail de contato do Salão do Pet).
 3. Vercel, *Settings → Environment Variables*: `NEXT_PUBLIC_VAPID_PUBLIC_KEY` = a chave pública (Production com a da
    produção; Preview com a do staging). Publique de novo para valer.
 
 ### WhatsApp (semana 7, depois da verificação da empresa na Meta)
-Um número central do Hora do Pet envia os avisos de todas as lojas. Antes da verificação, dá para testar com o número
+Um número central do Salão do Pet envia os avisos de todas as lojas. Antes da verificação, dá para testar com o número
 de teste da Meta, que só envia para os telefones cadastrados no app da Meta.
 
-1. https://developers.facebook.com → *Meus apps → Criar app* (tipo Empresa, ligado ao portfólio do Hora do Pet) →
+1. https://developers.facebook.com → *Meus apps → Criar app* (tipo Empresa, ligado ao portfólio do Salão do Pet) →
    adicionar o produto **WhatsApp**. Anote o **Phone number ID** do número (de teste ou o central).
 2. *Configurações do negócio → Usuários do sistema*: criar um usuário do sistema (Admin), dar acesso ao app e à conta
    do WhatsApp e gerar um token **sem expiração** com `whatsapp_business_messaging` e `whatsapp_business_management`.
@@ -126,25 +126,25 @@ de teste da Meta, que só envia para os telefones cadastrados no app da Meta.
 "Esqueci a senha" voltar para `/auth/confirmar`. No staging, inclua também `https://hora-do-pet-*-edigar-reis.vercel.app/**`
 (prévias dos PRs). Trocar pelo domínio quando ele existir.
 
-*Authentication → Emails → Templates → Reset password*: assunto `Hora do Pet: crie sua nova senha` e, no corpo, o
+*Authentication → Emails → Templates → Reset password*: assunto `Salão do Pet: crie sua nova senha` e, no corpo, o
 conteúdo de `supabase/templates/recuperar-senha.html`. Com esse modelo o link funciona em qualquer navegador; com o
 modelo padrão, só no mesmo navegador em que a pessoa pediu o link. Sem SMTP próprio (abaixo), o e-mail só chega para
 os membros da organização no Supabase.
 
 ### Domínio
-1. Registre o domínio (ex.: `agendapet.com.br` em https://registro.br — exige CPF/CNPJ).
-2. Na Vercel, *Settings → Domains*: `app.SEU-DOMINIO` (Production) e `staging.SEU-DOMINIO` atribuído à branch `main`.
-   A Vercel mostra os registros DNS a criar no registro.br.
+1. Domínio `salaodopet.com.br` comprado na Hostgator (01/11/2026); o DNS é editado no painel da Hostgator.
+2. Na Vercel, *Settings → Domains*: `app.salaodopet.com.br` (Production) e `staging.salaodopet.com.br` atribuído à branch `main`.
+   A Vercel mostra os registros DNS a criar na Hostgator.
 
 ### E-mail de envio (SMTP)
 O e-mail embutido do Supabase envia pouquíssimas mensagens por hora e serve só para teste. Antes de clientes reais:
 
 1. Crie a conta em https://resend.com (plano gratuito: 3.000 e-mails/mês).
-2. *Domains → Add domain*: use um subdomínio, ex.: `mail.SEU-DOMINIO`. Crie no registro.br os registros DNS
+2. *Domains → Add domain*: use um subdomínio, ex.: `mail.salaodopet.com.br`. Crie na Hostgator os registros DNS
    mostrados (SPF, DKIM) e aguarde a verificação.
 3. *API Keys → Create*: guarde a chave.
 4. Em cada projeto Supabase: *Authentication → Emails → SMTP Settings → Enable custom SMTP*:
-   host `smtp.resend.com`, porta `465`, usuário `resend`, senha = a API key, remetente `nao-responda@mail.SEU-DOMINIO`,
+   host `smtp.resend.com`, porta `465`, usuário `resend`, senha = a API key, remetente `nao-responda@mail.salaodopet.com.br`,
    nome da marca.
 
 ### Contas que demoram (iniciar já, em paralelo)

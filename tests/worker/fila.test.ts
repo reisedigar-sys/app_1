@@ -39,7 +39,7 @@ function pushFalso(falhas: Record<string, { erro: string; expirada?: boolean }> 
 
 describe("worker da fila", () => {
   it("monta o link com o endereço do app, no texto, nos parâmetros do modelo e no push", () => {
-    expect(textoFinal(msg("1"), "https://app.horadopet.com.br/")).toBe("Loja: lembrete. Confirme: https://app.horadopet.com.br/c/abc");
+    expect(textoFinal(msg("1"), "https://app.salaodopet.com.br/")).toBe("Loja: lembrete. Confirme: https://app.salaodopet.com.br/c/abc");
     expect(textoFinal({ ...msg("1", null), conteudo: { texto: "Pronto!", link: null } }, "https://x")).toBe("Pronto!");
     const m = comLinks({ ...msg("1"), conteudo: { ...msg("1").conteudo, push } }, "https://x/");
     expect(m.conteudo.parametros).toEqual(["Loja", "https://x/c/abc"]);

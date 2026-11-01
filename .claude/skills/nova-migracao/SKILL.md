@@ -1,6 +1,6 @@
 ---
 name: nova-migracao
-description: Use ao mudar o banco do Hora do Pet (tabela, coluna, função SQL, RLS, trigger). Cria a migração nova com RLS, seed da loja Moema, tipos e testes.
+description: Use ao mudar o banco do Salão do Pet (tabela, coluna, função SQL, RLS, trigger). Cria a migração nova com RLS, seed da loja Moema, tipos e testes.
 ---
 
 # Nova migração

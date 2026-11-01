@@ -35,7 +35,7 @@ describe("web push", () => {
     const navegador = await parDeChaves("ECDH");
     const auth = crypto.getRandomValues(new Uint8Array(16));
     const vapid = await parDeChaves("ECDSA");
-    const chaves = { publica: base64url(vapid.publica), privada: vapid.privada, assunto: "mailto:teste@horadopet.com.br" };
+    const chaves = { publica: base64url(vapid.publica), privada: vapid.privada, assunto: "mailto:teste@salaodopet.com.br" };
 
     const pedidos: { url: string; init: RequestInit }[] = [];
     const f = (async (url: string, init: RequestInit) => {

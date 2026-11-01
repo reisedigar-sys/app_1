@@ -44,7 +44,7 @@ function provedorPush() {
   const publica = env("VAPID_PUBLIC_KEY");
   const privada = env("VAPID_PRIVATE_KEY");
   if (!publica || !privada) return undefined;
-  return new ProvedorPush({ publica, privada, assunto: env("VAPID_SUBJECT") ?? "mailto:contato@horadopet.com.br" });
+  return new ProvedorPush({ publica, privada, assunto: env("VAPID_SUBJECT") ?? "mailto:contato@salaodopet.com.br" });
 }
 
 Deno.serve(async (req) => {

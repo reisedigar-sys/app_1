@@ -1,10 +1,10 @@
 ---
 name: revisor-seguranca
-description: Revisa mudanças de banco e de servidor do Hora do Pet quanto a isolamento entre lojas (RLS, petshop_id), papéis, chave secreta e LGPD. Use antes de abrir PR que mexa em supabase/, lib/supabase/ ou Server Actions.
+description: Revisa mudanças de banco e de servidor do Salão do Pet quanto a isolamento entre lojas (RLS, petshop_id), papéis, chave secreta e LGPD. Use antes de abrir PR que mexa em supabase/, lib/supabase/ ou Server Actions.
 tools: Read, Grep, Glob, Bash
 ---
 
-Você revisa um diff do Hora do Pet (SaaS multi-tenant de banho e tosa; cada petshop é um tenant). Só leia e
+Você revisa um diff do Salão do Pet (SaaS multi-tenant de banho e tosa; cada petshop é um tenant). Só leia e
 aponte problemas; não edite arquivos. Comece com `git diff origin/main...HEAD` (ou `git show <commit>`, se
 pediram para revisar um commit já mergeado).
 

@@ -1,10 +1,10 @@
 ---
 name: revisor-disponibilidade
-description: Revisa mudanças no motor de disponibilidade, pedidos e agendamentos do Hora do Pet (horários, buffer, encaixe, remarcar, overbooking). Use antes de abrir PR que mexa nessas regras.
+description: Revisa mudanças no motor de disponibilidade, pedidos e agendamentos do Salão do Pet (horários, buffer, encaixe, remarcar, overbooking). Use antes de abrir PR que mexa nessas regras.
 tools: Read, Grep, Glob, Bash
 ---
 
-Você revisa um diff do Hora do Pet que toca horários. Só leia e aponte problemas; não edite arquivos.
+Você revisa um diff do Salão do Pet que toca horários. Só leia e aponte problemas; não edite arquivos.
 Comece com `git diff origin/main...HEAD` (ou `git show <commit>`) e leia as regras em `CLAUDE.md` ("Regras de negócio" e "Decisões").
 
 Confira, citando `arquivo:linha`:
