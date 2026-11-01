@@ -44,6 +44,9 @@ async function notificacoes(db: Db, pedido: string) {
 /** Uma rodada do worker no instante informado, devolvendo só o que é do pedido (ou de todos, sem pedido). */
 async function rodada(db: Db, agora: string, filtro?: { pedido?: string; tutor?: string }) {
   await db.comoSuperusuario();
+  // worker_reservar só aplica prazos e lista de espera se pegar a trava (pg_try_advisory_xact_lock); outro arquivo de
+  // teste rodando o worker em paralelo a seguraria até o fim da transação dele. Espera a trava aqui.
+  await db.query("select pg_advisory_xact_lock(hashtext('worker_notificacoes'))");
   const reservadas = await db.rows<Reservada>("select * from public.worker_reservar(500, $1::timestamptz)", [agora]);
   // Conclui todas (o provedor de teste sempre aceita).
   for (const r of reservadas) await db.query("select public.worker_concluir($1, true, 'teste', null, null, $2::timestamptz)", [r.id, agora]);
