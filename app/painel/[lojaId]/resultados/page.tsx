@@ -26,7 +26,10 @@ async function Conteudo({ params, searchParams }: { params: Promise<{ lojaId: st
   const atual = dataNoFuso(new Date(), loja.fuso).slice(0, 7);
   const mes = ehMes(busca.mes) && busca.mes <= atual ? busca.mes : atual;
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc("resultados_do_mes", { p_petshop_id: lojaId, p_mes: `${mes}-01` });
+  const [{ data, error }, { data: sinais }] = await Promise.all([
+    supabase.rpc("resultados_do_mes", { p_petshop_id: lojaId, p_mes: `${mes}-01` }),
+    supabase.rpc("sinais_do_mes", { p_petshop_id: lojaId, p_mes: `${mes}-01` }),
+  ]);
   if (error || !data) return <Aviso tipo="erro">Não foi possível carregar os resultados.</Aviso>;
   const r = data as unknown as Resultados;
 
@@ -46,6 +49,10 @@ async function Conteudo({ params, searchParams }: { params: Promise<{ lojaId: st
     { rotulo: "Faturado", valor: formatarReais(r.faturado_centavos), detalhe: r.previsto_centavos > 0 ? `+ ${formatarReais(r.previsto_centavos)} previsto` : undefined },
     { rotulo: "Clientes", valor: String(r.clientes_atendidos), detalhe: `${r.clientes_novos} novo(s) no mês` },
   ];
+  // Sinal por Pix (semana 8b): só aparece para a loja que cobrou sinal no mês.
+  const s = sinais as { recebidos_centavos: number; retidos_centavos: number; quantidade: number } | null;
+  if (s && s.quantidade > 0)
+    numeros.push({ rotulo: "Sinais retidos", valor: formatarReais(s.retidos_centavos), detalhe: `de ${formatarReais(s.recebidos_centavos)} recebidos por Pix` });
 
   return (
     <div className="flex flex-col gap-4">

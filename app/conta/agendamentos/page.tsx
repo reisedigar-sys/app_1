@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { PassosAtendimento } from "@/components/agenda/passos-atendimento";
 import { Aviso, BotaoLink, Carregando, Titulo, Vazio } from "@/components/ui";
 import { exigirTutor } from "@/lib/conta/sessao";
+import { fraseSinal, politicaCancelamento } from "@/lib/pagamentos/sinal";
 import { formatarReais } from "@/lib/painel/formatos";
 import { createClient } from "@/lib/supabase/server";
 import { BotaoEnviar, FormAcao } from "@/components/form-acao";
@@ -27,6 +28,8 @@ const PERIODOS: Record<string, string> = { manha: "manhã", tarde: "tarde", qual
 const AVISOS: Record<string, string> = {
   cancelado: "Agendamento cancelado.",
   "cancelado-fora-do-prazo": "Agendamento cancelado fora do prazo de cancelamento gratuito da loja.",
+  "cancelado-sinal-devolvido": "Agendamento cancelado. O sinal volta para você por Pix.",
+  "cancelado-sinal-retido": "Agendamento cancelado fora do prazo de cancelamento gratuito: o sinal ficou com a loja.",
   remarcado: "Agendamento remarcado.",
 };
 
@@ -86,6 +89,11 @@ async function Lista({ searchParams }: { searchParams: Promise<Record<string, st
     ? await supabase.from("pagamento").select("id, pedido_id, status, valor_centavos, expira_em").in("pedido_id", [...new Set(data.map((a) => a.pedido_id))])
     : { data: [] };
   const sinalDo = new Map((pagamentos ?? []).map((p) => [p.pedido_id, p]));
+  // Parte do sinal de cada pet (paga, devolvida, retida ou descontada).
+  const { data: partes } = data.length
+    ? await supabase.from("pagamento_parte").select("agendamento_id, situacao, valor_centavos").in("agendamento_id", data.map((a) => a.id))
+    : { data: [] };
+  const parteDo = new Map((partes ?? []).map((p) => [p.agendamento_id, p]));
   // Uma loja: direto para o agendamento dela; várias: escolher em Minhas lojas.
   const novo = lojas?.length === 1 ? `/${lojas[0].slug}/agendar` : lojas?.length ? "/conta/lojas" : null;
   const botaoNovo = novo && (
@@ -165,6 +173,8 @@ async function Lista({ searchParams }: { searchParams: Promise<Record<string, st
     const alteravel = futuro && ["agendado", "confirmado"].includes(a.status);
     const gratuito = new Date(a.cancelamento_gratuito_ate).getTime() > agora;
     const sinal = sinalDo.get(a.pedido_id);
+    const parte = parteDo.get(a.id);
+    const fraseDoSinal = parte && fraseSinal(parte.situacao, parte.valor_centavos, "tutor");
     const aguardandoPix = alteravel && sinal?.status === "aguardando" && new Date(sinal.expira_em).getTime() > agora;
     return (
       <li key={a.id} className="flex flex-col gap-2 rounded-xl border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-950">
@@ -184,7 +194,7 @@ async function Lista({ searchParams }: { searchParams: Promise<Record<string, st
           </Link>{" "}
           · {a.profissional_nome} · {formatarReais(a.preco_total_centavos)}
         </p>
-        {sinal?.status === "pago" && <p className="text-sm text-emerald-800 dark:text-emerald-300">Sinal de {formatarReais(sinal.valor_centavos)} pago por Pix.</p>}
+        {fraseDoSinal && <p className="text-sm text-emerald-800 dark:text-emerald-300">{fraseDoSinal}</p>}
         {aguardandoPix && (
           <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border-2 border-amber-300 bg-amber-50 p-3 text-sm dark:border-amber-700 dark:bg-amber-950">
             <span>
@@ -208,11 +218,11 @@ async function Lista({ searchParams }: { searchParams: Promise<Record<string, st
             <CancelarAgendamento
               id={a.id}
               titulo={`Cancelar o horário de ${a.pet_nome}?`}
-              politica={
-                gratuito
-                  ? `Cancelamento gratuito até ${quando(a.cancelamento_gratuito_ate, a.loja_fuso)}.`
-                  : "O prazo de cancelamento gratuito da loja já passou. Se houver sinal pago, ele pode ser retido."
-              }
+              politica={politicaCancelamento({
+                gratuito,
+                ate: quando(a.cancelamento_gratuito_ate, a.loja_fuso),
+                sinalCentavos: parte?.situacao === "pago" ? parte.valor_centavos : null,
+              })}
             />
           </div>
         )}

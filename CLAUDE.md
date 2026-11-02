@@ -172,9 +172,12 @@ Cuidados:
   `/conta/lojas`, avisos no celular (tutor e equipe). Sem os segredos da Meta, o worker continua no provedor de teste.
 - Semana 8a (Pix com sinal) em revisão: migração 017 (`petshop_pagamento`, `pagamento`, `pagamento_evento`,
   `sinal_previsto`, `pagamento_webhook`, Pix vencido liberado pelo worker), `lib/pagamentos/` (Asaas e Pix simulado),
-  Edge Function `asaas` (webhook), Configurar → Pagamentos, tela do Pix do tutor e `/conta/pix/{id}`. A 8b (devolver
-  ou reter o sinal) vem antes de a 8a ir para a produção.
-- Próximo: 8b; 7b (bot de agendamento no número da loja) depois de a 7a estar no ar e da aprovação como *Tech Provider*.
+  Edge Function `asaas` (webhook), Configurar → Pagamentos, tela do Pix do tutor e `/conta/pix/{id}`.
+- Semana 8b (devolver ou reter o sinal) em revisão, no mesmo PR da 8a: migração 018 (`pagamento_parte`, `estorno`,
+  `estornos_reservar`/`estorno_concluir`, `conferencia_reservar`, `sinais_do_mes`, `agenda_loja` com o sinal), worker
+  `notificacoes` faz os estornos e a conferência, selos na agenda, sinal na ficha, sinais do mês em Pagamentos e em
+  Resultados, Minha conta e link `/c/{token}` dizem se o sinal volta antes de cancelar. Falta o teste no sandbox.
+- Próximo: teste da semana 8 no sandbox do Asaas; 7b (bot de agendamento no número da loja) depois de a 7a estar no ar e da aprovação como *Tech Provider*.
 
 ## Pendências fora do código (decisão ou ação do dono do produto)
 - **Repositório público**: `reisedigar-sys/app_1` está público. Recomendado torná-lo privado
@@ -209,10 +212,19 @@ Cuidados:
   (`PAYMENT_RECEIVED`/`CONFIRMED`) chega pela Edge Function `asaas` com o token `asaas-access-token`.
 - **15 minutos para pagar** (+2 de folga): o worker libera o horário (`app.expirar_pagamentos`), sem falta e sem aviso.
   Enquanto aguarda, os avisos do pedido esperam (`proxima_tentativa_em`). Pix pago confirma o pedido inteiro.
-  Pix que cai depois de liberado fica `devolver` (estorno na 8b).
+  Pix que cai depois de liberado é devolvido inteiro.
 - **Chamadas ao Asaas no servidor do app** (`lib/pagamentos/servico.ts`, `server-only`), sempre partindo do estado no
   banco; a autorização é das funções SQL chamadas antes pelo usuário. Pix simulado só no ambiente local ou com
   `PAGAMENTOS_TESTE=1`.
+- **Sinal dividido por pet** (`pagamento_parte`, proporcional ao valor; o resto dos centavos no último) e cada parte
+  segue o atendimento (trigger `agendamento_sinal`): tutor cancela no prazo → devolve; fora → retém; loja (equipe,
+  ou o sistema sem usuário) cancela → devolve; falta → retém; concluído → abate; desfazer o passo volta a "pago".
+  O prazo conta do horário de antes do cancelamento; remarcar mantém o sinal no mesmo agendamento.
+- **Estornos pelo worker** (Edge Function `notificacoes`, chave da subconta): até 5 tentativas (15 min × tentativa;
+  ex.: saldo insuficiente). Estorno parado em "processando" nunca é refeito (pode ter saído): vira `erro` e a loja
+  devolve pelo Asaas (aviso em Pagamentos e na ficha). O tutor não recebe mensagem; vê em Minha conta.
+- **Conferência**: cada Pix do Asaas vencido ou cancelado é consultado uma vez (1 h a 7 dias depois do vencimento,
+  `GET /payments?pixQrCodeId=`); se caiu, entra como evento do webhook (`conferencia_<id>`) e é devolvido.
 
 ## Decisões da semana 7
 - **Número central só envia** (avisos de todas as lojas, nome da loja no texto). Quem escreve para ele recebe, no

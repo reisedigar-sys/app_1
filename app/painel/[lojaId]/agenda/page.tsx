@@ -22,7 +22,8 @@ import {
 import { lerPeriodo } from "@/lib/painel/periodo";
 import { exigirLoja, exigirUsuario, podeOperar } from "@/lib/painel/sessao";
 import { createClient } from "@/lib/supabase/server";
-import { ListaAtendimentos } from "../lista-atendimentos";
+import { ListaAtendimentos, SeloSinal } from "../lista-atendimentos";
+import type { SituacaoSinal } from "@/lib/pagamentos/sinal";
 import { AoVivo } from "./ao-vivo";
 import { Filtros } from "./filtros";
 
@@ -189,6 +190,7 @@ type Item = {
   servicos: string[] | null;
   tutor_faltas: number | null;
   sem_confirmacao_em: string | null;
+  sinal: SituacaoSinal | null;
 };
 
 function minutosHora(h: string) {
@@ -313,6 +315,7 @@ function CartaoAtendimento({ a, fuso }: { a: Item; fuso: string }) {
         </span>
         {a.encaixe && <span className="rounded bg-black/10 px-1 text-[10px] uppercase">encaixe</span>}
         {a.status === "agendado" && a.sem_confirmacao_em && <span className="rounded bg-red-600 px-1 text-[10px] uppercase text-white">sem confirmação</span>}
+        <SeloSinal situacao={a.sinal} />
       </span>
       <span className="block truncate">{(a.servicos ?? []).join(" + ")}</span>
       <span className="block truncate opacity-80">
@@ -373,7 +376,7 @@ function AgendaSemana({
                           <Link href={`/painel/${lojaId}/agenda/${a.id}`} className={`block rounded border-l-4 px-1.5 py-1 ${COR_STATUS[a.status]}`}>
                             <span className="font-semibold">{horaNoFuso(a.inicio, fuso)}</span> {a.pet_nome}
                             <span className="sr-only"> · {NOME_STATUS[a.status]}</span>
-                            {a.status === "agendado" && <span aria-hidden> · {a.sem_confirmacao_em ? "sem confirmação" : "a confirmar"}</span>}
+                            {a.status === "agendado" && <span aria-hidden> · {a.sinal === "aguardando" ? "aguardando Pix" : a.sem_confirmacao_em ? "sem confirmação" : "a confirmar"}</span>}
                           </Link>
                         </li>
                       ))}

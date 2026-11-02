@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { COR_STATUS, NOME_STATUS, acaoRapida, dataNoFuso, horaNoFuso, somarDias } from "@/lib/painel/agenda";
+import { type SituacaoSinal, seloSinal } from "@/lib/pagamentos/sinal";
 import { linkLigar, linkWhatsApp, textoWhatsApp } from "@/lib/painel/contato";
 import type { Database } from "@/lib/supabase/database.types";
 import { AcaoRapida } from "./acao-rapida";
@@ -37,6 +38,12 @@ export function ContatoTutor({ telefone, texto }: { telefone: string | null | un
   );
 }
 
+/** Selo do sinal por Pix (aguardando, pago, retido, devolvido). */
+export function SeloSinal({ situacao }: { situacao: SituacaoSinal | null | undefined }) {
+  const selo = seloSinal(situacao);
+  return selo && <span className={`rounded px-1 text-[10px] uppercase ${selo.classe}`}>{selo.texto}</span>;
+}
+
 /** Um atendimento em forma de linha: o toque no texto abre a ficha; os botões resolvem sem sair da lista. */
 export function ItemAtendimento({ a, c, mostrarProfissional = true }: { a: LinhaAgenda; c: Contexto; mostrarProfissional?: boolean }) {
   const ehHoje = dataNoFuso(a.inicio, c.fuso) === c.hoje;
@@ -60,12 +67,13 @@ export function ItemAtendimento({ a, c, mostrarProfissional = true }: { a: Linha
           {a.tutor_nome}
           {(a.tutor_faltas ?? 0) > 0 && ` · ${a.tutor_faltas} falta(s)`}
         </span>
-        {(a.encaixe || (a.status === "agendado" && a.sem_confirmacao_em)) && (
+        {(a.encaixe || (a.status === "agendado" && a.sem_confirmacao_em) || seloSinal(a.sinal)) && (
           <span className="mt-1 flex flex-wrap gap-1">
             {a.encaixe && <span className="rounded bg-black/10 px-1 text-[10px] uppercase">encaixe</span>}
             {a.status === "agendado" && a.sem_confirmacao_em && (
               <span className="rounded bg-red-600 px-1 text-[10px] uppercase text-white">sem confirmação</span>
             )}
+            <SeloSinal situacao={a.sinal} />
           </span>
         )}
       </Link>

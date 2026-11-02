@@ -134,6 +134,9 @@ O staging usa a conta de testes (sandbox) do Asaas; a produção, a conta real. 
 5. Opcional no staging, antes do sandbox: `PAGAMENTOS_TESTE=1` na Vercel (Preview) liga o Pix simulado (conta aprovada
    na hora e botão "Simular pagamento"). Nunca na produção.
 
+As devoluções do sinal e a conferência dos Pix vencidos rodam no worker de notificações (Edge Function
+`notificacoes`), que já precisa estar configurado (seção do worker acima); não há segredo novo para isso.
+
 Sem `ASAAS_API_KEY`, a tela Pagamentos avisa que o recebimento ainda não está disponível (ou usa o Pix simulado, no
 ambiente local e com `PAGAMENTOS_TESTE=1`).
 

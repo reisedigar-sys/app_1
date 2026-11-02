@@ -23,6 +23,8 @@ export type PedidoDoLink = {
     servico_ids: string[];
     alteravel: boolean;
     cancelamento_gratuito_ate: string;
+    /** Parte do sinal pago deste pet (null = sem sinal pago). */
+    sinal_centavos: number | null;
   }[];
 };
 

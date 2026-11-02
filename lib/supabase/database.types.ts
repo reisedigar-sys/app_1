@@ -274,6 +274,80 @@ export type Database = {
           },
         ];
       };
+      estorno: {
+        Row: {
+          agendamento_id: string | null;
+          criado_em: string;
+          erro: string | null;
+          feito_em: string | null;
+          id: string;
+          motivo: string;
+          pagamento_id: string;
+          petshop_id: string;
+          processando_desde: string | null;
+          provedor_estorno_id: string | null;
+          proxima_tentativa_em: string;
+          status: string;
+          tentativas: number;
+          valor_centavos: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          agendamento_id?: string | null;
+          criado_em?: string;
+          erro?: string | null;
+          feito_em?: string | null;
+          id?: string;
+          motivo: string;
+          pagamento_id: string;
+          petshop_id: string;
+          processando_desde?: string | null;
+          provedor_estorno_id?: string | null;
+          proxima_tentativa_em?: string;
+          status?: string;
+          tentativas?: number;
+          valor_centavos: number;
+        };
+        Update: {
+          agendamento_id?: string | null;
+          criado_em?: string;
+          erro?: string | null;
+          feito_em?: string | null;
+          id?: string;
+          motivo?: string;
+          pagamento_id?: string;
+          petshop_id?: string;
+          processando_desde?: string | null;
+          provedor_estorno_id?: string | null;
+          proxima_tentativa_em?: string;
+          status?: string;
+          tentativas?: number;
+          valor_centavos?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "estorno_agendamento_id_fkey";
+            columns: ["agendamento_id"];
+            isOneToOne: false;
+            referencedRelation: "agendamento";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "estorno_pagamento_id_fkey";
+            columns: ["pagamento_id"];
+            isOneToOne: false;
+            referencedRelation: "pagamento";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "estorno_petshop_id_fkey";
+            columns: ["petshop_id"];
+            isOneToOne: false;
+            referencedRelation: "petshop";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       horario_trabalho: {
         Row: {
           dia_semana: number;
@@ -595,6 +669,7 @@ export type Database = {
       };
       pagamento: {
         Row: {
+          conferido_em: string | null;
           criado_em: string;
           expira_em: string;
           id: string;
@@ -612,6 +687,7 @@ export type Database = {
         };
         ComputedFields: never;
         Insert: {
+          conferido_em?: string | null;
           criado_em?: string;
           expira_em: string;
           id?: string;
@@ -628,6 +704,7 @@ export type Database = {
           valor_centavos: number;
         };
         Update: {
+          conferido_em?: string | null;
           criado_em?: string;
           expira_em?: string;
           id?: string;
@@ -688,6 +765,66 @@ export type Database = {
           tipo?: string;
         };
         Relationships: [];
+      };
+      pagamento_parte: {
+        Row: {
+          agendamento_id: string;
+          atualizado_em: string;
+          pagamento_id: string;
+          petshop_id: string;
+          situacao: Database["public"]["Enums"]["situacao_sinal"];
+          tutor_id: string;
+          valor_centavos: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          agendamento_id: string;
+          atualizado_em?: string;
+          pagamento_id: string;
+          petshop_id: string;
+          situacao?: Database["public"]["Enums"]["situacao_sinal"];
+          tutor_id: string;
+          valor_centavos: number;
+        };
+        Update: {
+          agendamento_id?: string;
+          atualizado_em?: string;
+          pagamento_id?: string;
+          petshop_id?: string;
+          situacao?: Database["public"]["Enums"]["situacao_sinal"];
+          tutor_id?: string;
+          valor_centavos?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "pagamento_parte_agendamento_id_fkey";
+            columns: ["agendamento_id"];
+            isOneToOne: true;
+            referencedRelation: "agendamento";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "pagamento_parte_pagamento_id_fkey";
+            columns: ["pagamento_id"];
+            isOneToOne: false;
+            referencedRelation: "pagamento";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "pagamento_parte_petshop_id_fkey";
+            columns: ["petshop_id"];
+            isOneToOne: false;
+            referencedRelation: "petshop";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "pagamento_parte_tutor_id_fkey";
+            columns: ["tutor_id"];
+            isOneToOne: false;
+            referencedRelation: "tutor";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       pedido: {
         Row: {
@@ -1572,6 +1709,8 @@ export type Database = {
           profissional_nome: string;
           sem_confirmacao_em: string;
           servicos: string[];
+          sinal: Database["public"]["Enums"]["situacao_sinal"];
+          sinal_centavos: number;
           status: Database["public"]["Enums"]["status_agendamento"];
           tutor_exige_sinal: boolean;
           tutor_faltas: number;
@@ -1639,6 +1778,14 @@ export type Database = {
           ultimo_atendimento: string;
         }[];
       };
+      conferencia_reservar: {
+        Args: { p_agora?: string; p_limite?: number };
+        Returns: {
+          id: string;
+          petshop_id: string;
+          qr_id: string;
+        }[];
+      };
       configurar_sinal: {
         Args: {
           p_fixo_centavos?: number;
@@ -1699,6 +1846,21 @@ export type Database = {
           p_tutor_id: string;
         };
         Returns: string;
+      };
+      estorno_concluir: {
+        Args: { p_agora?: string; p_erro?: string; p_id: string; p_ok: boolean; p_provedor_estorno_id?: string };
+        Returns: undefined;
+      };
+      estornos_reservar: {
+        Args: { p_agora?: string; p_limite?: number };
+        Returns: {
+          descricao: string;
+          id: string;
+          petshop_id: string;
+          provedor: string;
+          provedor_pagamento_id: string;
+          valor_centavos: number;
+        }[];
       };
       horario_da_loja: { Args: { p_local: string; p_petshop_id: string }; Returns: string };
       horarios_do_dia: {
@@ -1823,6 +1985,7 @@ export type Database = {
       remover_push: { Args: { p_endpoint: string; p_escopo: string }; Returns: undefined };
       resultados_do_mes: { Args: { p_mes?: string; p_petshop_id: string }; Returns: Json };
       salvar_perfil_tutor: { Args: { p_nome: string; p_telefone: string }; Returns: string };
+      sinais_do_mes: { Args: { p_mes?: string; p_petshop_id: string }; Returns: Json };
       sinal_previsto: { Args: { p_pets: number; p_petshop_id: string; p_total_centavos: number }; Returns: number };
       solicitar_conta_pagamento: { Args: { p_dados: Json; p_petshop_id: string }; Returns: undefined };
       timemultirange: { Args: Record<PropertyKey, never>; Returns: unknown };
@@ -1890,6 +2053,7 @@ export type Database = {
       periodo_dia: "manha" | "tarde" | "qualquer";
       porte: "mini" | "pequeno" | "medio" | "grande" | "gigante";
       situacao_conta_pagamento: "pendente" | "em_analise" | "aprovada" | "recusada";
+      situacao_sinal: "aguardando" | "pago" | "cancelado" | "devolver" | "devolvido" | "retido" | "abatido";
       status_agendamento:
         "agendado" | "confirmado" | "em_atendimento" | "pronto" | "concluido" | "cancelado" | "faltou";
       status_lista_espera: "aguardando" | "notificado" | "atendido" | "expirado" | "cancelado";
@@ -2025,6 +2189,7 @@ export const Constants = {
       periodo_dia: ["manha", "tarde", "qualquer"],
       porte: ["mini", "pequeno", "medio", "grande", "gigante"],
       situacao_conta_pagamento: ["pendente", "em_analise", "aprovada", "recusada"],
+      situacao_sinal: ["aguardando", "pago", "cancelado", "devolver", "devolvido", "retido", "abatido"],
       status_agendamento: ["agendado", "confirmado", "em_atendimento", "pronto", "concluido", "cancelado", "faltou"],
       status_lista_espera: ["aguardando", "notificado", "atendido", "expirado", "cancelado"],
       status_notificacao: ["pendente", "processando", "enviada", "falhou", "cancelada"],

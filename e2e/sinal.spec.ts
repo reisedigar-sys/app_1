@@ -3,7 +3,7 @@ import { config } from "dotenv";
 import pg from "pg";
 import { botao, campo, entrar, texto } from "./util";
 
-// Semana 8a: sinal por Pix com o provedor de teste (ambiente local, sem a chave do Asaas).
+// Semanas 8a e 8b: sinal por Pix com o provedor de teste (ambiente local, sem a chave do Asaas).
 const CENTRO = "20000000-0000-0000-0000-000000000001";
 const MOEMA = "20000000-0000-0000-0000-000000000003";
 
@@ -77,7 +77,7 @@ test("gerente abre a conta de recebimento e liga o sinal", async ({ page }) => {
   await expect(texto(page, "Sinal desligado.")).toBeVisible();
 });
 
-test("tutor paga o sinal por Pix e o horário fica garantido", async ({ page }) => {
+test("tutor paga o sinal por Pix, o horário fica garantido e, cancelando no prazo, o sinal volta", async ({ page }) => {
   await sql("update public.petshop_pagamento set modo_sinal = 'todos', sinal_tipo = 'percentual', sinal_percentual = 30 where petshop_id = $1", [MOEMA]);
   await criarTutorComPet(page);
 
@@ -107,4 +107,13 @@ test("tutor paga o sinal por Pix e o horário fica garantido", async ({ page }) 
   const cartao = page.locator("section").filter({ has: page.getByRole("heading", { name: "Próximos" }) }).locator(":scope > ul > li").first();
   await expect(cartao).toContainText("Confirmado");
   await expect(cartao).toContainText(/Sinal de R\$\s[\d,]+ pago por Pix\./);
+
+  // Cancelando dentro do prazo gratuito, o sinal volta (a devolução é feita pelo worker).
+  await cartao.getByRole("button", { name: "Cancelar" }).click();
+  const folha = page.getByRole("dialog", { name: "Cancelar o horário de Nina?" });
+  await expect(folha).toContainText(/Cancelando agora, o sinal de R\$\s[\d,]+ volta para você por Pix\./);
+  await folha.getByRole("button", { name: "Confirmar cancelamento" }).click();
+  await expect(texto(page, "Agendamento cancelado. O sinal volta para você por Pix.")).toBeVisible();
+  const cancelado = page.locator("section").filter({ has: page.getByRole("heading", { name: "Anteriores e cancelados" }) }).locator(":scope > ul > li").first();
+  await expect(cancelado).toContainText(/Sinal de R\$\s[\d,]+ sendo devolvido por Pix\./);
 });

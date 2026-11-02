@@ -19,7 +19,7 @@ atendente registrando o pedido pelo painel e enviando o link de agendamento no c
 | **Semana 7a — Mensagens de verdade e app da loja** | **em revisão** (PR da 7a): WhatsApp pelo número central, push, "PARAR", app com nome e ícone da loja, Minhas lojas. O envio real depende da verificação da Meta |
 | Semana 7b — Agendar pelo WhatsApp da loja | a fazer (depois da 7a e da aprovação como *Tech Provider* na Meta) |
 | **Semana 8a — Pix com sinal** | **em revisão**: conta da loja no Asaas, sinal (só de quem falta ou de todos), Pix com 15 minutos, horário liberado se não pagar. Vai para a produção junto com a 8b |
-| Semana 8b — Devolução e retenção do sinal | a fazer: devolve ou retém pelo prazo de cancelamento, conciliação diária, selos na agenda e sinais do mês |
+| **Semana 8b — Devolução e retenção do sinal** | **em revisão** (mesmo PR da 8a): devolve ou retém pelo prazo de cancelamento, estorno automático no Asaas, conferência dos Pix vencidos, selos na agenda e sinais do mês |
 | Semana 9 | a fazer |
 
 Como cada entrega chega aos clientes: PR da semana → merge na `main` (o staging se atualiza sozinho) → PR `main` →

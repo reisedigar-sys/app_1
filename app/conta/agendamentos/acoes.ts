@@ -16,7 +16,17 @@ export async function cancelar(_: Estado, form: FormData): Promise<Estado> {
   if (error) return { ok: false, mensagem: erroDeAgendamento(error).message };
   revalidatePath("/conta/agendamentos");
   const gratuito = (data as { gratuito: boolean }).gratuito;
-  redirect(`/conta/agendamentos?aviso=${gratuito ? "cancelado" : "cancelado-fora-do-prazo"}`);
+  // Sinal pago: o banco já decidiu se volta ou fica (migração 018).
+  const { data: parte } = await supabase.from("pagamento_parte").select("situacao").eq("agendamento_id", id).maybeSingle();
+  const aviso =
+    parte?.situacao === "devolver" || parte?.situacao === "devolvido"
+      ? "cancelado-sinal-devolvido"
+      : parte?.situacao === "retido"
+        ? "cancelado-sinal-retido"
+        : gratuito
+          ? "cancelado"
+          : "cancelado-fora-do-prazo";
+  redirect(`/conta/agendamentos?aviso=${aviso}`);
 }
 
 export async function remarcar(p: { id: string; inicio: string; profissionalId?: string }) {
