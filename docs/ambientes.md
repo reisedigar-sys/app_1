@@ -120,6 +120,26 @@ de teste da Meta, que só envia para os telefones cadastrados no app da Meta.
 6. Cadastre os modelos de `docs/modelos-whatsapp.md` e espere a aprovação. Mensagem com modelo ainda não aprovado
    falha e é tentada de novo (o painel mostra o erro da Meta).
 
+### Pix com sinal (semana 8, uma vez em cada ambiente)
+O staging usa a conta de testes (sandbox) do Asaas; a produção, a conta real. Cada loja abre a própria subconta em
+*Configurar → Pagamentos*; o webhook de cada subconta é cadastrado sozinho, apontando para a Edge Function `asaas`.
+
+1. Asaas (sandbox em https://sandbox.asaas.com; real em https://www.asaas.com): conta com o CNPJ da plataforma, menu
+   do usuário → *Integrações* → *Gerar nova chave de API*. A chave aparece uma vez só (`$aact_hmlg_…` no sandbox,
+   `$aact_prod_…` na real). Na conta real, peça ao gerente do Asaas a criação de subcontas por API.
+2. Crie um token para o webhook (texto aleatório de 32 a 64 caracteres, ex.: `openssl rand -hex 24`).
+3. Vercel, *Settings → Environment Variables* (tipo sensível; Preview = staging, Production = produção):
+   `ASAAS_API_KEY` (passo 1) e `ASAAS_WEBHOOK_TOKEN` (passo 2). Publique de novo para valer.
+4. Supabase, *Edge Functions → Secrets*: `ASAAS_WEBHOOK_TOKEN` com o mesmo valor do passo 2.
+5. Opcional no staging, antes do sandbox: `PAGAMENTOS_TESTE=1` na Vercel (Preview) liga o Pix simulado (conta aprovada
+   na hora e botão "Simular pagamento"). Nunca na produção.
+
+As devoluções do sinal e a conferência dos Pix vencidos rodam no worker de notificações (Edge Function
+`notificacoes`), que já precisa estar configurado (seção do worker acima); não há segredo novo para isso.
+
+Sem `ASAAS_API_KEY`, a tela Pagamentos avisa que o recebimento ainda não está disponível (ou usa o Pix simulado, no
+ambiente local e com `PAGAMENTOS_TESTE=1`).
+
 ### Supabase Auth (cada projeto)
 *Authentication → URL Configuration*: **Site URL** = endereço do app daquele ambiente (`https://staging.salaodopet.com.br`
 ou `https://salaodopet.com.br`) e, em **Redirect URLs**, o mesmo endereço terminado em `/**`, para o link de

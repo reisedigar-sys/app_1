@@ -18,7 +18,9 @@ atendente registrando o pedido pelo painel e enviando o link de agendamento no c
 | Semana 6 — Anti no-show | ✅ concluída (em produção desde 14/10/2026) |
 | **Semana 7a — Mensagens de verdade e app da loja** | **em revisão** (PR da 7a): WhatsApp pelo número central, push, "PARAR", app com nome e ícone da loja, Minhas lojas. O envio real depende da verificação da Meta |
 | Semana 7b — Agendar pelo WhatsApp da loja | a fazer (depois da 7a e da aprovação como *Tech Provider* na Meta) |
-| Semanas 8 e 9 | a fazer |
+| **Semana 8a — Pix com sinal** | **em revisão**: conta da loja no Asaas, sinal (só de quem falta ou de todos), Pix com 15 minutos, horário liberado se não pagar. Vai para a produção junto com a 8b |
+| **Semana 8b — Devolução e retenção do sinal** | **em revisão** (mesmo PR da 8a): devolve ou retém pelo prazo de cancelamento, estorno automático no Asaas, conferência dos Pix vencidos, selos na agenda e sinais do mês |
+| Semana 9 | a fazer |
 
 Como cada entrega chega aos clientes: PR da semana → merge na `main` (o staging se atualiza sozinho) → PR `main` →
 `producao` → aprovação do dono em *Actions → Deploy produção*.
@@ -26,7 +28,8 @@ Como cada entrega chega aos clientes: PR da semana → merge na `main` (o stagin
 ## Em paralelo desde a semana 1 (não dependem de código)
 - Submeter os templates de WhatsApp para aprovação (pode levar dias). **Pendente**: começar pela verificação da empresa
   na Meta (passo a passo em `docs/ambientes.md`)
-- Abrir conta no gateway Pix com split (Asaas) e entender o cadastro de cada loja. **Pendente**
+- Abrir conta no gateway Pix com split (Asaas) e entender o cadastro de cada loja. **Pendente**: conta de testes
+  (sandbox) primeiro; passo a passo em `docs/ambientes.md`
 - Fechar 2–3 petshops piloto e mostrar o progresso toda semana
 - Marca: **Salão do Pet** (decisão provisória do dono, 13/10/2026). Já aparece no app desde a semana 5
 

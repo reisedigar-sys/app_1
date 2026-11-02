@@ -7,6 +7,7 @@ import { Aviso, BotaoLink, Carregando } from "@/components/ui";
 import { telefoneLegivel } from "@/lib/loja-publica";
 import { cancelar, confirmar } from "./acoes";
 import { pedidoDoLink } from "./pedido";
+import { politicaCancelamento } from "@/lib/pagamentos/sinal";
 
 export const metadata: Metadata = { title: "Seu agendamento", robots: { index: false } };
 
@@ -88,11 +89,7 @@ async function Conteudo({ params, searchParams }: { params: Promise<{ token: str
                     id={a.id}
                     titulo={`Cancelar o horário de ${a.pet_nome}?`}
                     acaoCancelar={cancelar.bind(null, token)}
-                    politica={
-                      gratuito
-                        ? `Cancelamento gratuito até ${quando(a.cancelamento_gratuito_ate, loja.fuso)}.`
-                        : "O prazo de cancelamento gratuito da loja já passou. Se houver sinal pago, ele pode ser retido."
-                    }
+                    politica={politicaCancelamento({ gratuito, ate: quando(a.cancelamento_gratuito_ate, loja.fuso), sinalCentavos: a.sinal_centavos })}
                   />
                 </div>
               )}

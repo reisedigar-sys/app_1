@@ -34,7 +34,6 @@ const schema = z.object({
   antecedencia_minima_minutos: inteiro(0, 10080, "Entre 0 e 10080 minutos."),
   janela_maxima_dias: inteiro(1, 365, "Entre 1 e 365 dias."),
   cancelamento_gratuito_horas: inteiro(0, 720, "Entre 0 e 720 horas."),
-  sinal_percentual: z.coerce.number().min(0, "Entre 0 e 100.").max(100, "Entre 0 e 100."),
   limite_faltas: inteiro(0, 50, "Entre 0 e 50."),
   lembrete_d1_hora: z
     .string()

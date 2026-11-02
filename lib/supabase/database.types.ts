@@ -274,6 +274,80 @@ export type Database = {
           },
         ];
       };
+      estorno: {
+        Row: {
+          agendamento_id: string | null;
+          criado_em: string;
+          erro: string | null;
+          feito_em: string | null;
+          id: string;
+          motivo: string;
+          pagamento_id: string;
+          petshop_id: string;
+          processando_desde: string | null;
+          provedor_estorno_id: string | null;
+          proxima_tentativa_em: string;
+          status: string;
+          tentativas: number;
+          valor_centavos: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          agendamento_id?: string | null;
+          criado_em?: string;
+          erro?: string | null;
+          feito_em?: string | null;
+          id?: string;
+          motivo: string;
+          pagamento_id: string;
+          petshop_id: string;
+          processando_desde?: string | null;
+          provedor_estorno_id?: string | null;
+          proxima_tentativa_em?: string;
+          status?: string;
+          tentativas?: number;
+          valor_centavos: number;
+        };
+        Update: {
+          agendamento_id?: string | null;
+          criado_em?: string;
+          erro?: string | null;
+          feito_em?: string | null;
+          id?: string;
+          motivo?: string;
+          pagamento_id?: string;
+          petshop_id?: string;
+          processando_desde?: string | null;
+          provedor_estorno_id?: string | null;
+          proxima_tentativa_em?: string;
+          status?: string;
+          tentativas?: number;
+          valor_centavos?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "estorno_agendamento_id_fkey";
+            columns: ["agendamento_id"];
+            isOneToOne: false;
+            referencedRelation: "agendamento";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "estorno_pagamento_id_fkey";
+            columns: ["pagamento_id"];
+            isOneToOne: false;
+            referencedRelation: "pagamento";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "estorno_petshop_id_fkey";
+            columns: ["petshop_id"];
+            isOneToOne: false;
+            referencedRelation: "petshop";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       horario_trabalho: {
         Row: {
           dia_semana: number;
@@ -586,6 +660,165 @@ export type Database = {
           },
           {
             foreignKeyName: "notificacao_agendada_tutor_id_fkey";
+            columns: ["tutor_id"];
+            isOneToOne: false;
+            referencedRelation: "tutor";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      pagamento: {
+        Row: {
+          conferido_em: string | null;
+          criado_em: string;
+          expira_em: string;
+          id: string;
+          pago_em: string | null;
+          pedido_id: string;
+          petshop_id: string;
+          provedor: string;
+          provedor_pagamento_id: string | null;
+          qr_id: string | null;
+          qr_imagem: string | null;
+          qr_payload: string | null;
+          status: Database["public"]["Enums"]["status_pagamento"];
+          tutor_id: string;
+          valor_centavos: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          conferido_em?: string | null;
+          criado_em?: string;
+          expira_em: string;
+          id?: string;
+          pago_em?: string | null;
+          pedido_id: string;
+          petshop_id: string;
+          provedor: string;
+          provedor_pagamento_id?: string | null;
+          qr_id?: string | null;
+          qr_imagem?: string | null;
+          qr_payload?: string | null;
+          status?: Database["public"]["Enums"]["status_pagamento"];
+          tutor_id: string;
+          valor_centavos: number;
+        };
+        Update: {
+          conferido_em?: string | null;
+          criado_em?: string;
+          expira_em?: string;
+          id?: string;
+          pago_em?: string | null;
+          pedido_id?: string;
+          petshop_id?: string;
+          provedor?: string;
+          provedor_pagamento_id?: string | null;
+          qr_id?: string | null;
+          qr_imagem?: string | null;
+          qr_payload?: string | null;
+          status?: Database["public"]["Enums"]["status_pagamento"];
+          tutor_id?: string;
+          valor_centavos?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "pagamento_pedido_id_petshop_id_fkey";
+            columns: ["pedido_id", "petshop_id"];
+            isOneToOne: false;
+            referencedRelation: "pedido";
+            referencedColumns: ["id", "petshop_id"];
+          },
+          {
+            foreignKeyName: "pagamento_petshop_id_fkey";
+            columns: ["petshop_id"];
+            isOneToOne: false;
+            referencedRelation: "petshop";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "pagamento_tutor_id_fkey";
+            columns: ["tutor_id"];
+            isOneToOne: false;
+            referencedRelation: "tutor";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      pagamento_evento: {
+        Row: {
+          id: string;
+          payload: NonNullable<Json>;
+          recebido_em: string;
+          tipo: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          id: string;
+          payload: NonNullable<Json>;
+          recebido_em?: string;
+          tipo: string;
+        };
+        Update: {
+          id?: string;
+          payload?: NonNullable<Json>;
+          recebido_em?: string;
+          tipo?: string;
+        };
+        Relationships: [];
+      };
+      pagamento_parte: {
+        Row: {
+          agendamento_id: string;
+          atualizado_em: string;
+          pagamento_id: string;
+          petshop_id: string;
+          situacao: Database["public"]["Enums"]["situacao_sinal"];
+          tutor_id: string;
+          valor_centavos: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          agendamento_id: string;
+          atualizado_em?: string;
+          pagamento_id: string;
+          petshop_id: string;
+          situacao?: Database["public"]["Enums"]["situacao_sinal"];
+          tutor_id: string;
+          valor_centavos: number;
+        };
+        Update: {
+          agendamento_id?: string;
+          atualizado_em?: string;
+          pagamento_id?: string;
+          petshop_id?: string;
+          situacao?: Database["public"]["Enums"]["situacao_sinal"];
+          tutor_id?: string;
+          valor_centavos?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "pagamento_parte_agendamento_id_fkey";
+            columns: ["agendamento_id"];
+            isOneToOne: true;
+            referencedRelation: "agendamento";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "pagamento_parte_pagamento_id_fkey";
+            columns: ["pagamento_id"];
+            isOneToOne: false;
+            referencedRelation: "pagamento";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "pagamento_parte_petshop_id_fkey";
+            columns: ["petshop_id"];
+            isOneToOne: false;
+            referencedRelation: "petshop";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "pagamento_parte_tutor_id_fkey";
             columns: ["tutor_id"];
             isOneToOne: false;
             referencedRelation: "tutor";
@@ -917,6 +1150,69 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "profissional";
             referencedColumns: ["id", "petshop_id"];
+          },
+        ];
+      };
+      petshop_pagamento: {
+        Row: {
+          atualizado_em: string;
+          conta_id: string | null;
+          criado_em: string;
+          dados_conta: NonNullable<Json>;
+          documentos_url: string | null;
+          erro: string | null;
+          modo_sinal: Database["public"]["Enums"]["modo_sinal"];
+          petshop_id: string;
+          pix_chave: string | null;
+          provedor: string;
+          sinal_fixo_centavos: number | null;
+          sinal_percentual: number;
+          sinal_tipo: string;
+          situacao: Database["public"]["Enums"]["situacao_conta_pagamento"];
+          wallet_id: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          atualizado_em?: string;
+          conta_id?: string | null;
+          criado_em?: string;
+          dados_conta?: NonNullable<Json>;
+          documentos_url?: string | null;
+          erro?: string | null;
+          modo_sinal?: Database["public"]["Enums"]["modo_sinal"];
+          petshop_id: string;
+          pix_chave?: string | null;
+          provedor?: string;
+          sinal_fixo_centavos?: number | null;
+          sinal_percentual?: number;
+          sinal_tipo?: string;
+          situacao?: Database["public"]["Enums"]["situacao_conta_pagamento"];
+          wallet_id?: string | null;
+        };
+        Update: {
+          atualizado_em?: string;
+          conta_id?: string | null;
+          criado_em?: string;
+          dados_conta?: NonNullable<Json>;
+          documentos_url?: string | null;
+          erro?: string | null;
+          modo_sinal?: Database["public"]["Enums"]["modo_sinal"];
+          petshop_id?: string;
+          pix_chave?: string | null;
+          provedor?: string;
+          sinal_fixo_centavos?: number | null;
+          sinal_percentual?: number;
+          sinal_tipo?: string;
+          situacao?: Database["public"]["Enums"]["situacao_conta_pagamento"];
+          wallet_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "petshop_pagamento_petshop_id_fkey";
+            columns: ["petshop_id"];
+            isOneToOne: true;
+            referencedRelation: "petshop";
+            referencedColumns: ["id"];
           },
         ];
       };
@@ -1413,6 +1709,8 @@ export type Database = {
           profissional_nome: string;
           sem_confirmacao_em: string;
           servicos: string[];
+          sinal: Database["public"]["Enums"]["situacao_sinal"];
+          sinal_centavos: number;
           status: Database["public"]["Enums"]["status_agendamento"];
           tutor_exige_sinal: boolean;
           tutor_faltas: number;
@@ -1420,6 +1718,16 @@ export type Database = {
           tutor_nome: string;
           tutor_telefone: string;
         }[];
+      };
+      atualizar_conta_pagamento: {
+        Args: {
+          p_documentos_url?: string;
+          p_erro?: string;
+          p_petshop_id: string;
+          p_pix_chave?: string;
+          p_situacao: Database["public"]["Enums"]["situacao_conta_pagamento"];
+        };
+        Returns: undefined;
       };
       buscar_tutor_balcao: {
         Args: { p_petshop_id: string; p_telefone: string };
@@ -1451,6 +1759,7 @@ export type Database = {
       };
       cancelar_agendamento: { Args: { p_agendamento_id: string }; Returns: Json };
       cancelar_por_token: { Args: { p_agendamento_id: string; p_token: string }; Returns: Json };
+      chave_conta_pagamento: { Args: { p_petshop_id: string }; Returns: string };
       checklist_onboarding: { Args: { p_petshop_id: string }; Returns: Json };
       clientes_da_loja: {
         Args: { p_busca?: string; p_limite?: number; p_petshop_id: string; p_pular?: number };
@@ -1468,6 +1777,24 @@ export type Database = {
           tutor_id: string;
           ultimo_atendimento: string;
         }[];
+      };
+      conferencia_reservar: {
+        Args: { p_agora?: string; p_limite?: number };
+        Returns: {
+          id: string;
+          petshop_id: string;
+          qr_id: string;
+        }[];
+      };
+      configurar_sinal: {
+        Args: {
+          p_fixo_centavos?: number;
+          p_modo: Database["public"]["Enums"]["modo_sinal"];
+          p_percentual?: number;
+          p_petshop_id: string;
+          p_tipo: string;
+        };
+        Returns: undefined;
       };
       confirmar_por_token: { Args: { p_token: string }; Returns: number };
       copiar_catalogo: { Args: { p_destino: string; p_origem: string; p_substituir?: boolean }; Returns: Json };
@@ -1519,6 +1846,21 @@ export type Database = {
           p_tutor_id: string;
         };
         Returns: string;
+      };
+      estorno_concluir: {
+        Args: { p_agora?: string; p_erro?: string; p_id: string; p_ok: boolean; p_provedor_estorno_id?: string };
+        Returns: undefined;
+      };
+      estornos_reservar: {
+        Args: { p_agora?: string; p_limite?: number };
+        Returns: {
+          descricao: string;
+          id: string;
+          petshop_id: string;
+          provedor: string;
+          provedor_pagamento_id: string;
+          valor_centavos: number;
+        }[];
       };
       horario_da_loja: { Args: { p_local: string; p_petshop_id: string }; Returns: string };
       horarios_do_dia: {
@@ -1582,6 +1924,7 @@ export type Database = {
           telefone_e164: string;
         }[];
       };
+      pagamento_webhook: { Args: { p_evento: Json }; Returns: string };
       pedido_por_token: { Args: { p_token: string }; Returns: Json };
       profissionais_aptos: {
         Args: { p_itens: Json; p_petshop_id: string };
@@ -1610,8 +1953,25 @@ export type Database = {
         Args: { p_contato: boolean; p_marketing?: boolean; p_petshop_id: string };
         Returns: undefined;
       };
+      registrar_conta_pagamento: {
+        Args: {
+          p_api_key: string;
+          p_conta_id: string;
+          p_documentos_url?: string;
+          p_petshop_id: string;
+          p_pix_chave?: string;
+          p_provedor: string;
+          p_situacao: Database["public"]["Enums"]["situacao_conta_pagamento"];
+          p_wallet_id: string;
+        };
+        Returns: undefined;
+      };
       registrar_push: {
         Args: { p_auth: string; p_endpoint: string; p_escopo: string; p_p256dh: string };
+        Returns: undefined;
+      };
+      registrar_qr_pagamento: {
+        Args: { p_imagem: string; p_pagamento_id: string; p_payload: string; p_qr_id: string };
         Returns: undefined;
       };
       remarcar_agendamento: {
@@ -1625,6 +1985,9 @@ export type Database = {
       remover_push: { Args: { p_endpoint: string; p_escopo: string }; Returns: undefined };
       resultados_do_mes: { Args: { p_mes?: string; p_petshop_id: string }; Returns: Json };
       salvar_perfil_tutor: { Args: { p_nome: string; p_telefone: string }; Returns: string };
+      sinais_do_mes: { Args: { p_mes?: string; p_petshop_id: string }; Returns: Json };
+      sinal_previsto: { Args: { p_pets: number; p_petshop_id: string; p_total_centavos: number }; Returns: number };
+      solicitar_conta_pagamento: { Args: { p_dados: Json; p_petshop_id: string }; Returns: undefined };
       timemultirange: { Args: Record<PropertyKey, never>; Returns: unknown };
       unidades_para_pedido: {
         Args: { p_itens: Json; p_lat?: number; p_lng?: number; p_petshop_id: string };
@@ -1684,14 +2047,18 @@ export type Database = {
       canal_agendamento: "app_proprio" | "marketplace" | "balcao" | "whatsapp";
       categoria_mensagem: "utilidade" | "marketing" | "servico";
       criado_por_tipo: "tutor" | "equipe" | "bot_whatsapp" | "sistema";
+      modo_sinal: "nunca" | "faltas" | "todos";
       papel_loja: "dono" | "gerente" | "atendente" | "profissional";
       pelagem: "curta" | "media" | "longa";
       periodo_dia: "manha" | "tarde" | "qualquer";
       porte: "mini" | "pequeno" | "medio" | "grande" | "gigante";
+      situacao_conta_pagamento: "pendente" | "em_analise" | "aprovada" | "recusada";
+      situacao_sinal: "aguardando" | "pago" | "cancelado" | "devolver" | "devolvido" | "retido" | "abatido";
       status_agendamento:
         "agendado" | "confirmado" | "em_atendimento" | "pronto" | "concluido" | "cancelado" | "faltou";
       status_lista_espera: "aguardando" | "notificado" | "atendido" | "expirado" | "cancelado";
       status_notificacao: "pendente" | "processando" | "enviada" | "falhou" | "cancelada";
+      status_pagamento: "aguardando" | "pago" | "expirado" | "cancelado" | "devolver";
       tipo_bloqueio: "folga" | "almoco" | "feriado" | "outro";
       tipo_notificacao:
         | "confirmacao_imediata"
@@ -1816,13 +2183,17 @@ export const Constants = {
       canal_agendamento: ["app_proprio", "marketplace", "balcao", "whatsapp"],
       categoria_mensagem: ["utilidade", "marketing", "servico"],
       criado_por_tipo: ["tutor", "equipe", "bot_whatsapp", "sistema"],
+      modo_sinal: ["nunca", "faltas", "todos"],
       papel_loja: ["dono", "gerente", "atendente", "profissional"],
       pelagem: ["curta", "media", "longa"],
       periodo_dia: ["manha", "tarde", "qualquer"],
       porte: ["mini", "pequeno", "medio", "grande", "gigante"],
+      situacao_conta_pagamento: ["pendente", "em_analise", "aprovada", "recusada"],
+      situacao_sinal: ["aguardando", "pago", "cancelado", "devolver", "devolvido", "retido", "abatido"],
       status_agendamento: ["agendado", "confirmado", "em_atendimento", "pronto", "concluido", "cancelado", "faltou"],
       status_lista_espera: ["aguardando", "notificado", "atendido", "expirado", "cancelado"],
       status_notificacao: ["pendente", "processando", "enviada", "falhou", "cancelada"],
+      status_pagamento: ["aguardando", "pago", "expirado", "cancelado", "devolver"],
       tipo_bloqueio: ["folga", "almoco", "feriado", "outro"],
       tipo_notificacao: [
         "confirmacao_imediata",

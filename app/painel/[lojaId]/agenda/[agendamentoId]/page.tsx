@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { BotaoEnviar, FormAcao } from "@/components/form-acao";
 import { Aviso, BotaoLink, Cartao, Carregando } from "@/components/ui";
 import { COR_STATUS, NOME_CANAL, NOME_STATUS, acoesDeStatus, dataNoFuso, diaPorExtenso, horaNoFuso, podeRemarcarOuCancelar } from "@/lib/painel/agenda";
+import { fraseSinal } from "@/lib/pagamentos/sinal";
 import { NOME_PELAGEM, NOME_PORTE, formatarReais, telefoneLegivel } from "@/lib/painel/formatos";
 import { COLUNAS_MENSAGEM, type LinhaMensagem } from "@/lib/painel/mensagens";
 import { exigirLoja, podeConfigurar, podeOperar } from "@/lib/painel/sessao";
@@ -41,12 +42,16 @@ async function Conteudo({ params }: { params: Promise<{ lojaId: string; agendame
     .eq("petshop_id", lojaId)
     .maybeSingle();
   if (!a) notFound();
-  const [{ data: vinculo }, { data: obsPet }, { data: mensagens }] = await Promise.all([
+  const [{ data: vinculo }, { data: obsPet }, { data: mensagens }, { data: sinal }, { data: devolucao }] = await Promise.all([
     supabase.from("tutor_petshop").select("faltas, exige_sinal, observacoes, consentimento_contato_em").eq("petshop_id", lojaId).eq("tutor_id", a.tutor?.id ?? "").maybeSingle(),
     supabase.from("pet_petshop").select("observacoes").eq("petshop_id", lojaId).eq("pet_id", a.pet?.id ?? "").maybeSingle(),
     // Mensagens do pedido (os lembretes valem para todos os pets do pedido).
     supabase.from("notificacao_agendada").select(COLUNAS_MENSAGEM).eq("petshop_id", lojaId).eq("pedido_id", a.pedido_id).order("enviar_em"),
+    // Sinal por Pix deste pet (recepção, pelo RLS) e a devolução, quando houver (dono e gerência, pelo RLS).
+    supabase.from("pagamento_parte").select("situacao, valor_centavos").eq("agendamento_id", a.id).maybeSingle(),
+    supabase.from("estorno").select("status, erro").eq("petshop_id", lojaId).eq("agendamento_id", a.id).order("criado_em", { ascending: false }).limit(1).maybeSingle(),
   ]);
+  const fraseDoSinal = sinal && fraseSinal(sinal.situacao, sinal.valor_centavos, "loja");
 
   const operacao = podeOperar(papel);
   const jaComecou = new Date(a.inicio).getTime() <= agora();
@@ -84,7 +89,7 @@ async function Conteudo({ params }: { params: Promise<{ lojaId: string; agendame
                 <BotaoLink href={`/painel/${lojaId}/agenda/${a.id}/remarcar`} variante="secundario">
                   Remarcar
                 </BotaoLink>
-                <Cancelar lojaId={lojaId} id={a.id} />
+                <Cancelar lojaId={lojaId} id={a.id} sinal={sinal?.situacao === "pago" ? formatarReais(sinal.valor_centavos) : null} />
               </div>
             )}
           </div>
@@ -107,6 +112,12 @@ async function Conteudo({ params }: { params: Promise<{ lojaId: string; agendame
             <span>{formatarReais(a.preco_total_centavos)}</span>
           </li>
         </ul>
+        {fraseDoSinal && <p className="mt-2 text-sm font-medium">{fraseDoSinal}</p>}
+        {devolucao?.status === "erro" && (
+          <Aviso tipo="erro">
+            O Asaas não fez a devolução ({devolucao.erro}). Devolva o sinal ao cliente pelo app do Asaas.
+          </Aviso>
+        )}
         <p className="mt-2 text-xs text-neutral-500">
           Canal: {NOME_CANAL[a.canal]}
           {a.encaixe && " · encaixe"}

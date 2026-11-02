@@ -426,3 +426,7 @@ enabled = true
 
 [functions.whatsapp]
 verify_jwt = false
+
+# Webhook do Asaas (semana 8): confere o cabeçalho asaas-access-token (não usa JWT).
+[functions.asaas]
+verify_jwt = false

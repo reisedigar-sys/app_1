@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { FormAcao } from "@/components/form-acao";
 import { Caixa, Campo, Cartao, Selecao } from "@/components/ui";
 import type { Loja } from "@/lib/painel/sessao";
@@ -74,9 +75,15 @@ export function FormularioLoja({ loja, editavel }: { loja: Loja; editavel: boole
             <h2 className="font-medium">Cancelamento e faltas</h2>
             <div className="grid grid-cols-2 gap-3">
               <Campo rotulo="Cancelamento grátis até (horas antes)" nome="cancelamento_gratuito_horas" type="number" inputMode="numeric" defaultValue={loja.cancelamento_gratuito_horas} erro={erros.cancelamento_gratuito_horas} />
-              <Campo rotulo="Sinal (% do valor)" nome="sinal_percentual" type="number" inputMode="decimal" defaultValue={Number(loja.sinal_percentual)} erro={erros.sinal_percentual} ajuda="0 = sem sinal" />
               <Campo rotulo="Faltas antes de exigir sinal" nome="limite_faltas" type="number" inputMode="numeric" defaultValue={loja.limite_faltas} erro={erros.limite_faltas} />
             </div>
+            <p className="text-xs text-neutral-500">
+              O sinal por Pix (de quem cobrar e quanto) fica em{" "}
+              <Link href={`/painel/${loja.id}/pagamentos`} className="font-medium text-marca-700 underline dark:text-marca-400">
+                Pagamentos
+              </Link>
+              .
+            </p>
           </Cartao>
 
           <Cartao className="flex flex-col gap-4">

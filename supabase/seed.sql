@@ -179,7 +179,8 @@ insert into public.pedido (id, petshop_id, tutor_id, canal, chave_idempotencia, 
   ('60000000-0000-0000-0000-000000000002', '20000000-0000-0000-0000-000000000003', '40000000-0000-0000-0000-000000000001', 'whatsapp', 'seed-2', 'equipe', 0),
   ('60000000-0000-0000-0000-000000000003', '20000000-0000-0000-0000-000000000002', '40000000-0000-0000-0000-000000000002', 'balcao', 'seed-3', 'equipe', 0),
   ('60000000-0000-0000-0000-000000000004', '20000000-0000-0000-0000-000000000003', '40000000-0000-0000-0000-000000000002', 'app_proprio', 'seed-4', 'tutor', 0),
-  ('60000000-0000-0000-0000-000000000005', '20000000-0000-0000-0000-000000000001', '40000000-0000-0000-0000-000000000001', 'app_proprio', 'seed-5', 'tutor', 0);
+  ('60000000-0000-0000-0000-000000000005', '20000000-0000-0000-0000-000000000001', '40000000-0000-0000-0000-000000000001', 'app_proprio', 'seed-5', 'tutor', 0),
+  ('60000000-0000-0000-0000-000000000006', '20000000-0000-0000-0000-000000000003', '40000000-0000-0000-0000-000000000002', 'app_proprio', 'seed-6', 'tutor', 0);
 
 -- Agendamentos: (id, pedido, pet, profissional, dias a partir de hoje, hora local, serviço principal, status)
 with dados (id, pedido_id, pet_id, profissional_id, dias, hora, servico, status) as (
@@ -188,7 +189,8 @@ with dados (id, pedido_id, pet_id, profissional_id, dias, hora, servico, status)
     ('70000000-0000-0000-0000-000000000002', '60000000-0000-0000-0000-000000000002', '50000000-0000-0000-0000-000000000002', '30000000-0000-0000-0000-000000000301', 2, time '14:00', 'Banho e tosa higiênica', 'confirmado'),
     ('70000000-0000-0000-0000-000000000003', '60000000-0000-0000-0000-000000000003', '50000000-0000-0000-0000-000000000003', '30000000-0000-0000-0000-000000000201', 3, time '09:00', 'Tosa completa', 'agendado'),
     ('70000000-0000-0000-0000-000000000004', '60000000-0000-0000-0000-000000000004', '50000000-0000-0000-0000-000000000004', '30000000-0000-0000-0000-000000000302', -7, time '11:00', 'Banho', 'concluido'),
-    ('70000000-0000-0000-0000-000000000005', '60000000-0000-0000-0000-000000000005', '50000000-0000-0000-0000-000000000002', '30000000-0000-0000-0000-000000000101', -14, time '15:00', 'Banho', 'concluido')
+    ('70000000-0000-0000-0000-000000000005', '60000000-0000-0000-0000-000000000005', '50000000-0000-0000-0000-000000000002', '30000000-0000-0000-0000-000000000101', -14, time '15:00', 'Banho', 'concluido'),
+    ('70000000-0000-0000-0000-000000000006', '60000000-0000-0000-0000-000000000006', '50000000-0000-0000-0000-000000000004', '30000000-0000-0000-0000-000000000302', -3, time '11:00', 'Banho', 'cancelado')
 ), calc as (
   select d.*, pe.tutor_id, pd.petshop_id, pd.canal, sp.preco_centavos, sp.duracao_minutos, s.id as servico_id, ps.buffer_minutos,
          (((now() at time zone 'America/Sao_Paulo')::date + d.dias) + d.hora) at time zone ps.fuso as inicio
@@ -211,6 +213,24 @@ select petshop_id, id, servico_id, 0, preco_centavos, duracao_minutos from calc;
 
 update public.pedido p
    set total_centavos = (select sum(a.preco_total_centavos) from public.agendamento a where a.pedido_id = p.id);
+
+-- Sinal por Pix (migração 017): a Moema tem conta de recebimento de teste, sem cobrar sinal; o pedido antigo do
+-- Bruno ficou com o sinal pago.
+insert into public.petshop_pagamento (petshop_id, provedor, situacao, conta_id, wallet_id, pix_chave, dados_conta) values
+  ('20000000-0000-0000-0000-000000000003', 'teste', 'aprovada', 'teste-conta-moema', 'teste-carteira-moema', 'teste-chave-moema',
+   '{"nome": "Banho e Cia Moema Ltda", "cpf_cnpj": "11222333000181", "email": "financeiro@banhoecia.test"}');
+select vault.create_secret('teste-chave-moema', 'pagamento_conta_20000000-0000-0000-0000-000000000003', 'Chave de API da subconta da loja');
+insert into public.pagamento (petshop_id, pedido_id, tutor_id, valor_centavos, status, provedor, qr_id, expira_em, pago_em)
+select petshop_id, id, tutor_id, 2000, 'pago', 'teste', 'teste-qr-' || chave_idempotencia, criado_em + interval '15 minutes', criado_em + interval '2 minutes'
+  from public.pedido where id in ('60000000-0000-0000-0000-000000000004', '60000000-0000-0000-0000-000000000006');
+-- Semana 8b: o sinal do atendimento concluído foi abatido; o do cancelado pela loja foi devolvido.
+insert into public.pagamento_parte (agendamento_id, pagamento_id, petshop_id, tutor_id, valor_centavos, situacao)
+select a.id, p.id, p.petshop_id, p.tutor_id, p.valor_centavos,
+       case a.status when 'concluido' then 'abatido' else 'devolvido' end::public.situacao_sinal
+  from public.pagamento p join public.agendamento a on a.pedido_id = p.pedido_id;
+insert into public.estorno (pagamento_id, agendamento_id, petshop_id, valor_centavos, motivo, status, tentativas, provedor_estorno_id, feito_em)
+select p.id, '70000000-0000-0000-0000-000000000006', p.petshop_id, p.valor_centavos, 'loja_cancelou', 'feito', 1, 'teste-estorno-seed-6', now()
+  from public.pagamento p where p.pedido_id = '60000000-0000-0000-0000-000000000006';
 
 -- ---------------------------------------------------------------------------
 -- Anti no-show, lista de espera, WhatsApp e avaliações

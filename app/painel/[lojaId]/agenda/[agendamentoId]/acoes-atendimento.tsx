@@ -25,7 +25,8 @@ export function AcoesStatus({ lojaId, id, acoes }: { lojaId: string; id: string;
   );
 }
 
-export function Cancelar({ lojaId, id }: { lojaId: string; id: string }) {
+/** `sinal`: aviso de que o sinal pago volta para o cliente (a loja cancelando, sempre devolve). */
+export function Cancelar({ lojaId, id, sinal }: { lojaId: string; id: string; sinal?: string | null }) {
   const [confirmando, setConfirmando] = useState(false);
   const [estado, acao, pendente] = useActionState(cancelarNoPainel, {});
   if (estado.ok) return <Aviso tipo="ok">{estado.mensagem}</Aviso>;
@@ -39,7 +40,7 @@ export function Cancelar({ lojaId, id }: { lojaId: string; id: string }) {
     <form action={acao} className="flex flex-wrap items-center gap-2">
       <input type="hidden" name="loja_id" value={lojaId} />
       <input type="hidden" name="id" value={id} />
-      <span className="text-sm">Cancelar este atendimento?</span>
+      <span className="text-sm">Cancelar este atendimento?{sinal && ` O sinal de ${sinal} volta para o cliente por Pix.`}</span>
       <Botao type="submit" variante="perigo" disabled={pendente}>
         Sim, cancelar
       </Botao>

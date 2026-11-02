@@ -1,7 +1,8 @@
 import { config } from "dotenv";
 import pg from "pg";
 
-// Remove o que os testes E2E criam (contas @e2e.test, clientes de balcão "E2E …", lojas e redes novas), para o banco local voltar ao estado
+// Remove o que os testes E2E criam (contas @e2e.test, clientes de balcão "E2E …", lojas e redes novas,
+// contas de recebimento abertas nos testes), para o banco local voltar ao estado
 // do seed e os testes de banco (pnpm test) não dependerem da ordem em que as suítes rodam.
 export default async function limparDadosE2E() {
   config({ path: [".env.local", ".env.example"], quiet: true });
@@ -26,6 +27,12 @@ export default async function limparDadosE2E() {
       "delete from public.rede r where r.id in (select rede_id from _lojas) and not exists (select 1 from public.petshop p where p.rede_id = r.id)",
     );
     await db.query("delete from auth.users where id in (select id from _usuarios)");
+    // Sinal por Pix: só a Moema tem conta de recebimento no seed, e sem cobrar sinal.
+    await db.query("delete from public.petshop_pagamento where petshop_id <> '20000000-0000-0000-0000-000000000003'");
+    await db.query("update public.petshop_pagamento set modo_sinal = 'nunca'");
+    await db.query(
+      "delete from vault.secrets where name like 'pagamento_conta_%' and name <> 'pagamento_conta_20000000-0000-0000-0000-000000000003'",
+    );
     await db.query("commit");
   } catch (e) {
     await db.query("rollback");

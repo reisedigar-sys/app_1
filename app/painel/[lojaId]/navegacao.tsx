@@ -15,6 +15,7 @@ const CONFIGURACAO = [
   ["/horarios", "Horários"],
   ["/bloqueios", "Bloqueios"],
   ["/equipe", "Equipe"],
+  ["/pagamentos", "Pagamentos"],
 ] as const;
 
 const icone = (d: ReactNode) => (

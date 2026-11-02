@@ -4,7 +4,9 @@
 //   WHATSAPP_TOKEN e WHATSAPP_PHONE_NUMBER_ID (número central). Sem eles, as mensagens só ficam registradas no painel;
 //   WHATSAPP_SOMENTE_PARA (opcional, staging): telefones separados por vírgula; os outros ficam só registrados;
 //   VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY e VAPID_SUBJECT (mailto:…) para o push. Sem eles, não há push.
+// Também faz as devoluções do sinal por Pix e confere os Pix vencidos no Asaas (semana 8b).
 // Sem dependências: chama as funções do banco direto pela API REST (PostgREST) com a chave de serviço.
+import { processarPagamentos } from "../_shared/asaas.ts";
 import { type Mensagem, type MensagemProvider, ProvedorTeste, processarFila } from "../_shared/fila.ts";
 import { ProvedorPush } from "../_shared/webpush.ts";
 import { ProvedorWhatsApp } from "../_shared/whatsapp.ts";
@@ -52,11 +54,22 @@ Deno.serve(async (req) => {
   if (!token || req.headers.get("x-worker-token") !== token) {
     return new Response("acesso negado", { status: 403 });
   }
+  // A fila e os pagamentos rodam um independente do outro: erro em um não trava o outro.
+  let erro = false;
+  let total = {};
+  let pagamentos = {};
   try {
-    const total = await processarFila(rpc, provedorWhatsApp(), { appUrl: env("APP_URL") ?? "", push: provedorPush() });
-    return Response.json(total);
+    total = await processarFila(rpc, provedorWhatsApp(), { appUrl: env("APP_URL") ?? "", push: provedorPush() });
   } catch (e) {
     console.error(e);
-    return new Response("erro no worker", { status: 500 });
+    erro = true;
   }
+  try {
+    // Sinal por Pix (semana 8b): devoluções e conferência dos Pix vencidos, com a chave da subconta de cada loja.
+    pagamentos = await processarPagamentos(rpc);
+  } catch (e) {
+    console.error(e);
+    erro = true;
+  }
+  return erro ? new Response("erro no worker", { status: 500 }) : Response.json({ ...total, pagamentos });
 });

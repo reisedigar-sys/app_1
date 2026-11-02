@@ -6,10 +6,12 @@ import { Calendario, somarMes } from "@/components/agenda/calendario";
 import { HorariosLivres } from "@/components/agenda/horarios";
 import { PassosAtendimento } from "@/components/agenda/passos-atendimento";
 import { Avatar } from "@/components/agenda/profissional";
-import { Aviso, Botao, Caixa, classeInput } from "@/components/ui";
+import { PagarPix } from "@/components/pix";
+import { Aviso, Botao, BotaoLink, Caixa, classeInput } from "@/components/ui";
 import type { Horario, ItemPedido, Profissional, ResumoPedido, Unidade } from "@/lib/disponibilidade";
+import type { Pix } from "@/lib/pagamentos/servico";
 import { formatarReais, telefoneLegivel } from "@/lib/painel/formatos";
-import { buscarDias, buscarHorarios, buscarProfissionaisAptos, buscarUnidades, confirmarPedido } from "./acoes";
+import { buscarDias, buscarHorarios, buscarProfissionaisAptos, buscarUnidades, confirmarPedido, previsaoSinal } from "./acoes";
 import { ListaEspera } from "./lista-espera";
 
 export type ServicoCatalogo = {
@@ -33,7 +35,8 @@ export type LojaFluxo = {
 export type PedidoInicial = { pets: string[]; escolhas: Record<string, { principal: string; adicionais: string[] }> };
 
 type Escolha = { principal?: string; adicionais: string[]; observacoes: string };
-type Etapa = "pedido" | "quando" | "pronto";
+type Etapa = "pedido" | "quando" | "pagar" | "pronto";
+type Confirmado = ResumoPedido & { pagamentoId: string | null; pix: Pix | null; erroPix: string | null };
 
 const MESES_CURTOS = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
 const SEMANA = ["dom", "seg", "ter", "qua", "qui", "sex", "sáb"];
@@ -165,15 +168,21 @@ function Fluxo({ loja, pets, catalogo, consentimentoAnterior, inicial, petInicia
   const [horario, setHorario] = useState<Horario | null>(null);
   const [revisando, setRevisando] = useState(false);
   const [consentimento, setConsentimento] = useState(consentimentoAnterior);
-  const [resumo, setResumo] = useState<ResumoPedido | null>(null);
+  const [resumo, setResumo] = useState<Confirmado | null>(null);
+  // Sinal deste pedido (null = consultando; 0 = sem sinal) e valor pago, para a tela final.
+  const [sinal, setSinal] = useState<number | null>(null);
+  const [sinalPago, setSinalPago] = useState(0);
+  const pagou = useRef(false);
   const [erro, setErro] = useState<string | null>(null);
   const [carregando, iniciar] = useTransition();
   const [chave] = useState(() => crypto.randomUUID());
   const abrirQuandoPendente = useRef(false);
 
-  // Ao sair da tela de confirmação (inclusive quando o roteador só a esconde), o próximo acesso começa do zero.
+  // Ao sair da tela do Pix ou da confirmação (inclusive quando o roteador só a esconde), o próximo acesso começa do
+  // zero. Passar do Pix para a confirmação não conta como sair.
   useEffect(() => {
     if (etapa === "pronto") return reiniciar;
+    if (etapa === "pagar") return () => !pagou.current && reiniciar();
   }, [etapa, reiniciar]);
 
   const petPorId = useMemo(() => new Map(pets.map((p) => [p.id, p])), [pets]);
@@ -350,11 +359,52 @@ function Fluxo({ loja, pets, catalogo, consentimentoAnterior, inicial, petInicia
       }
       setResumo(r.dados);
       setRevisando(false);
-      setEtapa("pronto");
+      setEtapa(r.dados.pagamentoId ? "pagar" : "pronto");
+    });
+  }
+
+  function abrirRevisao() {
+    setSinal(null);
+    setRevisando(true);
+    iniciar(async () => {
+      const r = await previsaoSinal(lojaPedido, total, selecionados.length);
+      setSinal(r.ok ? r.dados : 0);
     });
   }
 
   // ---- telas ---------------------------------------------------------------
+  if (etapa === "pagar" && resumo && horario && dia && unidade) {
+    return (
+      <div className="flex flex-col gap-5">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold">Falta o sinal</h2>
+          <p className="text-sm text-neutral-500">
+            {diaLongo(dia, loja.hoje)} às {horario.hora} · {unidade.nome}
+          </p>
+        </div>
+        {resumo.pix ? (
+          <PagarPix
+            inicial={resumo.pix}
+            onPago={(pix) => {
+              pagou.current = true;
+              setSinalPago(pix.valorCentavos);
+              setEtapa("pronto");
+            }}
+            onVencido={reiniciar}
+          />
+        ) : (
+          <div className="flex flex-col gap-3">
+            <Aviso tipo="erro">{resumo.erroPix ?? "Não foi possível gerar o Pix agora."} O horário fica guardado por 15 minutos.</Aviso>
+            <BotaoLink href={`/conta/pix/${resumo.pagamentoId}`}>Tentar de novo</BotaoLink>
+          </div>
+        )}
+        <p className="text-center text-xs text-neutral-500">
+          O restante ({formatarReais(resumo.total_centavos - (resumo.pix?.valorCentavos ?? 0))}) é pago na loja.
+        </p>
+      </div>
+    );
+  }
+
   if (etapa === "pronto" && resumo && horario && dia && unidade) {
     const nomes = selecionados.map((id) => petPorId.get(id)!.nome);
     const quem = nomes.length > 1 ? `${nomes.slice(0, -1).join(", ")} e ${nomes.at(-1)}` : nomes[0];
@@ -375,7 +425,15 @@ function Fluxo({ loja, pets, catalogo, consentimentoAnterior, inicial, petInicia
           <h3 id="t-como-vai-ser" className="mb-3 font-titulo font-bold">Como vai ser</h3>
           <PassosAtendimento status="agendado" inicio={horario.hora} pronto={pronto} />
           <p className="mt-3 border-t border-neutral-200 pt-3 text-sm dark:border-neutral-800">
-            Total: <strong>{formatarReais(resumo.total_centavos)}</strong>, pago na loja.
+            {sinalPago > 0 ? (
+              <>
+                Sinal pago: <strong>{formatarReais(sinalPago)}</strong>. Na loja: <strong>{formatarReais(resumo.total_centavos - sinalPago)}</strong>.
+              </>
+            ) : (
+              <>
+                Total: <strong>{formatarReais(resumo.total_centavos)}</strong>, pago na loja.
+              </>
+            )}
           </p>
         </section>
         <div className="grid grid-cols-2 gap-2">
@@ -697,7 +755,7 @@ function Fluxo({ loja, pets, catalogo, consentimentoAnterior, inicial, petInicia
               {carregando && pedidoCompleto ? "Aguarde…" : "Ver horários"}
             </Botao>
           ) : (
-            <Botao type="button" onClick={() => setRevisando(true)} disabled={!horario || carregando} className="min-w-36">
+            <Botao type="button" onClick={abrirRevisao} disabled={!horario || carregando} className="min-w-36">
               Revisar
             </Botao>
           )}
@@ -717,6 +775,7 @@ function Fluxo({ loja, pets, catalogo, consentimentoAnterior, inicial, petInicia
           unidade={unidade.nome}
           cancelarAte={prazoCancelamento(horario.inicio, loja.cancelamentoGratuitoHoras, loja.fuso)}
           total={formatarReais(unidade.totalCentavos)}
+          sinal={sinal === null ? null : sinal > 0 ? { agora: formatarReais(sinal), naLoja: formatarReais(unidade.totalCentavos - sinal) } : undefined}
           consentimento={consentimento}
           onConsentimento={setConsentimento}
           carregando={carregando}
@@ -737,6 +796,8 @@ function FolhaRevisao(p: {
   unidade: string;
   cancelarAte: string;
   total: string;
+  /** null = consultando; undefined = sem sinal. */
+  sinal: { agora: string; naLoja: string } | null | undefined;
   consentimento: boolean;
   onConsentimento: (v: boolean) => void;
   carregando: boolean;
@@ -777,6 +838,8 @@ function FolhaRevisao(p: {
           {linha("Com", p.profissional)}
           {linha("Onde", p.unidade)}
           {linha("Cancelar grátis", p.cancelarAte)}
+          {p.sinal && linha("Sinal agora (Pix)", p.sinal.agora)}
+          {p.sinal && linha("Na loja", p.sinal.naLoja)}
         </div>
         <div className="my-3">
           <Caixa
@@ -786,10 +849,14 @@ function FolhaRevisao(p: {
             onChange={(e) => p.onConsentimento(e.target.checked)}
           />
         </div>
-        <Botao type="button" onClick={p.onConfirmar} disabled={p.carregando} aria-busy={p.carregando} className="w-full text-base">
-          {p.carregando ? "Confirmando…" : `Confirmar · ${p.total}`}
+        <Botao type="button" onClick={p.onConfirmar} disabled={p.carregando || p.sinal === null} aria-busy={p.carregando} className="w-full text-base">
+          {p.carregando ? "Aguarde…" : p.sinal ? `Confirmar e pagar sinal · ${p.sinal.agora}` : `Confirmar · ${p.total}`}
         </Botao>
-        <p className="mt-2 text-center text-xs text-neutral-500">O pagamento é feito na loja.</p>
+        <p className="mt-2 text-center text-xs text-neutral-500">
+          {p.sinal
+            ? `Pague o sinal por Pix em até 15 minutos para garantir o horário. Cancelando ${p.cancelarAte === "prazo já passou" ? "a partir de agora, o sinal fica com a loja" : `${p.cancelarAte}, o sinal volta para você; depois, fica com a loja`}.`
+            : "O pagamento é feito na loja."}
+        </p>
       </div>
     </div>
   );
