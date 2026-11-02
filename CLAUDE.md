@@ -59,6 +59,10 @@ Cuidados:
 - Skills do repositório em `.claude/skills/` (`nova-migracao`, `nova-tela`, `abrir-pr`, `subir-ambiente`,
   `levar-para-producao`) e revisores em `.claude/agents/` (`revisor-seguranca`, `revisor-disponibilidade`,
   `revisor-celular`): use-os em vez de refazer os passos de memória.
+- Times (aprovados em 02/11/2026): cada tarefa leva o prefixo do time no título. Os técnicos têm um agente no
+  repositório: `[Loja]` (`time-loja`, painel do pet shop), `[Tutor]` (`time-tutor`, lado do cliente), `[Admin]`
+  (`time-admin`, área `/admin` da plataforma) e `[Qualidade]` (`time-qualidade`, revisa todo PR antes do Edigar).
+  `[Mercado]`, `[Comercial]`, `[Financeiro]` e `[Coordenação]` ficam fora do repositório (dados de negócio são privados).
 - Documentação de apoio: `README.md` (setup e banco), `PLANO-MVP.md` (plano semana a semana), `PLANO-CRESCIMENTO.md` (Meta 1),
   `PROMPTS-CLAUDE-CODE.md` (prompts por semana). Ao fim de cada semana, atualize a seção "Estado atual" abaixo.
 
