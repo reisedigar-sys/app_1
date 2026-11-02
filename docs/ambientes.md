@@ -5,7 +5,7 @@
 | Para quê | Ver as entregas antes dos clientes; demonstração para os pilotos | Clientes reais |
 | Banco | Supabase `hora-do-pet-staging` (`cwnwrpvjebtzheqbhzhj`, plano Free) | Supabase `hora-do-pet-prod` (`xddxurtmevhgxwffknyb`) |
 | App | Vercel, deploy de Preview da branch `main` | Vercel, deploy de Production |
-| Endereço | `staging.salaodopet.com.br` (até lá, o endereço de Preview da `main`) | `app.salaodopet.com.br` (até lá, `hora-do-pet.vercel.app`) |
+| Endereço | `staging.salaodopet.com.br` (e o endereço de Preview da `main`) | `salaodopet.com.br` (`www` redireciona; `hora-do-pet.vercel.app` continua no ar) |
 | Origem do código | Branch `main` | Branch `producao` (atualizada por PR `main` → `producao`) |
 | Migrações | `deploy-staging.yml`, a cada merge na `main` | `deploy-producao.yml`, depois da sua aprovação |
 | App publicado por | Vercel, sozinha | `deploy-producao.yml`, **depois** das migrações (`vercel.json` desliga o deploy automático da `producao`) |
@@ -83,7 +83,7 @@ destes passos; até lá, as mensagens ficam na fila (nada é perdido, e as atras
 
 1. Gere um token aleatório (ex.: `openssl rand -hex 32`). Use um diferente para staging e para produção.
 2. *Edge Functions → Secrets* (ou `supabase secrets set --project-ref REF ...`):
-   `WORKER_TOKEN` = o token; `APP_URL` = endereço do app daquele ambiente (ex.: `https://hora-do-pet.vercel.app`).
+   `WORKER_TOKEN` = o token; `APP_URL` = endereço do app daquele ambiente (`https://staging.salaodopet.com.br` ou `https://salaodopet.com.br`).
 3. *SQL Editor*, no mesmo projeto (troque REF e TOKEN):
    ```sql
    select vault.create_secret('https://REF.supabase.co/functions/v1/notificacoes', 'worker_notificacoes_url');
@@ -121,10 +121,10 @@ de teste da Meta, que só envia para os telefones cadastrados no app da Meta.
    falha e é tentada de novo (o painel mostra o erro da Meta).
 
 ### Supabase Auth (cada projeto)
-*Authentication → URL Configuration*: **Site URL** = endereço do app daquele ambiente (por enquanto o da Vercel) e, em
-**Redirect URLs**, o mesmo endereço terminado em `/**` (ex.: `https://hora-do-pet.vercel.app/**`), para o link de
-"Esqueci a senha" voltar para `/auth/confirmar`. No staging, inclua também `https://hora-do-pet-*-edigar-reis.vercel.app/**`
-(prévias dos PRs). Trocar pelo domínio quando ele existir.
+*Authentication → URL Configuration*: **Site URL** = endereço do app daquele ambiente (`https://staging.salaodopet.com.br`
+ou `https://salaodopet.com.br`) e, em **Redirect URLs**, o mesmo endereço terminado em `/**`, para o link de
+"Esqueci a senha" voltar para `/auth/confirmar`. Mantenha também os endereços da Vercel (`https://hora-do-pet.vercel.app/**`
+na produção; no staging, `https://hora-do-pet-*-edigar-reis.vercel.app/**`, prévias dos PRs).
 
 *Authentication → Emails → Templates → Reset password*: assunto `Salão do Pet: crie sua nova senha` e, no corpo, o
 conteúdo de `supabase/templates/recuperar-senha.html`. Com esse modelo o link funciona em qualquer navegador; com o
@@ -133,16 +133,20 @@ os membros da organização no Supabase.
 
 ### Domínio
 1. Domínio `salaodopet.com.br` comprado na Hostgator (01/11/2026); o DNS é editado no painel da Hostgator.
-2. Na Vercel, *Settings → Domains*: `app.salaodopet.com.br` (Production) e `staging.salaodopet.com.br` atribuído à branch `main`.
-   A Vercel mostra os registros DNS a criar na Hostgator.
+2. Na Vercel, *Settings → Domains*: `salaodopet.com.br` (Production, com `www` redirecionando para ele) e
+   `staging.salaodopet.com.br` (Preview, branch `main`). A Vercel mostra os registros a criar na Hostgator
+   (*Editar Zona Avançada de DNS*): A no domínio e CNAME em `www` e `staging`.
+3. Os MX e o TXT `v=spf1` do ImprovMX (e-mail `contato@salaodopet.com.br` encaminhado ao Gmail) ficam como estão.
+   Passo a passo detalhado: guia `dominio-vercel-e-smtp.md` na pasta do projeto.
 
 ### E-mail de envio (SMTP)
 O e-mail embutido do Supabase envia pouquíssimas mensagens por hora e serve só para teste. Antes de clientes reais:
 
 1. Crie a conta em https://resend.com (plano gratuito: 3.000 e-mails/mês).
-2. *Domains → Add domain*: use um subdomínio, ex.: `mail.salaodopet.com.br`. Crie na Hostgator os registros DNS
-   mostrados (SPF, DKIM) e aguarde a verificação.
-3. *API Keys → Create*: guarde a chave.
+2. *Domains → Add domain*: `mail.salaodopet.com.br` (região São Paulo). Crie na Hostgator os registros DNS
+   mostrados (DKIM, MX e SPF em `send.mail`) e aguarde a verificação. O subdomínio não interfere no e-mail de
+   entrada da raiz (ImprovMX).
+3. *API Keys → Create*: uma chave por ambiente (`supabase-staging`, `supabase-producao`), só *Sending access*.
 4. Em cada projeto Supabase: *Authentication → Emails → SMTP Settings → Enable custom SMTP*:
    host `smtp.resend.com`, porta `465`, usuário `resend`, senha = a API key, remetente `nao-responda@mail.salaodopet.com.br`,
    nome da marca.
