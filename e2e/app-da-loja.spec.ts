@@ -33,3 +33,22 @@ test("tutor vê as lojas em que é cliente e liga ou desliga os avisos pelo What
   await page.getByRole("link", { name: "Conta" }).filter({ visible: true }).click();
   await expect(page.getByRole("heading", { name: "Avisos no celular" }).filter({ visible: true })).toBeVisible();
 });
+
+test("tutor e equipe instalam apps separados, e cada login leva ao outro lado", async ({ page, request }) => {
+  await page.goto("/conta/entrar");
+  expect(await page.locator('link[rel="manifest"]').getAttribute("href")).toBe("/manifest.webmanifest");
+  const tutor = await (await request.get("/manifest.webmanifest")).json();
+  expect(tutor).toMatchObject({ id: "/", name: "Salão do Pet", start_url: "/conta" });
+
+  await page.getByRole("link", { name: "Entrar no painel" }).filter({ visible: true }).click();
+  await expect(page).toHaveURL(/\/entrar$/);
+  await expect(page.locator('meta[name="apple-mobile-web-app-title"]')).toHaveAttribute("content", "Salão Loja");
+  const href = await page.locator('link[rel="manifest"]').getAttribute("href");
+  expect(href).toBe("/loja.webmanifest");
+  const loja = await (await request.get(href!)).json();
+  expect(loja).toMatchObject({ id: "/painel", name: "Salão do Pet Loja", start_url: "/painel" });
+  expect((await request.get(loja.icons[0].src)).headers()["content-type"]).toBe("image/png");
+
+  await page.getByRole("link", { name: "Entrar em Minha conta" }).filter({ visible: true }).click();
+  await expect(page).toHaveURL(/\/conta\/entrar/);
+});

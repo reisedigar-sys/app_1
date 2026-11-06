@@ -17,6 +17,12 @@ export default function EntrarTutorPage({ searchParams }: PageProps<"/conta/entr
       <Suspense fallback={<Carregando />}>
         <Conteudo searchParams={searchParams} />
       </Suspense>
+      <p className="text-center text-sm text-neutral-600 dark:text-neutral-400">
+        É pet shop?{" "}
+        <Link href="/entrar" className="text-marca-700 underline dark:text-marca-400">
+          Entrar no painel
+        </Link>
+      </p>
     </main>
   );
 }

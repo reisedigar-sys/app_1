@@ -1,5 +1,9 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { sair } from "@/app/entrar/acoes";
+import { metadataAppDaEquipe } from "@/lib/app-da-equipe";
+
+export const metadata: Metadata = metadataAppDaEquipe;
 
 export default function PainelLayout({ children }: LayoutProps<"/painel">) {
   return (

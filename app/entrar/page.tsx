@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { Carregando } from "@/components/ui";
+import { metadataAppDaEquipe } from "@/lib/app-da-equipe";
 import { FormularioCadastro, FormularioEntrar } from "./formularios";
 
-export const metadata: Metadata = { title: "Entrar" };
+export const metadata: Metadata = { ...metadataAppDaEquipe, title: "Entrar" };
 
 export default function EntrarPage({ searchParams }: PageProps<"/entrar">) {
   return (
@@ -16,6 +17,12 @@ export default function EntrarPage({ searchParams }: PageProps<"/entrar">) {
       <Suspense fallback={<Carregando />}>
         <Formularios searchParams={searchParams} />
       </Suspense>
+      <p className="text-center text-sm text-neutral-600 dark:text-neutral-400">
+        É tutor?{" "}
+        <Link href="/conta/entrar" className="text-marca-700 underline dark:text-marca-400">
+          Entrar em Minha conta
+        </Link>
+      </p>
     </main>
   );
 }
