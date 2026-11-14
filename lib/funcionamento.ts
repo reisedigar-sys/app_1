@@ -27,7 +27,7 @@ function partes(iso: string, fuso: string) {
 
 const diasEntre = (a: string, b: string) => Math.round((Date.parse(`${b}T12:00:00Z`) - Date.parse(`${a}T12:00:00Z`)) / 86_400_000);
 
-/** "Aberto agora · fecha às 18:00", "Fechado · abre amanhã às 09:00", "Fechado · abre terça às 09:00". */
+/** "Aberto agora · fecha às 18:00", "Fechado agora · abre amanhã às 09:00", "Fechado agora · abre terça às 09:00". */
 export function textoSituacao(s: Situacao, fuso: string, agora: Date = new Date()): { titulo: string; detalhe: string | null } {
   const hoje = partes(agora.toISOString(), fuso).dia;
   if (s.aberto) {
@@ -35,11 +35,11 @@ export function textoSituacao(s: Situacao, fuso: string, agora: Date = new Date(
     const f = partes(s.fechaEm, fuso);
     return { titulo: "Aberto agora", detalhe: f.dia === hoje ? `fecha às ${f.hora}` : null };
   }
-  if (!s.abreEm) return { titulo: "Fechado", detalhe: null };
+  if (!s.abreEm) return { titulo: "Fechado agora", detalhe: null };
   const a = partes(s.abreEm, fuso);
   const n = diasEntre(hoje, a.dia);
   const quando = n === 0 ? "hoje" : n === 1 ? "amanhã" : DIA_CURTO[new Date(`${a.dia}T12:00:00Z`).getUTCDay()];
-  return { titulo: "Fechado", detalhe: `abre ${quando} às ${a.hora}` };
+  return { titulo: "Fechado agora", detalhe: `abre ${quando} às ${a.hora}` };
 }
 
 /** Faixas da semana para mostrar ao tutor: segunda primeiro, "Fechado" nos dias sem faixa. */

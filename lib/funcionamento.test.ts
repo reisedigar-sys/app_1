@@ -22,7 +22,7 @@ describe("textoSituacao", () => {
   });
 
   it("fechada sem previsão de abrir", () => {
-    expect(textoSituacao({ aberto: false, fechaEm: null, abreEm: null }, FUSO, AGORA)).toEqual({ titulo: "Fechado", detalhe: null });
+    expect(textoSituacao({ aberto: false, fechaEm: null, abreEm: null }, FUSO, AGORA)).toEqual({ titulo: "Fechado agora", detalhe: null });
   });
 });
 

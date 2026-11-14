@@ -1,7 +1,7 @@
 import { type Situacao, textoSituacao } from "@/lib/funcionamento";
 
 /**
- * "Aberto agora · fecha às 18:00" (coral) ou "Fechado · abre amanhã às 09:00" (cinza).
+ * "Aberto agora · fecha às 18:00" (coral) ou "Fechado agora · abre amanhã às 09:00" (cinza).
  * Verde fica só para confirmado/pronto. `escuro` = sobre o cabeçalho azul-tinta da página da loja.
  */
 export function SeloFuncionamento({ situacao, fuso, escuro = false }: { situacao: Situacao; fuso: string; escuro?: boolean }) {

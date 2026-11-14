@@ -54,15 +54,21 @@ async function Conteudo({ params }: { params: Promise<{ lojaId: string }> }) {
         {faixas.length === 0 && (
           <Aviso tipo="alerta">Sem horário cadastrado: a página da loja não mostra se está aberta.</Aviso>
         )}
-        <ul className="flex flex-col divide-y divide-neutral-100 dark:divide-neutral-900" aria-label="Horário de funcionamento">
+        <ul
+          className="flex flex-col divide-y divide-neutral-100 dark:divide-neutral-900"
+          aria-label="Horário de funcionamento"
+        >
           {ORDEM_DIAS.map((d) => {
             const doDia = faixas.filter((f) => f.dia_semana === d);
             return (
               <li key={d} className="flex min-h-12 flex-wrap items-center gap-2 py-2">
                 <span className="w-20 text-sm font-medium">{DIAS_SEMANA[d]}</span>
-                {doDia.length === 0 && <span className="text-sm text-neutral-400">fechado</span>}
+                {doDia.length === 0 && <span className="text-sm text-neutral-500">Fechado</span>}
                 {doDia.map((f) => (
-                  <span key={f.id} className="inline-flex min-h-9 items-center gap-1 rounded-full bg-neutral-100 pl-3 text-sm dark:bg-neutral-900">
+                  <span
+                    key={f.id}
+                    className="inline-flex min-h-11 items-center gap-1 rounded-full bg-neutral-100 pl-3 text-sm dark:bg-neutral-900"
+                  >
                     {hhmm(f.abre)}–{hhmm(f.fecha)}
                     {editavel ? (
                       <form action={removerFaixa}>
@@ -70,7 +76,7 @@ async function Conteudo({ params }: { params: Promise<{ lojaId: string }> }) {
                         <input type="hidden" name="id" value={f.id} />
                         <button
                           type="submit"
-                          className="flex size-9 items-center justify-center rounded-full text-neutral-500 hover:text-red-600"
+                          className="flex size-11 items-center justify-center rounded-full text-neutral-500 hover:text-red-600"
                           aria-label={`Remover ${DIAS_SEMANA[d]} ${hhmm(f.abre)} a ${hhmm(f.fecha)}`}
                         >
                           ×
@@ -91,7 +97,7 @@ async function Conteudo({ params }: { params: Promise<{ lojaId: string }> }) {
         <>
           <Cartao>
             <h2 className="mb-3 font-medium">Adicionar horário</h2>
-            <NovaFaixa lojaId={lojaId} />
+            <NovaFaixa lojaId={lojaId} diasLivres={ORDEM_DIAS.filter((d) => !faixas.some((f) => f.dia_semana === d))} />
           </Cartao>
           <Cartao>
             <h2 className="mb-2 font-medium">Mesmo horário da equipe</h2>
