@@ -73,6 +73,8 @@ test("tutor novo agenda 2 pets pelo fluxo e vê os agendamentos gravados", async
   await expect(page.getByRole("heading", { name: "Em qual unidade?" })).toBeVisible();
   const unidades = page.getByRole("radiogroup", { name: "Unidades" });
   await expect(unidades.locator("label").filter({ hasText: "Pet Feliz Zona Sul" })).toBeVisible();
+  // "Aberto agora" de cada unidade (as duas têm horário de funcionamento no seed).
+  await expect(unidades.locator("[data-selo-funcionamento]")).toHaveCount(2);
   await unidades.locator("label").filter({ hasText: "Pet Feliz Centro" }).click();
   await verHorarios.click();
 

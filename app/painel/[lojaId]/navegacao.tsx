@@ -8,6 +8,7 @@ import type { ReactNode } from "react";
 const CONFIGURACAO = [
   ["/configurar", "Resumo"],
   ["/loja", "Loja"],
+  ["/funcionamento", "Funcionamento"],
   ["/profissionais", "Profissionais"],
   ["/servicos", "Serviços"],
   ["/precos", "Preços"],
