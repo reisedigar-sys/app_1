@@ -65,10 +65,12 @@ grant execute on function public.copiar_horario_da_equipe(uuid) to authenticated
 -- Aberto agora? Para cada loja pública com horário cadastrado: se está aberta, quando fecha e quando abre de novo.
 -- Calculado no fuso da loja; um bloqueio da loja inteira (feriado, reforma) fecha a loja nesse período.
 -- Lojas sem horário não aparecem no resultado (a tela não mostra selo). Até 50 lojas por chamada.
-create function public.situacao_lojas(p_lojas uuid[], p_agora timestamptz default null)
+-- O relógio (p_agora) só é escolhido pelos testes: a versão pública usa sempre now(), senão um visitante varreria o
+-- calendário e descobriria os bloqueios da loja (privados) em qualquer data.
+create function app.situacao_lojas(p_lojas uuid[], p_agora timestamptz)
 returns table (petshop_id uuid, aberto boolean, fecha_em timestamptz, abre_em timestamptz)
 language sql stable security definer set search_path = '' as $$
-  with agora as (select coalesce(p_agora, now()) as t),
+  with agora as (select p_agora as t),
   loja as (
     select p.id, p.fuso
       from public.petshop p
@@ -95,8 +97,16 @@ language sql stable security definer set search_path = '' as $$
     from livre lv, agora a
 $$;
 
-revoke all on function public.situacao_lojas(uuid[], timestamptz) from public;
-grant execute on function public.situacao_lojas(uuid[], timestamptz) to anon, authenticated;
+revoke all on function app.situacao_lojas(uuid[], timestamptz) from public, anon, authenticated;
+
+create function public.situacao_lojas(p_lojas uuid[])
+returns table (petshop_id uuid, aberto boolean, fecha_em timestamptz, abre_em timestamptz)
+language sql stable security definer set search_path = '' as $$
+  select * from app.situacao_lojas(p_lojas, now())
+$$;
+
+revoke all on function public.situacao_lojas(uuid[]) from public;
+grant execute on function public.situacao_lojas(uuid[]) to anon, authenticated;
 
 -- Lojas que já existem: começam com o horário da equipe (nada é apagado; a loja revisa no painel).
 insert into public.horario_funcionamento (petshop_id, dia_semana, abre, fecha)

@@ -14,7 +14,7 @@ const sp = (data: string, hora: string) => new Date(`${data}T${hora}:00-03:00`).
 type Situacao = { petshop_id: string; aberto: boolean; fecha_em: Date | null; abre_em: Date | null };
 
 async function situacao(db: Db, agora: string, loja: string = LOJA.centro) {
-  const linhas = await db.rows<Situacao>("select * from public.situacao_lojas($1::uuid[], $2::timestamptz)", [[loja], agora]);
+  const linhas = await db.rows<Situacao>("select * from app.situacao_lojas($1::uuid[], $2::timestamptz)", [[loja], agora]);
   return linhas[0] ? { ...linhas[0], fecha_em: linhas[0].fecha_em?.toISOString() ?? null, abre_em: linhas[0].abre_em?.toISOString() ?? null } : null;
 }
 
@@ -83,10 +83,13 @@ describe("situacao_lojas (aberto agora)", () => {
       expect(await situacao(db, sp(TERCA, "10:00"), LOJA.moema)).toBeNull();
     }));
 
-  it("anônimo consulta a situação e lê o horário das lojas", () =>
+  it("anônimo consulta a situação de agora (sem escolher o relógio) e lê o horário das lojas", () =>
     emTransacao(async (db) => {
       await db.como(ANON);
-      expect(await situacao(db, sp(TERCA, "10:00"))).toMatchObject({ aberto: true });
+      expect(await db.count("select * from public.situacao_lojas($1::uuid[])", [[LOJA.centro]])).toBe(1);
+      // Escolher a data revelaria os bloqueios da loja (privados) em qualquer dia.
+      expect(await db.erro("select * from app.situacao_lojas($1::uuid[], now())", [[LOJA.centro]])).toBe("42501");
+      expect(await db.erro("select * from public.situacao_lojas($1::uuid[], now())", [[LOJA.centro]])).toBe("42883");
       expect(await db.count("select 1 from public.horario_funcionamento where petshop_id = $1", [LOJA.centro])).toBe(5);
       expect((await db.tentar("delete from public.horario_funcionamento where petshop_id = $1", [LOJA.centro])).linhas).toBe(0);
     }));

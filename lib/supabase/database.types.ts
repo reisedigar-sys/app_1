@@ -2022,7 +2022,7 @@ export type Database = {
       sinais_do_mes: { Args: { p_mes?: string; p_petshop_id: string }; Returns: Json };
       sinal_previsto: { Args: { p_pets: number; p_petshop_id: string; p_total_centavos: number }; Returns: number };
       situacao_lojas: {
-        Args: { p_agora?: string; p_lojas: string[] };
+        Args: { p_lojas: string[] };
         Returns: {
           aberto: boolean;
           abre_em: string;
