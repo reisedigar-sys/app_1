@@ -3,11 +3,13 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import Link from "next/link";
 import { Avatar } from "@/components/agenda/profissional";
+import { SeloFuncionamento } from "@/components/selo-funcionamento";
 import { BotaoLink, Carregando } from "@/components/ui";
 import { iniciaisDaLoja } from "@/lib/app-da-loja";
+import { diaDaSemana, semana, situacaoDasLojas } from "@/lib/funcionamento";
 import { tutorAtual } from "@/lib/conta/sessao";
 import { enderecoDaLoja, lojaPorSlug, telefoneLegivel } from "@/lib/loja-publica";
-import { formatarReais } from "@/lib/painel/formatos";
+import { DIAS_SEMANA, formatarReais } from "@/lib/painel/formatos";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "Agende banho e tosa" };
@@ -28,7 +30,7 @@ async function Conteudo({ params }: { params: Promise<{ slug: string }> }) {
   if (!loja) notFound();
   const supabase = await createClient();
   const tutor = await tutorAtual();
-  const [servicos, profissionais, historico] = await Promise.all([
+  const [servicos, profissionais, historico, horario, situacoes] = await Promise.all([
     supabase
       .from("servico")
       .select("id, nome, descricao, tipo, servico_preco(preco_centavos, duracao_minutos)")
@@ -38,7 +40,12 @@ async function Conteudo({ params }: { params: Promise<{ slug: string }> }) {
       .order("ordem"),
     supabase.from("profissional").select("id, nome, foto_url, bio").eq("petshop_id", loja.id).eq("ativo", true).order("ordem"),
     tutor ? supabase.rpc("meus_agendamentos") : Promise.resolve({ data: null }),
+    supabase.from("horario_funcionamento").select("dia_semana, abre, fecha").eq("petshop_id", loja.id),
+    situacaoDasLojas(supabase, [loja.id]),
   ]);
+  const situacao = situacoes.get(loja.id);
+  const dias = (horario.data ?? []).length > 0 ? semana(horario.data!) : null;
+  const hoje = diaDaSemana(loja.fuso);
   const telefone = telefoneLegivel(loja.telefone_e164);
   const endereco = enderecoDaLoja(loja);
 
@@ -62,6 +69,7 @@ async function Conteudo({ params }: { params: Promise<{ slug: string }> }) {
           <h1 className="text-3xl font-extrabold">{loja.nome}</h1>
         </div>
         <div className="flex flex-wrap gap-2 text-xs">
+          {situacao && <SeloFuncionamento situacao={situacao} fuso={loja.fuso} escuro />}
           {endereco && <span className="rounded-full bg-white/10 px-3 py-1">{endereco}</span>}
           {telefone && (
             <a href={`tel:${loja.telefone_e164}`} className="rounded-full bg-white/10 px-3 py-1 underline-offset-2 hover:underline">
@@ -120,6 +128,27 @@ async function Conteudo({ params }: { params: Promise<{ slug: string }> }) {
                   <span className="font-semibold">{p.nome}</span>
                   {p.bio && <span className="text-xs text-neutral-500">{p.bio}</span>}
                 </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {dias && (
+        <section aria-labelledby="t-horario">
+          <h2 id="t-horario" className="mb-2 text-xl font-bold">Horário de funcionamento</h2>
+          <ul className="flex flex-col divide-y divide-neutral-100 rounded-2xl bg-neutral-50 px-4 dark:divide-neutral-800 dark:bg-neutral-900">
+            {dias.map((d) => (
+              <li
+                key={d.dia}
+                aria-current={d.dia === hoje ? "date" : undefined}
+                className="flex min-h-11 items-center justify-between gap-3 text-sm aria-[current=date]:font-semibold"
+              >
+                <span>
+                  {DIAS_SEMANA[d.dia]}
+                  {d.dia === hoje && <span className="ml-2 rounded-full bg-neutral-900 px-2 py-0.5 text-xs font-semibold text-white dark:bg-neutral-700">hoje</span>}
+                </span>
+                <span className={`tabular-nums ${d.faixas.length ? "" : "text-neutral-500"}`}>{d.faixas.length ? d.faixas.join(" e ") : "Fechado"}</span>
               </li>
             ))}
           </ul>

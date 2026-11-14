@@ -30,7 +30,10 @@ async function Conteudo({ params }: { params: Promise<{ lojaId: string }> }) {
   const { lojaId } = await params;
   const { loja } = await exigirLoja(lojaId);
   const supabase = await createClient();
-  const { data } = await supabase.rpc("checklist_onboarding", { p_petshop_id: lojaId });
+  const [{ data }, { count: faixasFuncionamento }] = await Promise.all([
+    supabase.rpc("checklist_onboarding", { p_petshop_id: lojaId }),
+    supabase.from("horario_funcionamento").select("id", { count: "exact", head: true }).eq("petshop_id", lojaId),
+  ]);
   const c = data as Checklist | null;
   const base = `/painel/${lojaId}`;
 
@@ -46,6 +49,8 @@ async function Conteudo({ params }: { params: Promise<{ lojaId: string }> }) {
       href: `${base}/precos`,
     },
     { ok: c.profissionais_sem_horario.length === 0, texto: "Todo profissional ativo tem horário", href: `${base}/horarios` },
+    // Não bloqueia o "Tudo pronto": sem horário de funcionamento, a página só não mostra "Aberto agora".
+    { ok: (faixasFuncionamento ?? 0) > 0, texto: "Horário de funcionamento (aparece para o cliente)", href: `${base}/funcionamento` },
   ];
 
   return (

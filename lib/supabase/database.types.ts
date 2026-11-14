@@ -348,6 +348,39 @@ export type Database = {
           },
         ];
       };
+      horario_funcionamento: {
+        Row: {
+          abre: string;
+          dia_semana: number;
+          fecha: string;
+          id: string;
+          petshop_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          abre: string;
+          dia_semana: number;
+          fecha: string;
+          id?: string;
+          petshop_id: string;
+        };
+        Update: {
+          abre?: string;
+          dia_semana?: number;
+          fecha?: string;
+          id?: string;
+          petshop_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "horario_funcionamento_petshop_id_fkey";
+            columns: ["petshop_id"];
+            isOneToOne: false;
+            referencedRelation: "petshop";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       horario_trabalho: {
         Row: {
           dia_semana: number;
@@ -1798,6 +1831,7 @@ export type Database = {
       };
       confirmar_por_token: { Args: { p_token: string }; Returns: number };
       copiar_catalogo: { Args: { p_destino: string; p_origem: string; p_substituir?: boolean }; Returns: Json };
+      copiar_horario_da_equipe: { Args: { p_petshop_id: string }; Returns: number };
       criar_bloqueio: {
         Args: {
           p_fim: string;
@@ -1987,6 +2021,15 @@ export type Database = {
       salvar_perfil_tutor: { Args: { p_nome: string; p_telefone: string }; Returns: string };
       sinais_do_mes: { Args: { p_mes?: string; p_petshop_id: string }; Returns: Json };
       sinal_previsto: { Args: { p_pets: number; p_petshop_id: string; p_total_centavos: number }; Returns: number };
+      situacao_lojas: {
+        Args: { p_lojas: string[] };
+        Returns: {
+          aberto: boolean;
+          abre_em: string;
+          fecha_em: string;
+          petshop_id: string;
+        }[];
+      };
       solicitar_conta_pagamento: { Args: { p_dados: Json; p_petshop_id: string }; Returns: undefined };
       timemultirange: { Args: Record<PropertyKey, never>; Returns: unknown };
       unidades_para_pedido: {

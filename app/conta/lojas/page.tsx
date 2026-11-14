@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { BotaoEnviar, FormAcao } from "@/components/form-acao";
+import { SeloFuncionamento } from "@/components/selo-funcionamento";
 import { BotaoLink, Cartao, Carregando, Titulo, Vazio } from "@/components/ui";
 import { exigirTutor } from "@/lib/conta/sessao";
+import { situacaoDasLojas } from "@/lib/funcionamento";
 import { createClient } from "@/lib/supabase/server";
 import { definirAvisosWhatsApp } from "./acoes";
 
@@ -39,6 +41,7 @@ async function Conteudo() {
   const supabase = await createClient();
   const { data: lojas, error } = await supabase.rpc("minhas_lojas");
   if (error) return <Vazio>Não foi possível carregar suas lojas.</Vazio>;
+  const situacoes = await situacaoDasLojas(supabase, lojas.map((l) => l.petshop_id));
 
   return (
     <>
@@ -61,6 +64,11 @@ async function Conteudo() {
                     <span className="text-sm text-neutral-500">
                       {l.proximo_inicio ? `Próximo: ${quando(l.proximo_inicio, l.fuso)}` : "Nenhum agendamento futuro"}
                     </span>
+                    {situacoes.has(l.petshop_id) && (
+                      <span className="mt-1">
+                        <SeloFuncionamento situacao={situacoes.get(l.petshop_id)!} fuso={l.fuso} />
+                      </span>
+                    )}
                   </div>
                 </div>
                 <div className="flex flex-wrap items-center justify-between gap-3">

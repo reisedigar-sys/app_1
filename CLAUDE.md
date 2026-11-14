@@ -141,6 +141,10 @@ Cuidados:
 - Resultados (migração 015): `resultados_do_mes` (só dono e gerência) e `petshop_indicador.faltas_antes_pct`
   (referência informada pela loja, fora de `petshop` porque a loja é pública). "Faltas evitadas" é sempre estimativa:
   taxa de antes × atendimentos realizados − faltas reais (`lib/painel/resultados.ts`).
+- Funcionamento (migração 019): `horario_funcionamento` é público e só informativo (não muda vagas; o motor segue a
+  agenda da equipe). `situacao_lojas` calcula aberto/fecha/abre no fuso da loja; bloqueio da loja inteira fecha.
+  Loja sem horário não mostra selo. Lojas existentes começaram com a união das janelas da equipe. Selo coral (aberto)
+  ou cinza (fechado), `components/selo-funcionamento.tsx`.
 - Preços (`/precos`): "Preço para todas", "Mesmo preço e tempo para todos" (abre assim em adicional sem tabela),
   copiar a tabela de outro serviço e aviso antes de trocar de serviço sem salvar (`lib/painel/precos.ts`). Valores
   aceitam vírgula ou ponto como decimal ("45.90" = R$ 45,90; `reaisParaCentavos`).
@@ -181,6 +185,9 @@ Cuidados:
   `estornos_reservar`/`estorno_concluir`, `conferencia_reservar`, `sinais_do_mes`, `agenda_loja` com o sinal), worker
   `notificacoes` faz os estornos e a conferência, selos na agenda, sinal na ficha, sinais do mês em Pagamentos e em
   Resultados, Minha conta e link `/c/{token}` dizem se o sinal volta antes de cancelar. Falta o teste no sandbox.
+- "Aberto agora" ([Tutor]) em revisão: migração 019 (`horario_funcionamento`, `situacao_lojas`,
+  `copiar_horario_da_equipe`), selo na página da loja, na lista de unidades e em Minhas lojas, horário da semana na
+  página da loja e Configurar → Funcionamento.
 - Próximo: teste da semana 8 no sandbox do Asaas; 7b (bot de agendamento no número da loja) depois de a 7a estar no ar e da aprovação como *Tech Provider*.
 
 ## Pendências fora do código (decisão ou ação do dono do produto)

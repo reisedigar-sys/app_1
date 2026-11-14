@@ -7,6 +7,7 @@ import { HorariosLivres } from "@/components/agenda/horarios";
 import { PassosAtendimento } from "@/components/agenda/passos-atendimento";
 import { Avatar } from "@/components/agenda/profissional";
 import { PagarPix } from "@/components/pix";
+import { SeloTexto } from "@/components/selo-funcionamento";
 import { Aviso, Botao, BotaoLink, Caixa, classeInput } from "@/components/ui";
 import type { Horario, ItemPedido, Profissional, ResumoPedido, Unidade } from "@/lib/disponibilidade";
 import type { Pix } from "@/lib/pagamentos/servico";
@@ -878,6 +879,11 @@ function EtapaUnidade({ unidades, unidade, onEscolher }: { unidades: Unidade[]; 
             <span className="flex flex-1 flex-col">
               <span className="font-semibold">{u.nome}</span>
               {u.endereco && <span className="text-sm text-neutral-500">{u.endereco}</span>}
+              {u.situacao && (
+                <span className="mt-1">
+                  <SeloTexto {...u.situacao} />
+                </span>
+              )}
             </span>
             <span className="font-semibold tabular-nums">{formatarReais(u.totalCentavos)}</span>
           </label>

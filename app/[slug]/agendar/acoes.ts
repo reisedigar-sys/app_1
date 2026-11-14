@@ -13,6 +13,7 @@ import {
   unidadesParaPedido,
 } from "@/lib/disponibilidade";
 import { tutorAtual } from "@/lib/conta/sessao";
+import { situacaoDasLojas, textoSituacao } from "@/lib/funcionamento";
 import { ErroPagamento, type Pix, qrDoPagamento } from "@/lib/pagamentos/servico";
 import { createClient } from "@/lib/supabase/server";
 
@@ -44,7 +45,19 @@ async function executar<T>(fn: () => Promise<T>): Promise<Resultado<T>> {
 export async function buscarUnidades(lojaId: string, itens: ItemPedido[], local?: { lat: number; lng: number }) {
   return executar(async () => {
     const coords = local ? z.object({ lat: z.number().min(-90).max(90), lng: z.number().min(-180).max(180) }).parse(local) : undefined;
-    return unidadesParaPedido(await createClient(), id.parse(lojaId), itensSchema.parse(itens) as ItemPedido[], coords);
+    const supabase = await createClient();
+    const unidades = await unidadesParaPedido(supabase, id.parse(lojaId), itensSchema.parse(itens) as ItemPedido[], coords);
+    // "Aberto agora" de cada unidade: o texto sai pronto daqui, no fuso de cada loja.
+    const ids = unidades.map((u) => u.id);
+    const [situacoes, fusos] = await Promise.all([
+      situacaoDasLojas(supabase, ids),
+      ids.length ? supabase.from("petshop").select("id, fuso").in("id", ids) : Promise.resolve({ data: [] }),
+    ]);
+    const fuso = new Map((fusos.data ?? []).map((p) => [p.id, p.fuso]));
+    return unidades.map((u) => {
+      const s = situacoes.get(u.id);
+      return s && fuso.has(u.id) ? { ...u, situacao: { aberto: s.aberto, ...textoSituacao(s, fuso.get(u.id)!) } } : u;
+    });
   });
 }
 

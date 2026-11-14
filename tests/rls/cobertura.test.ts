@@ -17,6 +17,7 @@ const TABELAS_PUBLICAS = new Set([
   "profissional",
   "profissional_servico",
   "avaliacao",
+  "horario_funcionamento", // horário de funcionamento: público como o endereço (migração 019)
 ]);
 
 let tabelas: string[] = [];

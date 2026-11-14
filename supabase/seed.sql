@@ -132,6 +132,12 @@ select s.petshop_id, '30000000-0000-0000-0000-000000000101', s.id, d, '09:00', '
  cross join (values (2), (4)) as dias (d)
  where s.petshop_id = '20000000-0000-0000-0000-000000000001' and s.nome = 'Tosa completa';
 
+-- Horário de funcionamento de cada loja = horário da equipe (o mesmo que a migração 019 faz nas lojas existentes).
+insert into public.horario_funcionamento (petshop_id, dia_semana, abre, fecha)
+select p.id, e.dia_semana, e.abre, e.fecha
+  from public.petshop p
+ cross join lateral app.funcionamento_da_equipe(p.id) e;
+
 -- Almoço de Marcos todo dia útil da próxima semana, folga de Pedro e feriado na Zona Sul.
 insert into public.bloqueio (petshop_id, profissional_id, tipo, periodo, motivo)
 select '20000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000102', 'almoco',

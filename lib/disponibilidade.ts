@@ -25,6 +25,8 @@ export type Unidade = {
   /** O pedido traduzido para os serviços desta unidade. */
   itens: ItemPedido[];
   totalCentavos: number;
+  /** "Aberto agora" (só quando a unidade tem horário de funcionamento). */
+  situacao?: { aberto: boolean; titulo: string; detalhe: string | null };
 };
 export type ResumoPedido = {
   pedido_id: string;
