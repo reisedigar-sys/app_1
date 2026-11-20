@@ -147,8 +147,9 @@ ou `https://salaodopet.com.br`) e, em **Redirect URLs**, o mesmo endereço termi
 na produção; no staging, `https://hora-do-pet-*-edigar-reis.vercel.app/**`, prévias dos PRs).
 
 *Authentication → Emails → Templates → Reset password*: assunto `Salão do Pet: crie sua nova senha` e, no corpo, o
-conteúdo de `supabase/templates/recuperar-senha.html`. Com esse modelo o link funciona em qualquer navegador; com o
-modelo padrão, só no mesmo navegador em que a pessoa pediu o link. Sem SMTP próprio (abaixo), o e-mail só chega para
+conteúdo de `supabase/templates/recuperar-senha.html`. Com esse modelo o link funciona em qualquer navegador e vai
+sempre para `{Site URL}/auth/confirmar`, mesmo quando o pedido sai do painel do Supabase (*Users → Send password
+recovery*), que não informa endereço de volta. Com o modelo padrão, só no mesmo navegador em que a pessoa pediu o link. Sem SMTP próprio (abaixo), o e-mail só chega para
 os membros da organização no Supabase.
 
 ### Domínio

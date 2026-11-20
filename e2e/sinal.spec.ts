@@ -85,6 +85,8 @@ test("tutor paga o sinal por Pix, o horário fica garantido e, cancelando no pra
   await page.locator("label").filter({ hasText: /^Banho\d/ }).filter({ visible: true }).click();
   await botao(page, "Ver horários").click();
   await expect(page.getByRole("heading", { name: "Quando fica bom?" }).filter({ visible: true })).toBeVisible();
+  // O terceiro dia com vaga fica a 2+ dias de hoje: fora das 24 h do prazo gratuito da Moema, a qualquer hora do dia.
+  await page.getByRole("radiogroup", { name: "Dias com vaga" }).filter({ visible: true }).getByRole("radio").nth(2).click();
   await page.getByRole("group", { name: /Manhã|Tarde/ }).filter({ visible: true }).getByRole("button").first().click();
   await botao(page, "Revisar").click();
 

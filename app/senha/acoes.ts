@@ -21,6 +21,8 @@ export async function pedirNovaSenha(_: Estado, form: FormData): Promise<Estado>
     .safeParse(dadosDoForm(form));
   if (!dados.success) return errosDeValidacao(dados.error);
   const supabase = await createClient();
+  // O modelo de e-mail do projeto (supabase/templates/recuperar-senha.html) monta o link com a Site URL e não usa este
+  // endereço; ele só vale para o modelo padrão do Supabase.
   const destino = `/senha/nova?para=${dados.data.para}`;
   const { error } = await supabase.auth.resetPasswordForEmail(dados.data.email, {
     redirectTo: `${await origem()}/auth/confirmar?next=${encodeURIComponent(destino)}`,
