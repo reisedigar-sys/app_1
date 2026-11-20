@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { Aviso, Carregando } from "@/components/ui";
+import { minhasLojas } from "@/lib/painel/sessao";
 import { createClient } from "@/lib/supabase/server";
 import { FormularioNovaSenha } from "../formularios";
 
@@ -20,7 +21,7 @@ export default function NovaSenhaPage({ searchParams }: PageProps<"/senha/nova">
 
 async function Conteudo({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const sp = await searchParams;
-  const para = sp.para === "equipe" ? "equipe" : "tutor";
+  let para = sp.para === "equipe" ? "equipe" : "tutor";
   // O link do e-mail abre uma sessão (em /auth/confirmar); sem ela, o link expirou ou já foi usado.
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
@@ -33,6 +34,8 @@ async function Conteudo({ searchParams }: { searchParams: Promise<Record<string,
         </Link>
       </>
     );
+  // O link do e-mail não diz de qual tela veio o pedido: quem trabalha em alguma loja volta para o painel.
+  if (sp.para !== "equipe" && sp.para !== "tutor" && (await minhasLojas()).length > 0) para = "equipe";
   return (
     <>
       <p className="-mt-4 text-sm text-neutral-500">Conta: {String(data.claims.email ?? "")}</p>

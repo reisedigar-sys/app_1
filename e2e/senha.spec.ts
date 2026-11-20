@@ -55,3 +55,22 @@ test("link de recuperação usado ou inválido pede um novo", async ({ page }) =
   await expect(texto(page, "Esse link expirou ou já foi usado. Peça um novo.")).toBeVisible();
   await expect(page.getByRole("link", { name: "Pedir um novo link" })).toHaveAttribute("href", "/senha/esqueci?para=equipe");
 });
+
+test("link do modelo de e-mail (sem destino) leva quem é da equipe ao painel", async ({ page }) => {
+  const email = `senha-equipe-${Date.now()}@e2e.test`;
+  const supabase = admin();
+  const { data: criado, error } = await supabase.auth.admin.createUser({ email, password: "senha-antiga-1", email_confirm: true });
+  expect(error).toBeNull();
+  const moema = "20000000-0000-0000-0000-000000000003";
+  const membro = await supabase.from("petshop_membro").insert({ petshop_id: moema, user_id: criado.user!.id, papel: "atendente" });
+  expect(membro.error).toBeNull();
+
+  // Mesmo formato do link de supabase/templates/recuperar-senha.html: só token_hash e type, sem `next`.
+  const { data } = await supabase.auth.admin.generateLink({ type: "recovery", email });
+  await page.goto(`/auth/confirmar?token_hash=${data.properties!.hashed_token}&type=recovery`);
+  await expect(page.getByRole("heading", { name: "Crie sua nova senha" })).toBeVisible();
+  await campo(page, "Nova senha").fill("senha-nova-2");
+  await campo(page, "Repita a nova senha").fill("senha-nova-2");
+  await botao(page, "Salvar nova senha").click();
+  await page.waitForURL(/\/painel/);
+});
